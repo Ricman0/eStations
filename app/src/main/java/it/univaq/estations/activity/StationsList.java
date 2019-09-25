@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.volley.Response;
+import com.google.android.gms.maps.model.LatLng;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -23,6 +24,7 @@ import java.util.List;
 
 import it.univaq.estations.R;
 import it.univaq.estations.activity.adapter.StationsListAdapter;
+import it.univaq.estations.model.PointOfCharge;
 import it.univaq.estations.model.Station;
 import it.univaq.estations.utility.RequestService;
 import it.univaq.estations.utility.Settings;
@@ -73,10 +75,38 @@ public class StationsList extends AppCompatActivity {
 
                     JSONObject item = jsonRoot.getJSONObject(i);
 
-                    String name = item.getString("name");
+                    String id = item.getString("ID");
 
-                    Station station = new Station();
-                    station.setName(name);
+                    JSONObject addressInfo = item.getJSONObject("AddressInfo");
+
+                    String title = addressInfo.getString("Title");
+
+                    String address = addressInfo.getString("AddressLine1");
+
+                    String town = addressInfo.getString("Town");
+
+                    String stateOrProvince = addressInfo.getString("StateOrProvince");
+
+                    LatLng position = new LatLng(addressInfo.getDouble("Latitude"), addressInfo.getDouble("Longitude"));
+
+                    String url = addressInfo.getString("RelatedURL");
+
+                    int numberOfConnections = item.getInt("NumberOfPoints");
+
+                    JSONArray connections = item.getJSONArray("Connections");
+
+                    Station station = new Station(id, title, address, town, stateOrProvince, position, url, numberOfConnections);
+
+                    for (int j = 0; j < numberOfConnections; j++)
+                    {
+                        JSONObject connection = connections.getJSONObject(j);
+                        PointOfCharge pointOfCharge = new PointOfCharge(
+                                connection.getInt("ID"), connection.getInt("Voltage"),
+                                connection.getInt("PowerKW"), connection.getInt("StatusTypeID")
+                        );
+                        station.addPointOfCharge(pointOfCharge);
+                    }
+
 
 //                    // Save on Database every city
 //                    Database.getInstance(getApplicationContext()).save(city);
