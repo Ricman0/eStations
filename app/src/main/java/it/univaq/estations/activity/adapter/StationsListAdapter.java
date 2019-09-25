@@ -30,7 +30,7 @@ public class StationsListAdapter extends RecyclerView.Adapter<StationsListAdapte
         return mDataset.length;
     }
 
-    class ViewHolder extends RecyclerView.ViewHolder {
+    public static class ViewHolder extends RecyclerView.ViewHolder {
 
 
         public ViewHolder(@NonNull View itemView) {

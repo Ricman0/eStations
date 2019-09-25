@@ -42,10 +42,17 @@ public class StationsList extends AppCompatActivity {
 
         recyclerView = findViewById(R.id.stations_list);
 
-        recyclerView.setHasFixedSize(true);
+        // use this setting to improve performance if you know that changes
+        // in content do not change the layout size of the RecyclerView
+        //recyclerView.setHasFixedSize(true);
+
+        // use a linear layout manager
         layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
 
+        // specify an adapter (see also next example)
+        //mAdapter = new MyAdapter(myDataset);
+        //recyclerView.setAdapter(mAdapter);
         StationsListAdapter adapter = new StationsListAdapter();
     }
 
