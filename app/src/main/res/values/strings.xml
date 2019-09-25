@@ -2,4 +2,5 @@
     <string name="app_name">estations</string>
 
     <string name="title_activity_maps">Map</string>
+    <string name="title_activity_stations_list">StationsList</string>
 </resources>
