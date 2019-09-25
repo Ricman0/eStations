@@ -1,10 +1,12 @@
 package it.univaq.estations.model;
 
+import com.google.android.gms.maps.model.LatLng;
+
 import java.util.ArrayList;
 
 public class Station {
 
-    private long id;
+    private String id;
 
     private String title;
 
@@ -14,9 +16,7 @@ public class Station {
 
     private String stateOrProvince;
 
-    private double latitude;
-
-    private double longitude;
+    private LatLng position;
 
     private String url;
 
@@ -26,15 +26,27 @@ public class Station {
 
     public Station(){}
 
-    public Station(long id) {
+    public Station(String id, String title, String address, String town, String stateOrProvince, LatLng position, String url, int numberOfConnections) {
+        this.id = id;
+        this.title = title;
+        this.address = address;
+        this.town = town;
+        this.stateOrProvince = stateOrProvince;
+        this.position = position;
+        this.url = url;
+        this.numberOfConnections = numberOfConnections;
+        this.pointOfCharges = null;
+    }
+
+    public Station(String id) {
         this.id = id;
     }
 
-    public long getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(long id) {
+    public void setId(String id) {
         this.id = id;
     }
 
@@ -78,20 +90,12 @@ public class Station {
         this.stateOrProvince = stateOrProvince;
     }
 
-    public double getLatitude() {
-        return latitude;
+    public LatLng getPosition() {
+        return position;
     }
 
-    public void setLatitude(double latitude) {
-        this.latitude = latitude;
-    }
-
-    public double getLongitude() {
-        return longitude;
-    }
-
-    public void setLongitude(double longitude) {
-        this.longitude = longitude;
+    public void setPosition(LatLng position) {
+        this.position = position;
     }
 
     public String getUrl() {
@@ -108,5 +112,9 @@ public class Station {
 
     public void setNumberOfConnections(int numberOfConnections) {
         this.numberOfConnections = numberOfConnections;
+    }
+
+    public void addPointOfCharge(PointOfCharge pointOfCharge){
+        this.pointOfCharges.add(pointOfCharge);
     }
 }

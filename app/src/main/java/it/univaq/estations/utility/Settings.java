@@ -2,7 +2,7 @@ package it.univaq.estations.utility;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import androidx.preference.PreferenceManager;
+import android.preference.PreferenceManager;
 
 /**
  * Settings class provides to save and load some values by SharedPreferences.

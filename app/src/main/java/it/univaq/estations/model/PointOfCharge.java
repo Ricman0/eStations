@@ -13,6 +13,13 @@ public class PointOfCharge {
     public PointOfCharge() {
     }
 
+    public PointOfCharge(long id, int voltage, int kw, int statusTypeId) {
+        this.id = id;
+        this.voltage = voltage;
+        this.kw = kw;
+        this.statusTypeId = statusTypeId;
+    }
+
     public PointOfCharge(long id) {
         this.id = id;
     }
