@@ -41,10 +41,11 @@
             </intent-filter>
         </activity>
 
+        <!--
         <service
-            android:name=".utility.RequestService"/>
-            <!--android:description="This service is used to get data from tot"/>-->
-
+            android:name=".utility.RequestService"
+            android:description="This service is used to get data from tot"/>
+        -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
