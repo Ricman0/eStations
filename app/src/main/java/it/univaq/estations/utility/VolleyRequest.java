@@ -22,7 +22,7 @@ public class VolleyRequest {
         queue = Volley.newRequestQueue(context);
     }
 
-    public void downloadCities(Response.Listener<String> listener){
+    public void downloadStations(Response.Listener<String> listener){
 
         StringRequest request = new StringRequest(
                 StringRequest.Method.GET,
