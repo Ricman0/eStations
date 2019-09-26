@@ -25,7 +25,7 @@ public class StationsListAdapter extends RecyclerView.Adapter<StationsListAdapte
         public ViewHolder(@NonNull TextView itemView) {
 
             super(itemView);
-            title = itemView;
+            title = itemView.findViewById(R.id.textView1);
         }
     }
 
@@ -39,7 +39,7 @@ public class StationsListAdapter extends RecyclerView.Adapter<StationsListAdapte
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        TextView v = (TextView) LayoutInflater.from(parent.getContext()).inflate(R.layout.activity_stations_list, parent, false);
+        TextView v = (TextView) LayoutInflater.from(parent.getContext()).inflate(R.layout.recycler_view_item, parent, false);
         return new ViewHolder(v);
     }
 
