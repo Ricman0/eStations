@@ -35,7 +35,7 @@ public class Station {
         this.position = position;
         this.url = url;
         this.numberOfConnections = numberOfConnections;
-        this.pointOfCharges = null;
+        this.pointOfCharges = new ArrayList<PointOfCharge>();
     }
 
     public Station(String id) {

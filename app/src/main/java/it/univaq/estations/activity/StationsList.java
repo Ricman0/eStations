@@ -32,7 +32,7 @@ import it.univaq.estations.utility.VolleyRequest;
 
 public class StationsList extends AppCompatActivity {
 
-    private List<Station> stations = new ArrayList<>();
+    private ArrayList<Station> stations = new ArrayList<>();
     private RecyclerView recyclerView;
     private LinearLayoutManager layoutManager;
     private StationsListAdapter adapter;
@@ -40,9 +40,11 @@ public class StationsList extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        downloadData();
         setContentView(R.layout.activity_stations_list);
 
-        recyclerView = findViewById(R.id.stations_list);
+        recyclerView = (RecyclerView) findViewById(R.id.stations_list);
 
         // use this setting to improve performance if you know that changes
         // in content do not change the layout size of the RecyclerView
@@ -52,10 +54,14 @@ public class StationsList extends AppCompatActivity {
         layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
 
+
+
         // specify an adapter (see also next example)
         //mAdapter = new MyAdapter(myDataset);
         //recyclerView.setAdapter(mAdapter);
-        StationsListAdapter adapter = new StationsListAdapter();
+        adapter = new StationsListAdapter(stations);
+        recyclerView.setAdapter(adapter);
+
     }
 
     // The Broadcast Receiver can receive the sent intent by LocaleBroadcastManager.
@@ -66,56 +72,6 @@ public class StationsList extends AppCompatActivity {
             if(intent == null) return;
             String response = intent.getStringExtra("response");
             if(response == null) return;
-
-            // Parsing of JSON response:
-            // [{"id":0,"name":"Ancona","region":"Marche","lat":43.615,"lon":13.515}, ...]
-            try {
-                JSONArray jsonRoot = new JSONArray(response);
-                for(int i = 0; i < jsonRoot.length(); i++){
-
-                    JSONObject item = jsonRoot.getJSONObject(i);
-
-                    String id = item.getString("ID");
-
-                    JSONObject addressInfo = item.getJSONObject("AddressInfo");
-
-                    String title = addressInfo.getString("Title");
-
-                    String address = addressInfo.getString("AddressLine1");
-
-                    String town = addressInfo.getString("Town");
-
-                    String stateOrProvince = addressInfo.getString("StateOrProvince");
-
-                    LatLng position = new LatLng(addressInfo.getDouble("Latitude"), addressInfo.getDouble("Longitude"));
-
-                    String url = addressInfo.getString("RelatedURL");
-
-                    int numberOfConnections = item.getInt("NumberOfPoints");
-
-                    JSONArray connections = item.getJSONArray("Connections");
-
-                    Station station = new Station(id, title, address, town, stateOrProvince, position, url, numberOfConnections);
-
-                    for (int j = 0; j < numberOfConnections; j++)
-                    {
-                        JSONObject connection = connections.getJSONObject(j);
-                        PointOfCharge pointOfCharge = new PointOfCharge(
-                                connection.getInt("ID"), connection.getInt("Voltage"),
-                                connection.getInt("PowerKW"), connection.getInt("StatusTypeID")
-                        );
-                        station.addPointOfCharge(pointOfCharge);
-                    }
-
-
-//                    // Save on Database every city
-//                    Database.getInstance(getApplicationContext()).save(city);
-//                    cities.add(city);
-                }
-
-            } catch (JSONException e){
-                e.printStackTrace();
-            }
 
             // Refresh list because the adapter data are changed
             if(adapter != null) adapter.notifyDataSetChanged();
@@ -165,7 +121,8 @@ public class StationsList extends AppCompatActivity {
     }
 
 
-    private void downloadData() {
+    private void downloadData()
+    {
 
         VolleyRequest.getInstance(getApplicationContext())
                 .downloadStations(new Response.Listener<String>() {
@@ -177,13 +134,45 @@ public class StationsList extends AppCompatActivity {
 
                                 JSONObject item = jsonRoot.getJSONObject(i);
 
-                                String name = item.getString("name");
+                                String id = item.getString("ID");
 
-                                final Station city = new Station();
-                                city.setName(name);
+                                JSONObject addressInfo = item.getJSONObject("AddressInfo");
 
-                                // Save on Database every city
-                                //Database.getInstance(getApplicationContext()).save(city);
+                                String title = addressInfo.getString("Title");
+
+                                String address = addressInfo.getString("AddressLine1");
+
+                                String town = addressInfo.getString("Town");
+
+                                String stateOrProvince = addressInfo.getString("StateOrProvince");
+
+                                LatLng position = new LatLng(addressInfo.getDouble("Latitude"), addressInfo.getDouble("Longitude"));
+
+                                String url = addressInfo.getString("RelatedURL");
+
+                                int numberOfConnections = item.getInt("NumberOfPoints");
+
+                                JSONArray connections = item.getJSONArray("Connections");
+
+                                Station station = new Station(id, title, address, town, stateOrProvince, position, url, numberOfConnections);
+
+                                for (int j = 0; j < numberOfConnections-1; j++)
+                                {
+                                    JSONObject connection = connections.getJSONObject(j);
+                                    PointOfCharge pointOfCharge = new PointOfCharge(
+                                            connection.getInt("ID"), connection.getInt("Voltage"),
+                                            connection.getInt("PowerKW"), connection.getInt("StatusTypeID")
+                                    );
+                                    station.addPointOfCharge(pointOfCharge);
+
+                                }
+
+
+//                    // Save on Database every city
+//                    Database.getInstance(getApplicationContext()).save(city);
+//                    cities.add(city);
+
+                                stations.add(station);
 
 //                                new Thread(new Runnable() {
 //                                    public void run() {
@@ -191,7 +180,6 @@ public class StationsList extends AppCompatActivity {
 //                                                .getCityDao().save(city);
 //                                    }
 //                                }).start();
-                                stations.add(city);
                             }
 
                         } catch (JSONException e) {

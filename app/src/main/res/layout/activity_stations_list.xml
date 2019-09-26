@@ -11,6 +11,9 @@
         android:id="@+id/stations_list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        tools:itemCount="5"
+        tools:layout_editor_absoluteX="0dp"
+        tools:layout_editor_absoluteY="-151dp"
         tools:listitem="@layout/recycler_view_item"
         tools:scrollbars="vertical" />
 
