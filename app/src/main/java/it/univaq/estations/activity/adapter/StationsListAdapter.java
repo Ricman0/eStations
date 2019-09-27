@@ -1,5 +1,6 @@
 package it.univaq.estations.activity.adapter;
 
+import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 import android.widget.TextView;
@@ -7,51 +8,63 @@ import android.view.View;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import it.univaq.estations.R;
 import it.univaq.estations.model.Station;
 
-public class StationsListAdapter extends RecyclerView.Adapter<StationsListAdapter.ViewHolder> {
+public class StationsListAdapter extends RecyclerView.Adapter<StationsListAdapter.ItemListViewHolder> {
 
-    private ArrayList<Station> mDataset;
+    private List<Station> mDataset;
+    private LayoutInflater mInflater;
 
-    public static class ViewHolder extends RecyclerView.ViewHolder {
+    //inner class
+    class ItemListViewHolder extends RecyclerView.ViewHolder {
 
         public TextView title;
-
-
-        public ViewHolder(@NonNull TextView itemView) {
+        public TextView town;
+        public TextView km;
+        public ItemListViewHolder(@NonNull View itemView) {
 
             super(itemView);
-            title = itemView.findViewById(R.id.textView1);
+            title = itemView.findViewById(R.id.stationName);
+            town = itemView.findViewById(R.id.stationTown);
+            km = itemView.findViewById(R.id.distanceFromStation);
         }
     }
 
 
-    public StationsListAdapter(ArrayList<Station> myDataset) {
+    public StationsListAdapter(Context context, List<Station> myDataset) {
+
         mDataset = myDataset;
+        this.mInflater = LayoutInflater.from(context);
     }
 
 
     // Create new views (invoked by the layout manager)
+    //inflates the row layout when needed
     @NonNull
     @Override
-    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        TextView v = (TextView) LayoutInflater.from(parent.getContext()).inflate(R.layout.recycler_view_item, parent, false);
-        return new ViewHolder(v);
+    public ItemListViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View v = (View) LayoutInflater.from(parent.getContext()).inflate(R.layout.recycler_view_item, parent, false);
+        return new ItemListViewHolder(v);
     }
 
     // Replace the contents of a view (invoked by the layout manager)
+    //come parametro prende in ingresso un oggetto di tipo View, ossia il layout list_item
+    //binds the daa to the textview in each row
     @Override
-    public void onBindViewHolder(@NonNull StationsListAdapter.ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull StationsListAdapter.ItemListViewHolder holder, int position) {
 
         //Station station = mDataset.get(position);  // superfluo??
 
         // - get element from your dataset at this position
         // - replace the contents of the view with that element
-        holder.title.setText(mDataset.get(position).getTitle());
+        if(getItemCount()!=0) {
+            holder.title.setText(mDataset.get(position).getName());
+            holder.town.setText(mDataset.get(position).getTown());
+            holder.km.setText("10km");
+        }
 
 
     }

@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.widget.Adapter;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -42,6 +43,7 @@ public class StationsList extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         downloadData();
+
         setContentView(R.layout.activity_stations_list);
 
         recyclerView = (RecyclerView) findViewById(R.id.stations_list);
@@ -59,7 +61,7 @@ public class StationsList extends AppCompatActivity {
         // specify an adapter (see also next example)
         //mAdapter = new MyAdapter(myDataset);
         //recyclerView.setAdapter(mAdapter);
-        adapter = new StationsListAdapter(stations);
+        adapter = new StationsListAdapter(this, stations);
         recyclerView.setAdapter(adapter);
 
     }
@@ -187,7 +189,7 @@ public class StationsList extends AppCompatActivity {
                         }
 
                         // Refresh list because the adapter data are changed
-//                        if(adapter != null) adapter.notifyDataSetChanged();
+                        if(adapter != null) adapter.notifyDataSetChanged();
                     }
                 });
     }
