@@ -46,7 +46,6 @@
       android:layout_height="wrap_content"
       app:layout_constraintEnd_toEndOf="@+id/statusIcon"
       app:layout_constraintTop_toBottomOf="@+id/statusIcon"
-
       android:textColor="@color/colorPrimary" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
