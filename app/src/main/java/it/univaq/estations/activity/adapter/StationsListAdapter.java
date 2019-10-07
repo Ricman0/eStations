@@ -63,7 +63,7 @@ public class StationsListAdapter extends RecyclerView.Adapter<StationsListAdapte
         if(getItemCount()!=0) {
             holder.title.setText(mDataset.get(position).getName());
             holder.town.setText(mDataset.get(position).getTown());
-            holder.km.setText("10km");
+            holder.km.setText(mDataset.get(position).getPosition().toString());
         }
 
 

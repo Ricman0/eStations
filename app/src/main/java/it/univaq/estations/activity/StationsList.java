@@ -14,6 +14,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.volley.Response;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.model.LatLng;
 
 import org.json.JSONArray;
@@ -37,13 +39,15 @@ public class StationsList extends AppCompatActivity {
     private RecyclerView recyclerView;
     private LinearLayoutManager layoutManager;
     private StationsListAdapter adapter;
+    //per la posizione
+    private FusedLocationProviderClient fusedLocationClient;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        downloadData();
-
+       // downloadData();
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
         setContentView(R.layout.activity_stations_list);
 
         recyclerView = (RecyclerView) findViewById(R.id.stations_list);
@@ -125,6 +129,13 @@ public class StationsList extends AppCompatActivity {
 
     private void downloadData()
     {
+        int v;
+
+        fusedLocationClient.getLastLocation().getResult().getLatitude();
+
+        int y;
+        LatLng x = new LatLng(        fusedLocationClient.getLastLocation().getResult().getLatitude()
+                ,        fusedLocationClient.getLastLocation().getResult().getLongitude());
 
         VolleyRequest.getInstance(getApplicationContext())
                 .downloadStations(new Response.Listener<String>() {
@@ -191,6 +202,6 @@ public class StationsList extends AppCompatActivity {
                         // Refresh list because the adapter data are changed
                         if(adapter != null) adapter.notifyDataSetChanged();
                     }
-                });
+                }, x);
     }
 }

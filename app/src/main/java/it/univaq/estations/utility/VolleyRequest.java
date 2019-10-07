@@ -2,10 +2,15 @@ package it.univaq.estations.utility;
 
 import android.content.Context;
 
+import androidx.annotation.StringRes;
+
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.google.android.gms.maps.model.LatLng;
+
+import it.univaq.estations.R;
 
 public class VolleyRequest {
 
@@ -22,11 +27,20 @@ public class VolleyRequest {
         queue = Volley.newRequestQueue(context);
     }
 
-    public void downloadStations(Response.Listener<String> listener){
+    public void downloadStations(Response.Listener<String> listener, LatLng currentPosition){
 
+        double curLat = currentPosition.latitude;
+        double curLng = currentPosition.longitude;
         StringRequest request = new StringRequest(
                 StringRequest.Method.GET,
-                "https://api.openchargemap.io/v3/poi/?output=json&countrycode=IT&maxresults=4&compact=true&verbose=false",
+
+                R.string.baseStationRequestUrl +
+                        "?output=json" +
+                        "&countrycode=IT" +
+                        "&maxresults=4" +
+                        "&latitude=" + curLat +
+                        "&longitude=" + curLng +
+                        "&compact=true&verbose=false",
                  listener,
                 null);
         queue.add(request);
