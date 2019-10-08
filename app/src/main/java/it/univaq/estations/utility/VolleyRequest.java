@@ -29,8 +29,15 @@ public class VolleyRequest {
 
     public void downloadStations(Response.Listener<String> listener, LatLng currentPosition){
 
-        double curLat = currentPosition.latitude;
-        double curLng = currentPosition.longitude;
+        double curLat = 0;
+        double curLng = 0;
+
+
+        if (currentPosition != null) {
+
+             curLat = currentPosition.latitude;
+             curLng = currentPosition.longitude;
+        }
         StringRequest request = new StringRequest(
                 StringRequest.Method.GET,
 
