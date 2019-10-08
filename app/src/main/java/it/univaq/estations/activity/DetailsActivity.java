@@ -16,6 +16,7 @@ public class DetailsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_details);
 
+        //get Extras from intent
         String stationNameString = getIntent().getStringExtra("stationName");
         String stationTownString = getIntent().getStringExtra("stationTown");
 

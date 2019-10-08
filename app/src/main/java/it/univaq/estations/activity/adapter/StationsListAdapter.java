@@ -1,6 +1,7 @@
 package it.univaq.estations.activity.adapter;
 
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 import android.widget.TextView;
@@ -12,6 +13,7 @@ import java.util.List;
 
 import it.univaq.estations.R;
 import it.univaq.estations.model.Station;
+import it.univaq.estations.activity.DetailsActivity;
 
 public class StationsListAdapter extends RecyclerView.Adapter<StationsListAdapter.ItemListViewHolder> {
 
@@ -31,22 +33,22 @@ public class StationsListAdapter extends RecyclerView.Adapter<StationsListAdapte
             town = itemView.findViewById(R.id.stationTown);
             km = itemView.findViewById(R.id.distanceFromStation);
 
-            // Define the click event on item
+            // Define the click event on item (creating Anonymous View.OnClickListener)
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
 
-                    // Open another Activity and pass to it the right city
-
-                    /**
-                    City city = mDataset.get(getAdapterPosition());
+                    // Open another Activity and pass to it the right station
+                    //new Intent object: Il costruttore, in caso di intent esplicito, richiede due parametri: il Context (che, nel nostro caso, è l’activity che vuole chiamare la seconda) e la classe che riceverà l’intent, cioè l’activity che vogliamo richiamare.
                     Intent intent = new Intent(v.getContext(), DetailsActivity.class);
-                    intent.putExtra("cityName", city.getName());
-                    intent.putExtra("regionName", city.getRegion());
-                    intent.putExtra("latitude", city.getLatitude());
-                    intent.putExtra("longitude", city.getLongitude());
+
+                    //add extras to intent
+                    Station station = mDataset.get(getAdapterPosition());
+                    intent.putExtra("stationName", station.getName());
+                    intent.putExtra("stationTown", station.getTown());
+
+                    //Avendo l’intent, per avviare la nuova activity
                     v.getContext().startActivity(intent);
-                     */
                 }
             });
         }
