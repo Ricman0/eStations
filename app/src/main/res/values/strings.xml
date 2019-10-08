@@ -3,4 +3,5 @@
 
     <string name="title_activity_maps">Map</string>
     <string name="title_activity_stations_list">StationsList</string>
+    <string name="title_details_activity">DetailsActivity</string>
 </resources>
