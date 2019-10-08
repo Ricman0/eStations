@@ -1,5 +1,6 @@
 package it.univaq.estations.activity.adapter;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.view.LayoutInflater;
@@ -23,10 +24,10 @@ public class StationsListAdapter extends RecyclerView.Adapter<StationsListAdapte
     //inner class
     class ItemListViewHolder extends RecyclerView.ViewHolder {
 
-        public TextView title;
-        public TextView town;
-        public TextView km;
-        public ItemListViewHolder(@NonNull View itemView) {
+        TextView title;
+        TextView town;
+        TextView km;
+        ItemListViewHolder(@NonNull View itemView) {
 
             super(itemView);
             title = itemView.findViewById(R.id.stationName);
@@ -67,13 +68,14 @@ public class StationsListAdapter extends RecyclerView.Adapter<StationsListAdapte
     @NonNull
     @Override
     public ItemListViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View v = (View) LayoutInflater.from(parent.getContext()).inflate(R.layout.recycler_view_item, parent, false);
+        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.recycler_view_item, parent, false);
         return new ItemListViewHolder(v);
     }
 
     // Replace the contents of a view (invoked by the layout manager)
     //come parametro prende in ingresso un oggetto di tipo View, ossia il layout list_item
     //binds the daa to the textview in each row
+    @SuppressLint("SetTextI18n")
     @Override
     public void onBindViewHolder(@NonNull StationsListAdapter.ItemListViewHolder holder, int position) {
 
@@ -84,7 +86,12 @@ public class StationsListAdapter extends RecyclerView.Adapter<StationsListAdapte
         if(getItemCount()!=0) {
             holder.title.setText(mDataset.get(position).getName());
             holder.town.setText(mDataset.get(position).getTown());
-            holder.km.setText(mDataset.get(position).getPosition().toString());
+            float[] dist = new float[1];
+            android.location.Location.distanceBetween( 42.360205, 13.377868,
+                    mDataset.get(position).getPosition().latitude, mDataset.get(position).getPosition().longitude, dist);
+            @SuppressWarnings("IntegerDivisionInFloatingPointContext") double km = ((int) dist[0] / 100)/10.0;
+            holder.km.setText(km + " km");
+//                    mDataset.get(position).getPosition().toString());
         }
 
 

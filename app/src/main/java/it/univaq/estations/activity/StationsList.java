@@ -139,11 +139,6 @@ public class StationsList extends AppCompatActivity {
                 {
                     currentPos = new LatLng( location.getLatitude(), location.getLongitude());
                 }
-                else {
-                    int v;
-                    v= 2;
-                    System.out.println(v);
-                }
             }
         });
 
@@ -179,7 +174,7 @@ public class StationsList extends AppCompatActivity {
 
                                 Station station = new Station(id, title, address, town, stateOrProvince, position, url, numberOfConnections);
 
-                                for (int j = 0; j < numberOfConnections-1; j++)
+                                for (int j = 0; j < numberOfConnections-2; j++)
                                 {
                                     JSONObject connection = connections.getJSONObject(j);
                                     PointOfCharge pointOfCharge = new PointOfCharge(
