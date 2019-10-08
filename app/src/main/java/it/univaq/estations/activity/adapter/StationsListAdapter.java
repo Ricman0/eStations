@@ -30,6 +30,25 @@ public class StationsListAdapter extends RecyclerView.Adapter<StationsListAdapte
             title = itemView.findViewById(R.id.stationName);
             town = itemView.findViewById(R.id.stationTown);
             km = itemView.findViewById(R.id.distanceFromStation);
+
+            // Define the click event on item
+            itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+
+                    // Open another Activity and pass to it the right city
+
+                    /**
+                    City city = mDataset.get(getAdapterPosition());
+                    Intent intent = new Intent(v.getContext(), DetailsActivity.class);
+                    intent.putExtra("cityName", city.getName());
+                    intent.putExtra("regionName", city.getRegion());
+                    intent.putExtra("latitude", city.getLatitude());
+                    intent.putExtra("longitude", city.getLongitude());
+                    v.getContext().startActivity(intent);
+                     */
+                }
+            });
         }
     }
 
@@ -64,6 +83,8 @@ public class StationsListAdapter extends RecyclerView.Adapter<StationsListAdapte
             holder.title.setText(mDataset.get(position).getName());
             holder.town.setText(mDataset.get(position).getTown());
             holder.km.setText("10km");
+
+
         }
 
 
