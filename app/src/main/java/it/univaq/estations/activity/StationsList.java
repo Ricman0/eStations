@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.location.Location;
 import android.os.Bundle;
 import android.widget.Adapter;
 
@@ -17,6 +18,7 @@ import com.android.volley.Response;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.tasks.OnSuccessListener;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -41,16 +43,16 @@ public class StationsList extends AppCompatActivity {
     private StationsListAdapter adapter;
     //per la posizione
     private FusedLocationProviderClient fusedLocationClient;
+    private LatLng currentPos;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-       // downloadData();
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
         setContentView(R.layout.activity_stations_list);
 
-        recyclerView = (RecyclerView) findViewById(R.id.stations_list);
+        recyclerView = findViewById(R.id.stations_list);
 
         // use this setting to improve performance if you know that changes
         // in content do not change the layout size of the RecyclerView
@@ -129,13 +131,21 @@ public class StationsList extends AppCompatActivity {
 
     private void downloadData()
     {
-        int v;
 
-        fusedLocationClient.getLastLocation().getResult().getLatitude();
-
-        int y;
-        LatLng x = new LatLng(        fusedLocationClient.getLastLocation().getResult().getLatitude()
-                ,        fusedLocationClient.getLastLocation().getResult().getLongitude());
+        fusedLocationClient.getLastLocation().addOnSuccessListener(this, new OnSuccessListener<Location>() {
+            @Override
+            public void onSuccess(Location location) {
+                if(location != null)
+                {
+                    currentPos = new LatLng( location.getLatitude(), location.getLongitude());
+                }
+                else {
+                    int v;
+                    v= 2;
+                    System.out.println(v);
+                }
+            }
+        });
 
         VolleyRequest.getInstance(getApplicationContext())
                 .downloadStations(new Response.Listener<String>() {
@@ -202,6 +212,6 @@ public class StationsList extends AppCompatActivity {
                         // Refresh list because the adapter data are changed
                         if(adapter != null) adapter.notifyDataSetChanged();
                     }
-                }, x);
+                }, currentPos);
     }
 }
