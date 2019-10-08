@@ -29,8 +29,8 @@ public class VolleyRequest {
 
     public void downloadStations(Response.Listener<String> listener, LatLng currentPosition){
 
-        double curLat = 0;
-        double curLng = 0;
+        double curLat;
+        double curLng;
 
 
         if (currentPosition != null) {
@@ -38,11 +38,14 @@ public class VolleyRequest {
              curLat = currentPosition.latitude;
              curLng = currentPosition.longitude;
         }
+        else {
+            curLat = 42.360205;
+            curLng = 13.377868;}
         StringRequest request = new StringRequest(
                 StringRequest.Method.GET,
 
-                R.string.baseStationRequestUrl +
-                        "?output=json" +
+//                R.string.baseStationRequestUrl +
+                        "https://api.openchargemap.io/v3/poi/?output=json" +
                         "&countrycode=IT" +
                         "&maxresults=4" +
                         "&latitude=" + curLat +

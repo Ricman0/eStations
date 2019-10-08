@@ -3,5 +3,4 @@
 
     <string name="title_activity_maps">Map</string>
     <string name="title_activity_stations_list">StationsList</string>
-    <string name="baseStationRequestUrl">https://api.openchargemap.io/v3/poi/</string>
 </resources>

@@ -49,7 +49,6 @@ public class StationsList extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-       // downloadData();
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
         setContentView(R.layout.activity_stations_list);
 
@@ -139,7 +138,11 @@ public class StationsList extends AppCompatActivity {
                 if(location != null)
                 {
                     currentPos = new LatLng( location.getLatitude(), location.getLongitude());
-                    int c;
+                }
+                else {
+                    int v;
+                    v= 2;
+                    System.out.println(v);
                 }
             }
         });
