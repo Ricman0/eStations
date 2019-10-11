@@ -1,26 +1,39 @@
 package it.univaq.estations.model;
 
+import androidx.room.ColumnInfo;
+import androidx.room.Entity;
+import androidx.room.OnConflictStrategy;
+import androidx.room.PrimaryKey;
+
 import com.google.android.gms.maps.model.LatLng;
 
 import java.util.ArrayList;
 
-
+@Entity(tableName = "stations")
 public class Station {
 
+    @PrimaryKey
     private String id;
 
+    @ColumnInfo(name = "title")
     private String title;
 
+    @ColumnInfo(name = "address")
     private String address;
 
+    @ColumnInfo(name = "town")
     private String town;
 
+    @ColumnInfo(name = "stateOrProvince")
     private String stateOrProvince;
 
+    @ColumnInfo(name = "position")
     private LatLng position;
 
+    @ColumnInfo(name = "url")
     private String url;
 
+    @ColumnInfo(name = "numberOfConnections")
     private int numberOfConnections;
 
     private ArrayList<PointOfCharge> pointOfCharges;

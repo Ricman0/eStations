@@ -1,13 +1,22 @@
 package it.univaq.estations.model;
 
+import androidx.room.ColumnInfo;
+import androidx.room.Entity;
+import androidx.room.PrimaryKey;
+
+@Entity(tableName = "pointofcharges")
 public class PointOfCharge {
 
+    @PrimaryKey
     private long id;
 
+    @ColumnInfo(name = "voltage")
     private int voltage;
 
+    @ColumnInfo(name = "kw")
     private int kw;
 
+    @ColumnInfo(name = "statusTypeId")
     private int statusTypeId;
 
     public PointOfCharge() {
