@@ -2,6 +2,7 @@ package it.univaq.estations.model;
 
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
+import androidx.room.Ignore;
 import androidx.room.OnConflictStrategy;
 import androidx.room.PrimaryKey;
 
@@ -36,6 +37,7 @@ public class Station {
     @ColumnInfo(name = "numberOfConnections")
     private int numberOfConnections;
 
+    @Ignore
     private ArrayList<PointOfCharge> pointOfCharges;
 
     public Station(){}

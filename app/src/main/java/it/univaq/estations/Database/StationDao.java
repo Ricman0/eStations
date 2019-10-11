@@ -24,6 +24,6 @@ public interface StationDao {
     @Query("SELECT * FROM stations ORDER BY town ASC")
     public List<Station> getAllStations();
 
-    @Query("SELECT * FROM station WHERE id=:id")
+    @Query("SELECT * FROM stations WHERE id=:id")
     public Station getById(long id);
 }
