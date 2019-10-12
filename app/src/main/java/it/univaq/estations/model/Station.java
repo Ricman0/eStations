@@ -11,6 +11,7 @@ import androidx.room.TypeConverters;
 import com.google.android.gms.maps.model.LatLng;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import it.univaq.estations.Database.LatLngConverter;
 
@@ -20,7 +21,7 @@ public class Station {
     @PrimaryKey @NonNull
     private String id;
 
-    @ColumnInfo(name = "title")
+    @ColumnInfo(name = "name")
     private String title;
 
     @ColumnInfo(name = "address")
@@ -137,7 +138,19 @@ public class Station {
         this.numberOfConnections = numberOfConnections;
     }
 
+    public ArrayList<PointOfCharge> getPointOfCharges() {
+        return pointOfCharges;
+    }
+
+    public void setPointOfCharges(ArrayList<PointOfCharge> pointOfCharges) {
+        this.pointOfCharges = pointOfCharges;
+    }
+
     public void addPointOfCharge(PointOfCharge pointOfCharge){
         this.pointOfCharges.add(pointOfCharge);
+    }
+
+    public void addPointOfChargeList(List<PointOfCharge> pointOfChargeList){
+        this.pointOfCharges.addAll(pointOfChargeList);
     }
 }
