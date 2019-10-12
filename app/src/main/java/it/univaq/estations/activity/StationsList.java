@@ -100,6 +100,9 @@ public class StationsList extends AppCompatActivity {
                 if(location != null)
                 {
                     currentPos = new LatLng( location.getLatitude(), location.getLongitude());
+                    LocalBroadcastManager.getInstance(getApplicationContext())
+                            .registerReceiver(myReceiver, new IntentFilter(RequestService.FILTER_REQUEST_DOWNLOAD));
+                    downloadData();
                 }
             }
         });
@@ -108,15 +111,15 @@ public class StationsList extends AppCompatActivity {
 //            startLocationUpdates();
 //        }
         // Registering the receiver
-        LocalBroadcastManager.getInstance(getApplicationContext())
-                .registerReceiver(myReceiver, new IntentFilter(RequestService.FILTER_REQUEST_DOWNLOAD));
+//        LocalBroadcastManager.getInstance(getApplicationContext())
+//                .registerReceiver(myReceiver, new IntentFilter(RequestService.FILTER_REQUEST_DOWNLOAD));
 
         // If is the first time you open the app, do a HTTP request to download the data
 //        if(Settings.loadBoolean(getApplicationContext(), Settings.FIRST_TIME, true)){
 //            Intent intentService = new Intent(getApplicationContext(), RequestService.class);
 //            intentService.putExtra(RequestService.REQUEST_ACTION, RequestService.REQUEST_DOWNLOAD);
 //            startService(intentService);
-            downloadData();
+//            downloadData();
 
 //        }
 //        else {
