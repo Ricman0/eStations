@@ -32,14 +32,15 @@ public class VolleyRequest {
         double curLat;
         double curLng;
 
+
         if (currentPosition != null) {
 
              curLat = currentPosition.latitude;
              curLng = currentPosition.longitude;
         }
         else {
-            curLat = 42;
-            curLng = 13;}
+            curLat = 42.360205;
+            curLng = 13.377868;}
         StringRequest request = new StringRequest(
                 StringRequest.Method.GET,
                         "https://api.openchargemap.io/v3/poi/?output=json" +

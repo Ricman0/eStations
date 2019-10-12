@@ -166,35 +166,40 @@ public class StationsList extends AppCompatActivity {
 
                                 JSONObject item = jsonRoot.getJSONObject(i);
 
-                                String id = item.getString("ID");
+                                String id = item.optString("ID");
 
-                                JSONObject addressInfo = item.getJSONObject("AddressInfo");
+                                JSONObject addressInfo = item.optJSONObject("AddressInfo");
 
-                                String title = addressInfo.getString("Title");
+                                String title = "", address = "", town = "", stateOrProvince = "", url = "";
+                                LatLng position = null;
 
-                                String address = addressInfo.getString("AddressLine1");
+                                if (addressInfo != null){
 
-                                String town = addressInfo.getString("Town");
+                                    title = addressInfo.optString("Title", "No Name");
 
-                                String stateOrProvince = addressInfo.getString("StateOrProvince");
+                                    address = addressInfo.optString("AddressLine1", "No Address");
 
-                                LatLng position = new LatLng(addressInfo.getDouble("Latitude"), addressInfo.getDouble("Longitude"));
+                                    town = addressInfo.optString("Town", "No Town");
 
-                                String url = addressInfo.getString("RelatedURL");
+                                    stateOrProvince = addressInfo.optString("StateOrProvince", "No State or Province");
 
-                                JSONArray connections = item.getJSONArray("Connections");
+                                    position = new LatLng(addressInfo.optDouble("Latitude"), addressInfo.optDouble("Longitude"));
 
-                                int numberOfConnections = connections.length();
+                                    url = addressInfo.optString("RelatedURL", "No Url");
+                                }
 
+                                JSONArray connections = item.optJSONArray("Connections");
 
-                                Station station = new Station(id, title, address, town, stateOrProvince, position, url, numberOfConnections);
+                                int numberOfPointsOfCharge = (connections != null ? connections.length() : 0 );
 
-                                for (int j = 0; j < numberOfConnections; j++)
+                                Station station = new Station(id, title, address, town, stateOrProvince, position, url, numberOfPointsOfCharge);
+
+                                for (int j = 0; j < numberOfPointsOfCharge; j++)
                                 {
                                     JSONObject connection = connections.getJSONObject(j);
                                     PointOfCharge pointOfCharge = new PointOfCharge(
-                                            connection.getInt("ID"), id, connection.getInt("Voltage"),
-                                            connection.getInt("PowerKW"), connection.getInt("StatusTypeID")
+                                            connection.optInt("ID"), id, connection.optInt("Voltage"),
+                                            connection.optInt("PowerKW"), connection.optInt("StatusTypeID")
                                     );
                                     station.addPointOfCharge(pointOfCharge);
 
