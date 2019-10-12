@@ -1,18 +1,12 @@
 package it.univaq.estations.activity;
 
-import android.Manifest;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -32,7 +26,6 @@ import it.univaq.estations.R;
 import it.univaq.estations.activity.adapter.StationsListAdapter;
 import it.univaq.estations.model.PointOfCharge;
 import it.univaq.estations.model.Station;
-import it.univaq.estations.utility.RequestService;
 import it.univaq.estations.utility.Settings;
 import it.univaq.estations.utility.VolleyRequest;
 
@@ -47,6 +40,7 @@ public class StationsList extends AppCompatActivity {
     //per la posizione
     private FusedLocationProviderClient fusedLocationClient;
     private LatLng currentPos;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,11 +59,7 @@ public class StationsList extends AppCompatActivity {
         layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
 
-
-
         // specify an adapter (see also next example)
-        //mAdapter = new MyAdapter(myDataset);
-        //recyclerView.setAdapter(mAdapter);
         adapter = new StationsListAdapter(this, stations);
         recyclerView.setAdapter(adapter);
 
@@ -100,61 +90,17 @@ public class StationsList extends AppCompatActivity {
                 if(location != null)
                 {
                     currentPos = new LatLng( location.getLatitude(), location.getLongitude());
-                    LocalBroadcastManager.getInstance(getApplicationContext())
-                            .registerReceiver(myReceiver, new IntentFilter(RequestService.FILTER_REQUEST_DOWNLOAD));
+                    // Registering the receiver
+//                    LocalBroadcastManager.getInstance(getApplicationContext())
+//                            .registerReceiver(myReceiver, new IntentFilter(RequestService.FILTER_REQUEST_DOWNLOAD));
                     downloadData();
                 }
             }
         });
 
-//        if (requestingLocationUpdates) {
-//            startLocationUpdates();
-//        }
-        // Registering the receiver
-//        LocalBroadcastManager.getInstance(getApplicationContext())
-//                .registerReceiver(myReceiver, new IntentFilter(RequestService.FILTER_REQUEST_DOWNLOAD));
-
-        // If is the first time you open the app, do a HTTP request to download the data
-//        if(Settings.loadBoolean(getApplicationContext(), Settings.FIRST_TIME, true)){
-//            Intent intentService = new Intent(getApplicationContext(), RequestService.class);
-//            intentService.putExtra(RequestService.REQUEST_ACTION, RequestService.REQUEST_DOWNLOAD);
-//            startService(intentService);
-//            downloadData();
-
-//        }
-//        else {
-//            // If is not the first time you open the app, get all saved data from Database
-//            stations.addAll(Database.getInstance(getApplicationContext()).getAllCities());
-//            if(adapter != null) adapter.notifyDataSetChanged();
-//
-//
-//            new Thread(new Runnable() {
-//                @Override
-//                public void run() {
-//                    List<City> data = RDatabase.getInstance(getApplicationContext())
-//                            .getCityDao().getAllCities();
-//                    cities.addAll(data);
-//
-//                    runOnUiThread(new Runnable() {
-//                        @Override
-//                        public void run() {
-//                            if(adapter != null) adapter.notifyDataSetChanged();
-//                        }
-//                    });
-//                }
-//            }).start();
-//
-//
-//        }
         Settings.save(getApplicationContext(), Settings.FIRST_TIME, false);
     }
 
-
-//    private void startLocationUpdates() {
-//        fusedLocationClient.requestLocationUpdates(locationRequest,
-//                locationCallback,
-//                Looper.getMainLooper());
-//    }
 
     private void downloadData()
     {
@@ -208,19 +154,7 @@ public class StationsList extends AppCompatActivity {
 
                                 }
 
-
-//                    // Save on Database every city
-//                    Database.getInstance(getApplicationContext()).save(city);
-//                    cities.add(city);
-
                                 stations.add(station);
-
-//                                new Thread(new Runnable() {
-//                                    public void run() {
-//                                        RDatabase.getInstance(getApplicationContext())
-//                                                .getCityDao().save(city);
-//                                    }
-//                                }).start();
                             }
 
                         } catch (JSONException e) {
@@ -233,42 +167,8 @@ public class StationsList extends AppCompatActivity {
                 }, currentPos);
     }
 
-        private void permissionCheck(){
 
-            boolean permissionAccessCoarseLocationApproved =
-                    ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
-                            == PackageManager.PERMISSION_GRANTED;
-            boolean permissionAccessFineLocationApproved =
-                    ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-                            == PackageManager.PERMISSION_GRANTED;
-            boolean permissionAccessInternetApproved =
-                    ContextCompat.checkSelfPermission(this, Manifest.permission.INTERNET)
-                    == PackageManager.PERMISSION_GRANTED;
-
-            if (!permissionAccessCoarseLocationApproved) {
-                // Permission is not granted
-//                if (ActivityCompat.shouldShowRequestPermissionRationale(this,
-//                        Manifest.permission.READ_CONTACTS)) {
-//                    // Show an explanation to the user *asynchronously* -- don't block
-//                    // this thread waiting for the user's response! After the user
-//                    // sees the explanation, try again to request the permission.
-//                } else {
-                    // No explanation needed; request the permission
-                    ActivityCompat.requestPermissions(this,
-                            new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},
-                            MY_PERMISSIONS_REQUEST_COARSE_LOCATION);
-
-                    // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
-                    // app-defined int constant. The callback method gets the
-                    // result of the request.
-                //}
-            } else {
-                // Permission has already been granted        }
-
-        }
-    }
-
-   // @Override
+//    @Override
 //    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
 //        switch (requestCode) {
 //            case MY_PERMISSIONS_REQUEST_INTERNET: {
@@ -284,7 +184,6 @@ public class StationsList extends AppCompatActivity {
 //            }
 //            case MY_PERMISSIONS_REQUEST_COARSE_LOCATION:{
 //
-//
 //            }
 //
 //            // other 'case' lines to check for other
@@ -294,4 +193,40 @@ public class StationsList extends AppCompatActivity {
 //                throw new IllegalStateException("Unexpected value: " + requestCode);
 //        }
 //    }
-}
+
+//    private void permissionCheck(){
+//
+//            boolean permissionAccessCoarseLocationApproved =
+//                    ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
+//                            == PackageManager.PERMISSION_GRANTED;
+//            boolean permissionAccessFineLocationApproved =
+//                    ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+//                            == PackageManager.PERMISSION_GRANTED;
+//            boolean permissionAccessInternetApproved =
+//                    ContextCompat.checkSelfPermission(this, Manifest.permission.INTERNET)
+//                    == PackageManager.PERMISSION_GRANTED;
+//
+//            if (!permissionAccessCoarseLocationApproved) {
+//                // Permission is not granted
+////                if (ActivityCompat.shouldShowRequestPermissionRationale(this,
+////                        Manifest.permission.READ_CONTACTS)) {
+////                    // Show an explanation to the user *asynchronously* -- don't block
+////                    // this thread waiting for the user's response! After the user
+////                    // sees the explanation, try again to request the permission.
+////                } else {
+//                    // No explanation needed; request the permission
+//                    ActivityCompat.requestPermissions(this,
+//                            new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},
+//                            MY_PERMISSIONS_REQUEST_COARSE_LOCATION);
+//
+//                    // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
+//                    // app-defined int constant. The callback method gets the
+//                    // result of the request.
+//                //}
+//            } else {
+//                // Permission has already been granted        }
+//
+//        }
+//    }
+
+    }
