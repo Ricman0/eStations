@@ -193,7 +193,7 @@ public class StationsList extends AppCompatActivity {
                                 {
                                     JSONObject connection = connections.getJSONObject(j);
                                     PointOfCharge pointOfCharge = new PointOfCharge(
-                                            connection.getInt("ID"), connection.getInt("Voltage"),
+                                            connection.getInt("ID"), id, connection.getInt("Voltage"),
                                             connection.getInt("PowerKW"), connection.getInt("StatusTypeID")
                                     );
                                     station.addPointOfCharge(pointOfCharge);

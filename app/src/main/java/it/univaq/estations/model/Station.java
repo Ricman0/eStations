@@ -1,18 +1,23 @@
 package it.univaq.estations.model;
 
+import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
+import androidx.room.Ignore;
 import androidx.room.OnConflictStrategy;
 import androidx.room.PrimaryKey;
+import androidx.room.TypeConverters;
 
 import com.google.android.gms.maps.model.LatLng;
 
 import java.util.ArrayList;
 
+import it.univaq.estations.Database.LatLngConverter;
+
 @Entity(tableName = "stations")
 public class Station {
 
-    @PrimaryKey
+    @PrimaryKey @NonNull
     private String id;
 
     @ColumnInfo(name = "title")
@@ -28,6 +33,7 @@ public class Station {
     private String stateOrProvince;
 
     @ColumnInfo(name = "position")
+    @TypeConverters(LatLngConverter.class)
     private LatLng position;
 
     @ColumnInfo(name = "url")
@@ -36,8 +42,10 @@ public class Station {
     @ColumnInfo(name = "numberOfConnections")
     private int numberOfConnections;
 
+    @Ignore
     private ArrayList<PointOfCharge> pointOfCharges;
 
+    @Ignore
     public Station(){}
 
     public Station(String id, String title, String address, String town, String stateOrProvince, LatLng position, String url, int numberOfConnections) {
@@ -52,6 +60,7 @@ public class Station {
         this.pointOfCharges = new ArrayList<PointOfCharge>();
     }
 
+    @Ignore
     public Station(String id) {
         this.id = id;
     }
