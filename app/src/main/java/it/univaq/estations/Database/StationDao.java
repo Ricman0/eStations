@@ -25,5 +25,5 @@ public interface StationDao {
     public List<Station> getAllStations();
 
     @Query("SELECT * FROM stations WHERE id=:id")
-    public Station getById(long id);
+    public Station getById(String id);
 }
