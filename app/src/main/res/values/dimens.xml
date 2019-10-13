@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <dimen name="titleMargin">10dp</dimen>
+    <dimen name="listMarginTop">10dp</dimen>
+    <dimen name="listMarginSide">15dp</dimen>
+</resources>
