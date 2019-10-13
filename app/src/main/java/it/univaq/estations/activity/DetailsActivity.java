@@ -1,6 +1,7 @@
 package it.univaq.estations.activity;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
 import android.net.Uri;
@@ -11,6 +12,8 @@ import android.widget.TextView;
 
 import it.univaq.estations.Database.Database;
 import it.univaq.estations.R;
+import it.univaq.estations.activity.adapter.PointOfChargeListAdapter;
+import it.univaq.estations.model.PointOfCharge;
 import it.univaq.estations.model.Station;
 
 /**
@@ -20,6 +23,8 @@ public class DetailsActivity extends AppCompatActivity {
 
     private Station station;
     private Database appDB;
+    private RecyclerView  recyclerView;
+    private PointOfChargeListAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,8 +32,8 @@ public class DetailsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_details);
 
         //get Extras from intent
-        String stationNameString = getIntent().getStringExtra("stationName"); //potrei eliminare
-        String stationTownString = getIntent().getStringExtra("stationTown"); // potrei eliminare
+      //  String stationNameString = getIntent().getStringExtra("stationName"); //potrei eliminare
+      //  String stationTownString = getIntent().getStringExtra("stationTown"); // potrei eliminare
         String stationId = getIntent().getStringExtra("stationId");
 
         //get station from database
@@ -37,14 +42,24 @@ public class DetailsActivity extends AppCompatActivity {
         station.addPointOfChargeList(appDB.getPointOfChargeDao().getAllStationPointOfCharges(stationId));
 
         //fill the layout with the station data
-
-
-
         TextView stationName = findViewById(R.id.stationNameDetails);
         TextView stationTown = findViewById(R.id.stationTownDetails);
+        TextView stationAddress = findViewById(R.id.stationAddressDetails);
+        TextView stationUrl = findViewById(R.id.stationUrlDetails);
+        TextView stationNumPointOfCharges = findViewById(R.id.numPointOfChargesDetails);
 
-        stationName.setText(stationNameString);
-        stationTown.setText(stationTownString);
+        stationName.setText(station.getName());
+        stationTown.setText(station.getTown());
+        stationAddress.setText(station.getAddress());
+        stationUrl.setText(station.getUrl());
+        stationNumPointOfCharges.setText(station.getPointOfCharges().size());
+
+        //fill the station points of charge
+        recyclerView = findViewById(R.id.pointOfCharge_list);
+        // specify an adapter (see also next example)
+        adapter = new PointOfChargeListAdapter(this, station.getPointOfCharges());
+        recyclerView.setAdapter(adapter);
+
 
         //add click listener to the navigatioToStation button
         Button button = findViewById(R.id.navigateToStation);
