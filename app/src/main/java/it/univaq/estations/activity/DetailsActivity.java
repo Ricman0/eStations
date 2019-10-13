@@ -1,13 +1,14 @@
 package it.univaq.estations.activity;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import it.univaq.estations.Database.Database;
@@ -23,6 +24,7 @@ public class DetailsActivity extends AppCompatActivity {
 
     private Station station;
     private Database appDB;
+    private LinearLayoutManager layoutManager;
     private RecyclerView  recyclerView;
     private PointOfChargeListAdapter adapter;
 
@@ -32,8 +34,6 @@ public class DetailsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_details);
 
         //get Extras from intent
-      //  String stationNameString = getIntent().getStringExtra("stationName"); //potrei eliminare
-      //  String stationTownString = getIntent().getStringExtra("stationTown"); // potrei eliminare
         String stationId = getIntent().getStringExtra("stationId");
 
         //get station from database
@@ -55,6 +55,8 @@ public class DetailsActivity extends AppCompatActivity {
         stationNumPointOfCharges.setText(station.getPointOfCharges().size());
 
         //fill the station points of charge
+        layoutManager = new LinearLayoutManager(this);
+        recyclerView.setLayoutManager(layoutManager);
         recyclerView = findViewById(R.id.pointOfCharge_list);
         // specify an adapter (see also next example)
         adapter = new PointOfChargeListAdapter(this, station.getPointOfCharges());
@@ -62,7 +64,7 @@ public class DetailsActivity extends AppCompatActivity {
 
 
         //add click listener to the navigatioToStation button
-        Button button = findViewById(R.id.navigateToStation);
+        ImageButton button = findViewById(R.id.navigateToStation);
         button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 // Code here executes on main thread after user presses button

@@ -45,8 +45,6 @@ public class StationsListAdapter extends RecyclerView.Adapter<StationsListAdapte
 
                     //add extras to intent
                     Station station = mDataset.get(getAdapterPosition());
-                    intent.putExtra("stationName", station.getName());
-                    intent.putExtra("stationTown", station.getTown());
                     intent.putExtra("stationId", station.getId());
 
                     //Avendo l’intent, per avviare la nuova activity
