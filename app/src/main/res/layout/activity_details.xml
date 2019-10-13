@@ -16,6 +16,7 @@
         tools:srcCompat="@tools:sample/backgrounds/scenic[4]"
         android:contentDescription="TODO" />
 
+
     <ScrollView
         android:id="@+id/ScrollViewDetails"
         android:layout_width="match_parent"
@@ -26,22 +27,36 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <Button
-                android:id="@+id/navigateToStation"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Navigate"
-                android:layout_gravity="end"
-                />
-
-            <TextView
-                android:id="@+id/stationNameDetails"
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/linearLayout2"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="TextView"
-                android:textStyle="bold"
-                android:layout_margin="@string/titleMargin"
-                android:textAppearance="@style/TextAppearance.AppCompat.Display1" />
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:id="@+id/stationNameDetails"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:maxLines="1"
+                    android:layout_marginStart="@string/titleMargin"
+                    android:text="TextView1111111111111111111"
+                    android:textAppearance="@style/TextAppearance.AppCompat.Display1"
+                    android:textStyle="bold"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toStartOf="@+id/navigateToStation"/>
+
+                <ImageButton
+                    android:id="@+id/navigateToStation"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="@string/listMarginSide"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@+id/stationNameDetails"
+                    app:srcCompat="@android:drawable/ic_menu_directions" />
+
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
             <TextView
                 android:id="@+id/stationTownDetails"
