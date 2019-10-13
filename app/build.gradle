@@ -50,6 +50,3 @@ dependencies {
     annotationProcessor "android.arch.persistence.room:compiler:1.1.1"
     //implementation 'com.google.android.material:material:1.1.0-beta01' //for Material Components for Android
 }
-
-
-
