@@ -106,19 +106,22 @@ public class StationsList extends AppCompatActivity {
                                 //                            .registerReceiver(myReceiver, new IntentFilter(RequestService.FILTER_REQUEST_DOWNLOAD));
                                 downloadData();
                                 saveData();
-                                Settings.save(getApplicationContext(), Settings.LOCATION_UPDATED, false);
+                                //Settings.save(getApplicationContext(), Settings.LOCATION_UPDATED, false);
+                                Settings.save(getApplicationContext(), Settings.LOCATION_UPDATED, true);
                             }
                         }
                     });
         }
         else
             {
+                Settings.save(getApplicationContext(), Settings.LOCATION_UPDATED, true); // da eliminare quando usiamo la localizzazione che cambia
                 //get stations and all pointOFCharges from database
                 stations.addAll( appDB.getStationDao().getAllStations()); // get all stations without theirs pointOFCharges
                 for (int k = 0; k < stations.size(); k++)
                 {
                     Station stationToFill = stations.get(k);
                     stationToFill.addPointOfChargeList(appDB.getPointOfChargeDao().getAllStationPointOfCharges(stationToFill.getId()));
+
                 }
             }
     }
