@@ -27,4 +27,5 @@ public interface StationDao {
 
     @Query("SELECT * FROM stations WHERE id=:id")
     public Station getById(String id);
+
 }
