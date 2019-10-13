@@ -19,7 +19,7 @@ import it.univaq.estations.model.Station;
 public class DetailsActivity extends AppCompatActivity {
 
     private Station station;
-    private Database appDB = Database.getInstance(getApplicationContext());
+    private Database appDB;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,6 +32,7 @@ public class DetailsActivity extends AppCompatActivity {
         String stationId = getIntent().getStringExtra("stationId");
 
         //get station from database
+        appDB = Database.getInstance(getApplicationContext());
         station = appDB.getStationDao().getById(stationId);
         station.addPointOfChargeList(appDB.getPointOfChargeDao().getAllStationPointOfCharges(stationId));
 
