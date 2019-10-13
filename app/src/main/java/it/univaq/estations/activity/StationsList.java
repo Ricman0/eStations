@@ -41,7 +41,7 @@ public class StationsList extends AppCompatActivity {
     //per la posizione
     private FusedLocationProviderClient fusedLocationClient;
     private LatLng currentPos;
-    private Database appDB = Database.getInstance(getApplicationContext());
+    private Database appDB;
 
 
     @Override
@@ -64,6 +64,7 @@ public class StationsList extends AppCompatActivity {
         // specify an adapter (see also next example)
         adapter = new StationsListAdapter(this, stations);
         recyclerView.setAdapter(adapter);
+        appDB = Database.getInstance(getApplicationContext());
 
     }
 
