@@ -97,7 +97,7 @@ public class StationsList extends AppCompatActivity {
                             if(location != null)
                             {
                                 //delete all database table
-                                appDB.clearAllTables(); // è asincrono
+//                                appDB.clearAllTables(); // è asincrono
 
                                 currentPos = new LatLng( location.getLatitude(), location.getLongitude());
 
