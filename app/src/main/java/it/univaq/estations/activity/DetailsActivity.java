@@ -13,8 +13,8 @@ import it.univaq.estations.model.Station;
  * */
 public class DetailsActivity extends AppCompatActivity {
 
-    Station station;
-    Database appDB = Database.getInstance(getApplicationContext());
+    private Station station;
+    private Database appDB = Database.getInstance(getApplicationContext());
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,7 +31,7 @@ public class DetailsActivity extends AppCompatActivity {
         station.addPointOfChargeList(appDB.getPointOfChargeDao().getAllStationPointOfCharges(stationId));
 
         //fill the layout with the station data
-        
+
 
 
         TextView stationName = findViewById(R.id.stationNameDetails);

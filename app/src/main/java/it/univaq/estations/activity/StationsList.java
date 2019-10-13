@@ -22,6 +22,7 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 
+import it.univaq.estations.Database.Database;
 import it.univaq.estations.R;
 import it.univaq.estations.activity.adapter.StationsListAdapter;
 import it.univaq.estations.model.PointOfCharge;
@@ -40,6 +41,7 @@ public class StationsList extends AppCompatActivity {
     //per la posizione
     private FusedLocationProviderClient fusedLocationClient;
     private LatLng currentPos;
+    private Database appDB = Database.getInstance(getApplicationContext());
 
 
     @Override
@@ -83,22 +85,41 @@ public class StationsList extends AppCompatActivity {
         super.onResume();
 //        this.permissionCheck();
 
-        fusedLocationClient.getLastLocation()
-                .addOnSuccessListener(this, new OnSuccessListener<Location>() {
-            @Override
-            public void onSuccess(Location location) {
-                if(location != null)
+        // se fusedLocationClient.getLastLocation() == l'ultima posizione memorizzata allora recupero dal db altimenti richiedo; cancello e memorizzo nuove stazioni.
+        boolean location_updated = Settings.loadBoolean(getApplicationContext(), Settings.LOCATION_UPDATED, true);
+        if(location_updated == true){
+
+            fusedLocationClient.getLastLocation()
+                    .addOnSuccessListener(this, new OnSuccessListener<Location>() {
+                        @Override
+                        public void onSuccess(Location location) {
+                            if(location != null)
+                            {
+                                //delete all database table
+                                appDB.clearAllTables(); // è asincrono
+
+                                currentPos = new LatLng( location.getLatitude(), location.getLongitude());
+
+                                // Registering the receiver
+                                //                    LocalBroadcastManager.getInstance(getApplicationContext())
+                                //                            .registerReceiver(myReceiver, new IntentFilter(RequestService.FILTER_REQUEST_DOWNLOAD));
+                                downloadData();
+                                saveData();
+                                Settings.save(getApplicationContext(), Settings.LOCATION_UPDATED, false);
+                            }
+                        }
+                    });
+        }
+        else
+            {
+                //get stations and all pointOFCharges from database
+                stations.addAll( appDB.getStationDao().getAllStations()); // get all stations without theirs pointOFCharges
+                for (int k = 0; k < stations.size(); k++)
                 {
-                    currentPos = new LatLng( location.getLatitude(), location.getLongitude());
-                    // Registering the receiver
-//                    LocalBroadcastManager.getInstance(getApplicationContext())
-//                            .registerReceiver(myReceiver, new IntentFilter(RequestService.FILTER_REQUEST_DOWNLOAD));
-                    downloadData();
+                    Station stationToFill = stations.get(k);
+                    stationToFill.addPointOfChargeList(appDB.getPointOfChargeDao().getAllStationPointOfCharges(stationToFill.getId()));
                 }
             }
-        });
-
-        Settings.save(getApplicationContext(), Settings.FIRST_TIME, false);
     }
 
 
@@ -167,6 +188,19 @@ public class StationsList extends AppCompatActivity {
                 }, currentPos);
     }
 
+    private void saveData(){
+        // per ogni stazione salva la stazione e tutti i suoi punti di ricarica
+        for (int k = 0; k < stations.size(); k++)
+        {
+            Station stationToSave = stations.get(k);
+            appDB.getStationDao().save(stationToSave); // salvo la stazione
+            for (int p = 0; p < stationToSave.getPointOfCharges().size(); p++)
+            {
+                PointOfCharge pointOfChargeToSave = stationToSave.getPointOfCharges().get(p);
+                appDB.getPointOfChargeDao().save(pointOfChargeToSave); // salvo il punto di ricarica
+            }
+        }
+    }
 
 //    @Override
 //    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {

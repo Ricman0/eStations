@@ -4,6 +4,8 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
+import com.google.android.gms.location.FusedLocationProviderClient;
+
 /**
  * Settings class provides to save and load some values by SharedPreferences.
  */
@@ -11,6 +13,8 @@ public class Settings {
 
     public static final String LAST_ACCESS = "last_access_time"; // Used to save the last timestamp when the user open the app
     public static final String FIRST_TIME = "first_time"; // Used to remember if is the first time that the user open the app
+
+    public static final String LOCATION_UPDATED = "location_updated"; // Used to remember if the location was updated
 
     public static void save(Context context, String key, long value){
 

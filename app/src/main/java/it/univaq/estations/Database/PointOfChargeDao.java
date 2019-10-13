@@ -5,8 +5,8 @@ import androidx.room.Delete;
 import androidx.room.Insert;
 import androidx.room.Query;
 import androidx.room.Update;
+import androidx.room.OnConflictStrategy;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import it.univaq.estations.model.PointOfCharge;
@@ -14,7 +14,7 @@ import it.univaq.estations.model.PointOfCharge;
 @Dao
 public interface PointOfChargeDao {
 
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     public void save(PointOfCharge poc);
 
     @Delete
