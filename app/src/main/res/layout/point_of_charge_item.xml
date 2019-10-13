@@ -8,15 +8,15 @@
         android:id="@+id/divider1Details"
         android:layout_width="match_parent"
         android:layout_height="2dp"
-        android:layout_marginTop="@string/listMarginTop"
-        android:layout_marginHorizontal="@string/listMarginSide"
+        android:layout_marginTop="@dimen/listMarginTop"
+        android:layout_marginHorizontal="@dimen/listMarginSide"
         android:background="?android:attr/listDivider" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@string/listMarginTop"
-        android:layout_marginHorizontal="@string/listMarginSide"
+        android:layout_marginTop="@dimen/listMarginTop"
+        android:layout_marginHorizontal="@dimen/listMarginSide"
         android:orientation="vertical">
 
         <TextView
@@ -25,15 +25,15 @@
             android:layout_height="wrap_content"
             android:text="Punto di ricarica"
             android:textStyle="bold"
-            android:layout_marginTop="@string/listMarginTop"
-            android:layout_marginHorizontal="@string/listMarginSide"
+            android:layout_marginTop="@dimen/listMarginTop"
+            android:layout_marginHorizontal="@dimen/listMarginSide"
             android:textAppearance="@style/TextAppearance.AppCompat.Large" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@string/listMarginTop"
-            android:layout_marginHorizontal="@string/listMarginSide"
+            android:layout_marginTop="@dimen/listMarginTop"
+            android:layout_marginHorizontal="@dimen/listMarginSide"
             android:orientation="horizontal">
 
             <TextView
@@ -55,8 +55,8 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@string/listMarginTop"
-            android:layout_marginHorizontal="@string/listMarginSide"
+            android:layout_marginTop="@dimen/listMarginTop"
+            android:layout_marginHorizontal="@dimen/listMarginSide"
             android:orientation="horizontal">
 
             <TextView
@@ -78,8 +78,8 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@string/listMarginTop"
-            android:layout_marginHorizontal="@string/listMarginSide"
+            android:layout_marginTop="@dimen/listMarginTop"
+            android:layout_marginHorizontal="@dimen/listMarginSide"
             android:orientation="horizontal">
 
             <TextView
