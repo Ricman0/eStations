@@ -8,6 +8,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
@@ -33,70 +35,58 @@ public class DetailsActivity extends AppCompatActivity {
     private PointOfChargeListAdapter adapter;
     private String stationId;
     private Context context;
+    Handler mHandler;
+    Thread threadToLoadStationFromDB;
+    private static final int LOAD_STATION_COMPLETED = 100;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_details);
 
+        mHandler = new Handler() {
+
+            @Override
+            public void handleMessage(Message msg) {
+                super.handleMessage(msg);
+                if (msg.what == LOAD_STATION_COMPLETED) {
+                    fillDetailsLayout();
+                    managePointsOfChargeRecyclerView();
+                }
+            }
+        };
+    }
+
+    @Override
+    public void onPause(){
+        super.onPause();
+        threadToLoadStationFromDB.stop(); //threadToLoadStationFromDB.interrupt(); // better check
+    }
+
+    @Override
+    public void onResume(){
+        super.onResume();
+        context = getApplicationContext();
+
         //get Extras from intent
         stationId = getIntent().getStringExtra("stationId");
 
         //get station from database
         appDB = Database.getInstance(getApplicationContext());
-        context = getApplicationContext();
 
-
-        Thread t = new Thread(new Runnable() {
+        threadToLoadStationFromDB = new Thread(new Runnable() {
             @Override
             public void run() {
                 station = appDB.getStationDao().getById(stationId);
                 station.addPointOfChargeList(appDB.getPointOfChargeDao().getAllStationPointsOfCharge(stationId));
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        //fill the layout with the station data
-                        TextView stationName = findViewById(R.id.stationNameDetails);
-                        TextView stationTown = findViewById(R.id.stationTownDetails);
-                        TextView stationAddress = findViewById(R.id.stationAddressDetails);
-                        TextView stationUrl = findViewById(R.id.stationUrlDetails);
-                        TextView stationNumPointsOfCharge = findViewById(R.id.numPointsOfChargeDetails);
-
-                        stationName.setText(station.getTitle());
-                        stationTown.setText(station.getTown());
-                        stationAddress.setText(station.getAddress());
-                        stationUrl.setText(station.getUrl());
-                        stationNumPointsOfCharge.setText(String.valueOf(station.getNumberOfPointsOfCharge()));
-                        pointsOfCharge = station.getPointsOfCharge();
-
-
-                        recyclerView = findViewById(R.id.pointOfCharge_list);
-                        layoutManager = new LinearLayoutManager(context);
-                        recyclerView.setLayoutManager(layoutManager);
-
-                        // specify an adapter
-                        adapter = new PointOfChargeListAdapter(context, pointsOfCharge);
-                        recyclerView.setAdapter(adapter);
-
-
-
-
-                    }
-                });
-
+                Message message = new Message();
+                message.what = LOAD_STATION_COMPLETED;
+                mHandler.sendMessage(message);
             }
         });
-        t.start();
 
-
-        /*recyclerView = findViewById(R.id.pointOfCharge_list);
-        layoutManager = new LinearLayoutManager(this);
-        recyclerView.setLayoutManager(layoutManager);
-
-        // specify an adapter
-        adapter = new PointOfChargeListAdapter(this, pointsOfCharge);
-        recyclerView.setAdapter(adapter);
-*/
+        threadToLoadStationFromDB.start();
 
         //add click listener to the navigatioToStation button
         ImageButton button = findViewById(R.id.navigateToStation);
@@ -116,5 +106,33 @@ public class DetailsActivity extends AppCompatActivity {
                 startActivity(mapIntent);
             }
         });
+    }
+
+    public void fillDetailsLayout(){
+
+        //fill the layout with the station data
+        TextView stationName = findViewById(R.id.stationNameDetails);
+        TextView stationTown = findViewById(R.id.stationTownDetails);
+        TextView stationAddress = findViewById(R.id.stationAddressDetails);
+        TextView stationUrl = findViewById(R.id.stationUrlDetails);
+        TextView stationNumPointsOfCharge = findViewById(R.id.numPointsOfChargeDetails);
+
+        stationName.setText(station.getTitle());
+        stationTown.setText(station.getTown());
+        stationAddress.setText(station.getAddress());
+        stationUrl.setText(station.getUrl());
+        stationNumPointsOfCharge.setText(String.valueOf(station.getNumberOfPointsOfCharge()));
+    }
+
+    public void managePointsOfChargeRecyclerView(){
+        pointsOfCharge = station.getPointsOfCharge();
+
+        recyclerView = findViewById(R.id.pointOfCharge_list);
+        layoutManager = new LinearLayoutManager(context);
+        recyclerView.setLayoutManager(layoutManager);
+
+        // specify an adapter
+        adapter = new PointOfChargeListAdapter(context, pointsOfCharge);
+        recyclerView.setAdapter(adapter);
     }
 }
