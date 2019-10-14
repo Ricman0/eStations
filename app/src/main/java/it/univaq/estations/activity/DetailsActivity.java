@@ -65,8 +65,8 @@ public class DetailsActivity extends AppCompatActivity {
                         stationTown.setText(station.getTown());
                         stationAddress.setText(station.getAddress());
                         stationUrl.setText(station.getUrl());
-                        stationNumPointOfCharges.setText(station.getPointOfCharges().size());
-                        pointsOfCharge = station.getPointOfCharges();
+                        stationNumPointOfCharges.setText(station.getPointsOfCharge().size());
+                        pointsOfCharge = station.getPointsOfCharge();
 
                         if(adapter != null) adapter.notifyDataSetChanged();
 

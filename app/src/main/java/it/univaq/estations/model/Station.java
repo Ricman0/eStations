@@ -4,7 +4,6 @@ import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.Ignore;
-import androidx.room.OnConflictStrategy;
 import androidx.room.PrimaryKey;
 import androidx.room.TypeConverters;
 
@@ -40,16 +39,16 @@ public class Station {
     @ColumnInfo(name = "url")
     private String url;
 
-    @ColumnInfo(name = "numberOfConnections")
+    @ColumnInfo(name = "numberOfPointsOfCharge")
     private int numberOfConnections;
 
     @Ignore
-    private ArrayList<PointOfCharge> pointOfCharges;
+    private ArrayList<PointOfCharge> pointsOfCharge;
 
     @Ignore
     public Station(){}
 
-    public Station(String id, String title, String address, String town, String stateOrProvince, LatLng position, String url, int numberOfConnections) {
+    public Station(String id, String title, String address, String town, String stateOrProvince, LatLng position, String url, int numberOfPointsOfCharge) {
         this.id = id;
         this.title = title;
         this.address = address;
@@ -57,8 +56,8 @@ public class Station {
         this.stateOrProvince = stateOrProvince;
         this.position = position;
         this.url = url;
-        this.numberOfConnections = numberOfConnections;
-        this.pointOfCharges = new ArrayList<PointOfCharge>();
+        this.numberOfConnections = numberOfPointsOfCharge;
+        this.pointsOfCharge = new ArrayList<PointOfCharge>();
     }
 
     @Ignore
@@ -134,23 +133,23 @@ public class Station {
         return numberOfConnections;
     }
 
-    public void setNumberOfConnections(int numberOfConnections) {
-        this.numberOfConnections = numberOfConnections;
+    public void setNumberOfConnections(int numberOfPointsOfCharge) {
+        this.numberOfConnections = numberOfPointsOfCharge;
     }
 
-    public ArrayList<PointOfCharge> getPointOfCharges() {
-        return pointOfCharges;
+    public ArrayList<PointOfCharge> getPointsOfCharge() {
+        return pointsOfCharge;
     }
 
-    public void setPointOfCharges(ArrayList<PointOfCharge> pointOfCharges) {
-        this.pointOfCharges = pointOfCharges;
+    public void setPointsOfCharge(ArrayList<PointOfCharge> pointsOfCharge) {
+        this.pointsOfCharge = pointsOfCharge;
     }
 
     public void addPointOfCharge(PointOfCharge pointOfCharge){
-        this.pointOfCharges.add(pointOfCharge);
+        this.pointsOfCharge.add(pointOfCharge);
     }
 
     public void addPointOfChargeList(List<PointOfCharge> pointOfChargeList){
-        this.pointOfCharges.addAll(pointOfChargeList);
+        this.pointsOfCharge.addAll(pointOfChargeList);
     }
 }

@@ -105,7 +105,6 @@ public class StationsList extends AppCompatActivity {
                                 //                    LocalBroadcastManager.getInstance(getApplicationContext())
                                 //                            .registerReceiver(myReceiver, new IntentFilter(RequestService.FILTER_REQUEST_DOWNLOAD));
                                 downloadData();
-//                                saveData();
                                 //Settings.save(getApplicationContext(), Settings.LOCATION_UPDATED, false);
                                 Settings.save(getApplicationContext(), Settings.LOCATION_UPDATED, true);
                             }
@@ -207,9 +206,9 @@ public class StationsList extends AppCompatActivity {
         {
             Station stationToSave = stations.get(k);
             appDB.getStationDao().save(stationToSave); // salvo la stazione
-            for (int p = 0; p < stationToSave.getPointOfCharges().size(); p++)
+            for (int p = 0; p < stationToSave.getPointsOfCharge().size(); p++)
             {
-                PointOfCharge pointOfChargeToSave = stationToSave.getPointOfCharges().get(p);
+                PointOfCharge pointOfChargeToSave = stationToSave.getPointsOfCharge().get(p);
                 appDB.getPointOfChargeDao().save(pointOfChargeToSave); // salvo il punto di ricarica
             }
         }

@@ -8,7 +8,7 @@ import androidx.room.Ignore;
 import androidx.room.Index;
 import androidx.room.PrimaryKey;
 
-@Entity(tableName = "pointofcharges", foreignKeys = @ForeignKey(entity = Station.class,
+@Entity(tableName = "pointsofcharge", foreignKeys = @ForeignKey(entity = Station.class,
         parentColumns = "id",
         childColumns = "station_id",
         onDelete = ForeignKey.CASCADE), indices = {@Index(value = "station_id")})

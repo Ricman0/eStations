@@ -16,7 +16,7 @@ import it.univaq.estations.R;
 import it.univaq.estations.model.PointOfCharge;
 
 public class PointOfChargeListAdapter extends RecyclerView.Adapter<PointOfChargeListAdapter.ItemPointOfChargeListViewHolder>{
-    private List<PointOfCharge> pointOfCharges;
+    private List<PointOfCharge> pointsOfCharge;
     private LayoutInflater mInflater;
 
     //inner class
@@ -37,7 +37,7 @@ public class PointOfChargeListAdapter extends RecyclerView.Adapter<PointOfCharge
 
     public PointOfChargeListAdapter(Context context, List<PointOfCharge> myDataset) {
 
-        pointOfCharges = myDataset;
+        pointsOfCharge = myDataset;
         this.mInflater = LayoutInflater.from(context);
     }
 
@@ -60,9 +60,9 @@ public class PointOfChargeListAdapter extends RecyclerView.Adapter<PointOfCharge
         // - get element from your dataset at this position
         // - replace the contents of the view with that element
         if(getItemCount()!=0) {
-            holder.volt.setText(pointOfCharges.get(position).getVoltage());
-            holder.kw.setText(pointOfCharges.get(position).getKw());
-            holder.status.setText(pointOfCharges.get(position).getStatusTypeId());
+            holder.volt.setText(pointsOfCharge.get(position).getVoltage());
+            holder.kw.setText(pointsOfCharge.get(position).getKw());
+            holder.status.setText(pointsOfCharge.get(position).getStatusTypeId());
         }
 
 
@@ -71,6 +71,6 @@ public class PointOfChargeListAdapter extends RecyclerView.Adapter<PointOfCharge
     // Return the size of your dataset (invoked by the layout manager)
     @Override
     public int getItemCount() {
-        return pointOfCharges.size();
+        return pointsOfCharge.size();
     }
 }
