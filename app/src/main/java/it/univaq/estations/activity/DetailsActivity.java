@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -31,7 +32,7 @@ public class DetailsActivity extends AppCompatActivity {
     private RecyclerView  recyclerView;
     private PointOfChargeListAdapter adapter;
     private String stationId;
-
+    private Context context;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,6 +44,8 @@ public class DetailsActivity extends AppCompatActivity {
 
         //get station from database
         appDB = Database.getInstance(getApplicationContext());
+        context = getApplicationContext();
+
 
         Thread t = new Thread(new Runnable() {
             @Override
@@ -57,16 +60,26 @@ public class DetailsActivity extends AppCompatActivity {
                         TextView stationTown = findViewById(R.id.stationTownDetails);
                         TextView stationAddress = findViewById(R.id.stationAddressDetails);
                         TextView stationUrl = findViewById(R.id.stationUrlDetails);
-                        TextView stationNumPointOfCharges = findViewById(R.id.numPointOfChargesDetails);
+                        TextView stationNumPointsOfCharge = findViewById(R.id.numPointsOfChargeDetails);
 
-                        stationName.setText(station.getName());
+                        stationName.setText(station.getTitle());
                         stationTown.setText(station.getTown());
                         stationAddress.setText(station.getAddress());
                         stationUrl.setText(station.getUrl());
-                        stationNumPointOfCharges.setText(station.getPointsOfCharge().size());
+                        stationNumPointsOfCharge.setText(String.valueOf(station.getNumberOfPointsOfCharge()));
                         pointsOfCharge = station.getPointsOfCharge();
 
-                        if(adapter != null) adapter.notifyDataSetChanged();
+
+                        recyclerView = findViewById(R.id.pointOfCharge_list);
+                        layoutManager = new LinearLayoutManager(context);
+                        recyclerView.setLayoutManager(layoutManager);
+
+                        // specify an adapter
+                        adapter = new PointOfChargeListAdapter(context, pointsOfCharge);
+                        recyclerView.setAdapter(adapter);
+
+
+
 
                     }
                 });
@@ -76,14 +89,14 @@ public class DetailsActivity extends AppCompatActivity {
         t.start();
 
 
-        //fill the station points of charge
-        recyclerView = findViewById(R.id.pointOfCharge_list);
+        /*recyclerView = findViewById(R.id.pointOfCharge_list);
         layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
 
-        // specify an adapter (see also next example)
+        // specify an adapter
         adapter = new PointOfChargeListAdapter(this, pointsOfCharge);
         recyclerView.setAdapter(adapter);
+*/
 
         //add click listener to the navigatioToStation button
         ImageButton button = findViewById(R.id.navigateToStation);

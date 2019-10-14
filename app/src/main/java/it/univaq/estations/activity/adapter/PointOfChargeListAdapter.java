@@ -60,9 +60,9 @@ public class PointOfChargeListAdapter extends RecyclerView.Adapter<PointOfCharge
         // - get element from your dataset at this position
         // - replace the contents of the view with that element
         if(getItemCount()!=0) {
-            holder.volt.setText(pointsOfCharge.get(position).getVoltage());
-            holder.kw.setText(pointsOfCharge.get(position).getKw());
-            holder.status.setText(pointsOfCharge.get(position).getStatusTypeId());
+            holder.volt.setText(String.valueOf(pointsOfCharge.get(position).getVoltage()));
+            holder.kw.setText(String.valueOf(pointsOfCharge.get(position).getKw()));
+            holder.status.setText(String.valueOf(pointsOfCharge.get(position).getStatusTypeId()));
         }
 
 

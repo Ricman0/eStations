@@ -90,7 +90,6 @@ public class StationsListAdapter extends RecyclerView.Adapter<StationsListAdapte
                     mDataset.get(position).getPosition().latitude, mDataset.get(position).getPosition().longitude, dist);
             @SuppressWarnings("IntegerDivisionInFloatingPointContext") double km = ((int) dist[0] / 100)/10.0;
             holder.km.setText(km + " km");
-//                    mDataset.get(position).getPosition().toString());
         }
 
 
