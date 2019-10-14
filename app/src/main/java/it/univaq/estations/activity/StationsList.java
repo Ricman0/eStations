@@ -119,7 +119,7 @@ public class StationsList extends AppCompatActivity {
                 for (int k = 0; k < stations.size(); k++)
                 {
                     Station stationToFill = stations.get(k);
-                    stationToFill.addPointOfChargeList(appDB.getPointOfChargeDao().getAllStationPointOfCharges(stationToFill.getId()));
+                    stationToFill.addPointOfChargeList(appDB.getPointOfChargeDao().getAllStationPointsOfCharge(stationToFill.getId()));
 
                 }
             }

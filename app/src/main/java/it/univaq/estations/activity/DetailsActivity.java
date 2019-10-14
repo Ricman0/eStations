@@ -43,14 +43,12 @@ public class DetailsActivity extends AppCompatActivity {
 
         //get station from database
         appDB = Database.getInstance(getApplicationContext());
-        //station = appDB.getStationDao().getById(stationId);
-        //station.addPointOfChargeList(appDB.getPointOfChargeDao().getAllStationPointOfCharges(stationId));
 
         Thread t = new Thread(new Runnable() {
             @Override
             public void run() {
                 station = appDB.getStationDao().getById(stationId);
-                station.addPointOfChargeList(appDB.getPointOfChargeDao().getAllStationPointOfCharges(stationId));
+                station.addPointOfChargeList(appDB.getPointOfChargeDao().getAllStationPointsOfCharge(stationId));
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {

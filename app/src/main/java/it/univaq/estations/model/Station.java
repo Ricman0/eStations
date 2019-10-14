@@ -40,7 +40,7 @@ public class Station {
     private String url;
 
     @ColumnInfo(name = "numberOfPointsOfCharge")
-    private int numberOfConnections;
+    private int numberOfPointsOfCharge;
 
     @Ignore
     private ArrayList<PointOfCharge> pointsOfCharge;
@@ -56,7 +56,7 @@ public class Station {
         this.stateOrProvince = stateOrProvince;
         this.position = position;
         this.url = url;
-        this.numberOfConnections = numberOfPointsOfCharge;
+        this.numberOfPointsOfCharge = numberOfPointsOfCharge;
         this.pointsOfCharge = new ArrayList<PointOfCharge>();
     }
 
@@ -129,12 +129,12 @@ public class Station {
         this.url = url;
     }
 
-    public int getNumberOfConnections() {
-        return numberOfConnections;
+    public int getNumberOfPointsOfCharge() {
+        return numberOfPointsOfCharge;
     }
 
-    public void setNumberOfConnections(int numberOfPointsOfCharge) {
-        this.numberOfConnections = numberOfPointsOfCharge;
+    public void setNumberOfPointsOfCharge(int numberOfPointsOfCharge) {
+        this.numberOfPointsOfCharge = numberOfPointsOfCharge;
     }
 
     public ArrayList<PointOfCharge> getPointsOfCharge() {
