@@ -11,6 +11,8 @@ import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
+import java.util.ArrayList;
+
 import it.univaq.estations.Database.Database;
 import it.univaq.estations.R;
 import it.univaq.estations.activity.adapter.PointOfChargeListAdapter;
@@ -23,10 +25,13 @@ import it.univaq.estations.model.Station;
 public class DetailsActivity extends AppCompatActivity {
 
     private Station station;
+    private ArrayList<PointOfCharge> pointsOfCharge = new ArrayList<>();
     private Database appDB;
     private LinearLayoutManager layoutManager;
     private RecyclerView  recyclerView;
     private PointOfChargeListAdapter adapter;
+    private String stationId;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,34 +39,52 @@ public class DetailsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_details);
 
         //get Extras from intent
-        String stationId = getIntent().getStringExtra("stationId");
+        stationId = getIntent().getStringExtra("stationId");
 
         //get station from database
         appDB = Database.getInstance(getApplicationContext());
-        station = appDB.getStationDao().getById(stationId);
-        station.addPointOfChargeList(appDB.getPointOfChargeDao().getAllStationPointOfCharges(stationId));
+        //station = appDB.getStationDao().getById(stationId);
+        //station.addPointOfChargeList(appDB.getPointOfChargeDao().getAllStationPointOfCharges(stationId));
 
-        //fill the layout with the station data
-        TextView stationName = findViewById(R.id.stationNameDetails);
-        TextView stationTown = findViewById(R.id.stationTownDetails);
-        TextView stationAddress = findViewById(R.id.stationAddressDetails);
-        TextView stationUrl = findViewById(R.id.stationUrlDetails);
-        TextView stationNumPointOfCharges = findViewById(R.id.numPointOfChargesDetails);
+        Thread t = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                station = appDB.getStationDao().getById(stationId);
+                station.addPointOfChargeList(appDB.getPointOfChargeDao().getAllStationPointOfCharges(stationId));
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        //fill the layout with the station data
+                        TextView stationName = findViewById(R.id.stationNameDetails);
+                        TextView stationTown = findViewById(R.id.stationTownDetails);
+                        TextView stationAddress = findViewById(R.id.stationAddressDetails);
+                        TextView stationUrl = findViewById(R.id.stationUrlDetails);
+                        TextView stationNumPointOfCharges = findViewById(R.id.numPointOfChargesDetails);
 
-        stationName.setText(station.getName());
-        stationTown.setText(station.getTown());
-        stationAddress.setText(station.getAddress());
-        stationUrl.setText(station.getUrl());
-        stationNumPointOfCharges.setText(station.getPointOfCharges().size());
+                        stationName.setText(station.getName());
+                        stationTown.setText(station.getTown());
+                        stationAddress.setText(station.getAddress());
+                        stationUrl.setText(station.getUrl());
+                        stationNumPointOfCharges.setText(station.getPointOfCharges().size());
+                        pointsOfCharge = station.getPointOfCharges();
+
+                        if(adapter != null) adapter.notifyDataSetChanged();
+
+                    }
+                });
+
+            }
+        });
+        t.start();
+
 
         //fill the station points of charge
         layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView = findViewById(R.id.pointOfCharge_list);
         // specify an adapter (see also next example)
-        adapter = new PointOfChargeListAdapter(this, station.getPointOfCharges());
+        adapter = new PointOfChargeListAdapter(this, pointsOfCharge);
         recyclerView.setAdapter(adapter);
-
 
         //add click listener to the navigatioToStation button
         ImageButton button = findViewById(R.id.navigateToStation);
