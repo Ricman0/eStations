@@ -105,7 +105,7 @@ public class StationsList extends AppCompatActivity {
                                 //                    LocalBroadcastManager.getInstance(getApplicationContext())
                                 //                            .registerReceiver(myReceiver, new IntentFilter(RequestService.FILTER_REQUEST_DOWNLOAD));
                                 downloadData();
-                                saveData();
+//                                saveData();
                                 //Settings.save(getApplicationContext(), Settings.LOCATION_UPDATED, false);
                                 Settings.save(getApplicationContext(), Settings.LOCATION_UPDATED, true);
                             }
@@ -190,6 +190,13 @@ public class StationsList extends AppCompatActivity {
                         if(adapter != null) adapter.notifyDataSetChanged();
                     }
                 }, currentPos);
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                saveData();
+            }
+        }).start();
     }
 
     private void saveData(){
