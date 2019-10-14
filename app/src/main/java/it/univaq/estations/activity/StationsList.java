@@ -182,6 +182,13 @@ public class StationsList extends AppCompatActivity {
                                 stations.add(station);
                             }
 
+                            new Thread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    saveData();
+                                }
+                            }).start();
+
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
@@ -191,12 +198,7 @@ public class StationsList extends AppCompatActivity {
                     }
                 }, currentPos);
 
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                saveData();
-            }
-        }).start();
+
     }
 
     private void saveData(){
