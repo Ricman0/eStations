@@ -79,9 +79,10 @@ public class DetailsActivity extends AppCompatActivity {
 
 
         //fill the station points of charge
+        recyclerView = findViewById(R.id.pointOfCharge_list);
         layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
-        recyclerView = findViewById(R.id.pointOfCharge_list);
+
         // specify an adapter (see also next example)
         adapter = new PointOfChargeListAdapter(this, pointsOfCharge);
         recyclerView.setAdapter(adapter);
