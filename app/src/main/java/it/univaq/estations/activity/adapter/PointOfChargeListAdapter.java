@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.List;
 
 import it.univaq.estations.R;
+import it.univaq.estations.model.CheckInStatusTypes;
 import it.univaq.estations.model.PointOfCharge;
 
 public class PointOfChargeListAdapter extends RecyclerView.Adapter<PointOfChargeListAdapter.ItemPointOfChargeListViewHolder>{
@@ -22,12 +23,14 @@ public class PointOfChargeListAdapter extends RecyclerView.Adapter<PointOfCharge
     //inner class
     class ItemPointOfChargeListViewHolder extends RecyclerView.ViewHolder {
 
+        TextView number;
         TextView volt;
         TextView kw;
         TextView status;
         ItemPointOfChargeListViewHolder(@NonNull View itemView) {
 
             super(itemView);
+            number = itemView.findViewById(R.id.pointOfChargeNum);
             volt = itemView.findViewById(R.id.voltPointOfChargesDetails);
             kw = itemView.findViewById(R.id.kwPointOfChargesDetails);
             status = itemView.findViewById(R.id.statusPointOfChargesDetails);
@@ -60,9 +63,10 @@ public class PointOfChargeListAdapter extends RecyclerView.Adapter<PointOfCharge
         // - get element from your dataset at this position
         // - replace the contents of the view with that element
         if(getItemCount()!=0) {
-            holder.volt.setText(String.valueOf(pointsOfCharge.get(position).getVoltage()));
-            holder.kw.setText(String.valueOf(pointsOfCharge.get(position).getKw()));
-            holder.status.setText(String.valueOf(pointsOfCharge.get(position).getStatusTypeId()));
+            holder.number.setText(String.valueOf(position+1));
+            holder.volt.setText(String.valueOf(pointsOfCharge.get(position).getVoltage()) + " V");
+            holder.kw.setText(String.valueOf(pointsOfCharge.get(position).getKw()) + " Kw");
+            holder.status.setText(String.valueOf(CheckInStatusTypes.valueOf(pointsOfCharge.get(position).getStatusTypeId())));
         }
 
 

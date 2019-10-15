@@ -3,6 +3,7 @@ package it.univaq.estations.activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.location.Location;
 import android.os.Bundle;
 
@@ -42,11 +43,13 @@ public class StationsList extends AppCompatActivity {
     private FusedLocationProviderClient fusedLocationClient;
     private LatLng currentPos;
     private Database appDB;
+    private boolean shouldExecuteDownload;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        shouldExecuteDownload = true;
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
         setContentView(R.layout.activity_stations_list);
@@ -65,6 +68,8 @@ public class StationsList extends AppCompatActivity {
         adapter = new StationsListAdapter(this, stations);
         recyclerView.setAdapter(adapter);
         appDB = Database.getInstance(getApplicationContext());
+
+
 
     }
 
@@ -86,43 +91,44 @@ public class StationsList extends AppCompatActivity {
         super.onResume();
 //        this.permissionCheck();
 
-        // se fusedLocationClient.getLastLocation() == l'ultima posizione memorizzata allora recupero dal db altimenti richiedo; cancello e memorizzo nuove stazioni.
-        boolean location_updated = Settings.loadBoolean(getApplicationContext(), Settings.LOCATION_UPDATED, true);
-        if(location_updated == true){
+        if(shouldExecuteDownload) {
+            shouldExecuteDownload = false;
+            // se fusedLocationClient.getLastLocation() == l'ultima posizione memorizzata allora recupero dal db altimenti richiedo; cancello e memorizzo nuove stazioni.
+            boolean location_updated = Settings.loadBoolean(getApplicationContext(), Settings.LOCATION_UPDATED, true);
+            if (location_updated == true) {
 
-            fusedLocationClient.getLastLocation()
-                    .addOnSuccessListener(this, new OnSuccessListener<Location>() {
-                        @Override
-                        public void onSuccess(Location location) {
-                            if(location != null)
-                            {
-                                //delete all database table
-//                                appDB.clearAllTables(); // è asincrono
+                fusedLocationClient.getLastLocation()
+                        .addOnSuccessListener(this, new OnSuccessListener<Location>() {
+                            @Override
+                            public void onSuccess(Location location) {
+                                if (location != null) {
+                                    //delete all database table
+                                    //                                appDB.clearAllTables(); // è asincrono
 
-                                currentPos = new LatLng( location.getLatitude(), location.getLongitude());
+                                    currentPos = new LatLng(location.getLatitude(), location.getLongitude());
 
-                                // Registering the receiver
-                                //                    LocalBroadcastManager.getInstance(getApplicationContext())
-                                //                            .registerReceiver(myReceiver, new IntentFilter(RequestService.FILTER_REQUEST_DOWNLOAD));
-                                downloadData();
-                                //Settings.save(getApplicationContext(), Settings.LOCATION_UPDATED, false);
-                                Settings.save(getApplicationContext(), Settings.LOCATION_UPDATED, true);
+                                    // Registering the receiver
+                                    //                    LocalBroadcastManager.getInstance(getApplicationContext())
+                                    //                            .registerReceiver(myReceiver, new IntentFilter(RequestService.FILTER_REQUEST_DOWNLOAD));
+                                    downloadData();
+                                    //Settings.save(getApplicationContext(), Settings.LOCATION_UPDATED, false);
+                                    Settings.save(getApplicationContext(), Settings.LOCATION_UPDATED, true);
+                                }
                             }
-                        }
-                    });
-        }
-        else
-            {
+                        });
+            } else {
                 Settings.save(getApplicationContext(), Settings.LOCATION_UPDATED, true); // da eliminare quando usiamo la localizzazione che cambia
                 //get stations and all pointOFCharges from database
-                stations.addAll( appDB.getStationDao().getAllStations()); // get all stations without theirs pointOFCharges
-                for (int k = 0; k < stations.size(); k++)
-                {
+                stations.addAll(appDB.getStationDao().getAllStations()); // get all stations without theirs pointOFCharges
+                for (int k = 0; k < stations.size(); k++) {
                     Station stationToFill = stations.get(k);
                     stationToFill.addPointOfChargeList(appDB.getPointOfChargeDao().getAllStationPointsOfCharge(stationToFill.getId()));
 
                 }
             }
+        }
+
+
     }
 
 
@@ -131,6 +137,8 @@ public class StationsList extends AppCompatActivity {
 
         VolleyRequest.getInstance(getApplicationContext())
                 .downloadStations(new Response.Listener<String>() {
+                    private Bitmap imageStation;
+
                     @Override
                     public void onResponse(String response) {
                         try {
@@ -161,11 +169,37 @@ public class StationsList extends AppCompatActivity {
                                     url = addressInfo.optString("RelatedURL", "No Url");
                                 }
 
+                                JSONArray mediaArray = item.optJSONArray("MediaItems");
+
+                                String mediaUrl = null;
+
+
+                                if(mediaArray != null){
+                                    int k=0;
+                                    while (mediaUrl == null || k != mediaArray.length()){
+
+                                        //big image
+                                        //mediaUrl = mediaArray.getJSONObject(k).optString("ItemURL", null);
+
+                                        //small image
+                                        mediaUrl = mediaArray.getJSONObject(k).optString("ItemThumbnailURL", null);
+                                        k++;
+                                    }
+                                }
+
+
+
+                                VolleyRequest.getInstance(getApplicationContext()).downloadImage(new Response.Listener<Bitmap>(){
+                                    public void onResponse(Bitmap imageResp){
+                                        imageStation = imageResp;
+
+                                    }
+                                },mediaUrl);
                                 JSONArray connections = item.optJSONArray("Connections");
 
                                 int numberOfPointsOfCharge = (connections != null ? connections.length() : 0 );
 
-                                Station station = new Station(id, title, address, town, stateOrProvince, position, url, numberOfPointsOfCharge);
+                                Station station = new Station(id, title, address, town, stateOrProvince, position, url, numberOfPointsOfCharge, imageStation);
 
                                 for (int j = 0; j < numberOfPointsOfCharge; j++)
                                 {

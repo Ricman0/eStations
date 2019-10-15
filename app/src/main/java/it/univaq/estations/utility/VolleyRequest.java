@@ -1,11 +1,13 @@
 package it.univaq.estations.utility;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 
 import androidx.annotation.StringRes;
 
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
+import com.android.volley.toolbox.ImageRequest;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.google.android.gms.maps.model.LatLng;
@@ -47,10 +49,16 @@ public class VolleyRequest {
                         "&countrycode=IT" +
                         "&maxresults=4" +
                         "&latitude=" + curLat +
-                        "&longitude=" + curLng +
+                        "&longitude=" + curLng + "includecomments=true"+
                         "&compact=true&verbose=false",
                  listener,
                 null);
         queue.add(request);
+    }
+
+    public void downloadImage(Response.Listener<Bitmap> listener, String url){
+
+        ImageRequest imageRequest = new ImageRequest(url,listener,0,0,null, Bitmap.Config.RGB_565, null);
+        queue.add(imageRequest);
     }
 }

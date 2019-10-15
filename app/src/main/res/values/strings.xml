@@ -94,6 +94,8 @@
         "when a user tries to pick up one of cards.\n\n"
     </string>
     <string name="action_settings">Settings</string>
-
+    <string name="voltage">"Voltaggio: "</string>
+    <string name="power">"Potenza: "</string>
+    <string name="status">"Stato: "</string>
 
 </resources>

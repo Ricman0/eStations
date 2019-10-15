@@ -1,5 +1,7 @@
 package it.univaq.estations.model;
 
+import android.graphics.Bitmap;
+
 import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
@@ -45,10 +47,13 @@ public class Station {
     @Ignore
     private ArrayList<PointOfCharge> pointsOfCharge;
 
+    private Bitmap stationImage;
+
     @Ignore
     public Station(){}
 
-    public Station(String id, String title, String address, String town, String stateOrProvince, LatLng position, String url, int numberOfPointsOfCharge) {
+    public Station(String id, String title, String address, String town, String stateOrProvince,
+                   LatLng position, String url, int numberOfPointsOfCharge, Bitmap stationImage) {
         this.id = id;
         this.title = title;
         this.address = address;
@@ -58,6 +63,7 @@ public class Station {
         this.url = url;
         this.numberOfPointsOfCharge = numberOfPointsOfCharge;
         this.pointsOfCharge = new ArrayList<PointOfCharge>();
+        this.stationImage = stationImage;
     }
 
     @Ignore
