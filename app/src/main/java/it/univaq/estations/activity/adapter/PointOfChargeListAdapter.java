@@ -71,6 +71,7 @@ public class PointOfChargeListAdapter extends RecyclerView.Adapter<PointOfCharge
     // Return the size of your dataset (invoked by the layout manager)
     @Override
     public int getItemCount() {
+
         return pointsOfCharge.size();
     }
 }

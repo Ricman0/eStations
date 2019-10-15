@@ -45,6 +45,7 @@ public class DetailsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_details);
 
+
         mHandler = new Handler() {
 
             @Override
@@ -56,17 +57,7 @@ public class DetailsActivity extends AppCompatActivity {
                 }
             }
         };
-    }
 
-    @Override
-    public void onPause(){
-        super.onPause();
-        threadToLoadStationFromDB.stop(); //threadToLoadStationFromDB.interrupt(); // better check
-    }
-
-    @Override
-    public void onResume(){
-        super.onResume();
         context = getApplicationContext();
 
         //get Extras from intent
@@ -88,24 +79,54 @@ public class DetailsActivity extends AppCompatActivity {
 
         threadToLoadStationFromDB.start();
 
-        //add click listener to the navigatioToStation button
+        //add click listener to the navigationToStation button
         ImageButton button = findViewById(R.id.navigateToStation);
         button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                // Code here executes on main thread after user presses button
-
-                // Create a Uri from an intent string. Use the result to create an Intent.
-                Uri gmmIntentUri = Uri.parse("google.streetview:cbll=46.414382,10.013988");
-
-                // Create an Intent from gmmIntentUri. Set the action to ACTION_VIEW
-                Intent mapIntent = new Intent(Intent.ACTION_VIEW, gmmIntentUri);
-                // Make the Intent explicit by setting the Google Maps package
-                mapIntent.setPackage("com.google.android.apps.maps");
-
-                // Attempt to start an activity that can handle the Intent
-                startActivity(mapIntent);
+                reachDestination();
             }
         });
+    }
+
+    @Override
+    public void onPause(){
+        super.onPause();
+        threadToLoadStationFromDB.interrupt();
+    }
+
+    @Override
+    public void onResume(){
+        super.onResume();
+        /*context = getApplicationContext();
+
+        //get Extras from intent
+        stationId = getIntent().getStringExtra("stationId");
+
+        //get station from database
+        appDB = Database.getInstance(getApplicationContext());
+
+        threadToLoadStationFromDB = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                station = appDB.getStationDao().getById(stationId);
+                station.addPointOfChargeList(appDB.getPointOfChargeDao().getAllStationPointsOfCharge(stationId));
+                Message message = new Message();
+                message.what = LOAD_STATION_COMPLETED;
+                mHandler.sendMessage(message);
+            }
+        });
+
+        threadToLoadStationFromDB.start();
+
+        //add click listener to the navigationToStation button
+        ImageButton button = findViewById(R.id.navigateToStation);
+        button.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                reachDestination();
+            }
+        });*/
+
+
     }
 
     public void fillDetailsLayout(){
@@ -134,5 +155,33 @@ public class DetailsActivity extends AppCompatActivity {
         // specify an adapter
         adapter = new PointOfChargeListAdapter(context, pointsOfCharge);
         recyclerView.setAdapter(adapter);
+    }
+
+
+    public void reachDestination(){
+        //In order to launch Google Maps: create an Intent object specifying its action, URI and package.
+
+        String latitude = String.valueOf(station.getPosition().latitude);
+        String longitude = String.valueOf(station.getPosition().longitude);
+
+        Uri gmmIntentUri = Uri.parse("google.navigation:q="+latitude+","+longitude+"&mode=d");
+        // Create an Intent from gmmIntentUri. Set the action to ACTION_VIEW
+        Intent mapIntent = new Intent(Intent.ACTION_VIEW, gmmIntentUri);
+        // will ensure that the Google Maps app for Android handles the Intent.
+        mapIntent.setPackage("com.google.android.apps.maps");
+
+        /*
+        If the system cannot identify an app that can respond to the intent, estations app may crash.
+        For this reason, first verify that a receiving application is installed
+        before you present one of these intents to a user.
+        To verify that an app is available to receive the intent, call resolveActivity() on your Intent object.
+        If the result is non-null, there is at least one app that can handle the intent.
+        If the result is null, you should not use the intent and, if possible, you should disable the feature that invokes the intent.
+         */
+        if (mapIntent.resolveActivity(getPackageManager()) != null) {
+            //launch the necessary app (in this case Google Maps) and start the corresponding Activity
+            startActivity(mapIntent);
+        }
+
     }
 }
