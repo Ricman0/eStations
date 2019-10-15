@@ -40,7 +40,7 @@
                 android:id="@+id/labelVoltPointOfChargeDetails"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Voltage:"
+                android:text="@string/point_of_charge_item_voltage"
                 android:textAppearance="@style/TextAppearance.AppCompat.Large" />
 
             <TextView
@@ -63,7 +63,7 @@
                 android:id="@+id/labelKwPointOfChargeDetails"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Power:"
+                android:text="@string/point_of_charge_item_power"
                 android:textAppearance="@style/TextAppearance.AppCompat.Large" />
 
             <TextView
@@ -86,7 +86,7 @@
                 android:id="@+id/labelStatusPointOfChargeDetails"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Status:"
+                android:text="@string/point_of_charge_item_Status"
                 android:textAppearance="@style/TextAppearance.AppCompat.Large" />
 
             <TextView
