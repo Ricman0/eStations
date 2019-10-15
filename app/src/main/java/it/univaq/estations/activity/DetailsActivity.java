@@ -6,13 +6,17 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.view.View;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.android.volley.Response;
 
 import java.util.ArrayList;
 
@@ -21,6 +25,7 @@ import it.univaq.estations.R;
 import it.univaq.estations.activity.adapter.PointOfChargeListAdapter;
 import it.univaq.estations.model.PointOfCharge;
 import it.univaq.estations.model.Station;
+import it.univaq.estations.utility.VolleyRequest;
 
 /**
  * Java Class for detail stations
@@ -38,6 +43,7 @@ public class DetailsActivity extends AppCompatActivity {
     Handler mHandler;
     Thread threadToLoadStationFromDB;
     private static final int LOAD_STATION_COMPLETED = 100;
+    private String urlImage = "";
 
 
     @Override
@@ -52,6 +58,14 @@ public class DetailsActivity extends AppCompatActivity {
             public void handleMessage(Message msg) {
                 super.handleMessage(msg);
                 if (msg.what == LOAD_STATION_COMPLETED) {
+                    if(urlImage != null ) {
+                        VolleyRequest.getInstance(getApplicationContext()).downloadImage(new Response.Listener<Bitmap>() {
+                            @Override
+                            public void onResponse(Bitmap response) {
+                                changeImage(response);
+                            }
+                        }, urlImage);
+                    }
                     fillDetailsLayout();
                     managePointsOfChargeRecyclerView();
                 }
@@ -71,6 +85,7 @@ public class DetailsActivity extends AppCompatActivity {
             public void run() {
                 station = appDB.getStationDao().getById(stationId);
                 station.addPointOfChargeList(appDB.getPointOfChargeDao().getAllStationPointsOfCharge(stationId));
+                urlImage = station.getStationImageUrl();
                 Message message = new Message();
                 message.what = LOAD_STATION_COMPLETED;
                 mHandler.sendMessage(message);
@@ -183,5 +198,11 @@ public class DetailsActivity extends AppCompatActivity {
             startActivity(mapIntent);
         }
 
+    }
+
+    private void changeImage(Bitmap newImage)
+    {
+        ImageView imageStation = findViewById(R.id.StationImageDetails);
+        imageStation.setImageBitmap(newImage);
     }
 }

@@ -49,16 +49,15 @@ public class Station {
     @Ignore
     private ArrayList<PointOfCharge> pointsOfCharge;
 
-    @ColumnInfo(name = "image", typeAffinity = ColumnInfo.BLOB)
-    @TypeConverters(BitmapConverter.class)
-    private Bitmap stationImage;
+    @ColumnInfo(name = "urlImage")
+    private String stationImageUrl;
 
     @Ignore
     public Station(){}
 
 
     public Station(String id, String title, String address, String town, String stateOrProvince,
-                   LatLng position, String url, int numberOfPointsOfCharge, Bitmap stationImage) {
+                   LatLng position, String url, int numberOfPointsOfCharge, String stationImageUrl) {
         this.id = id;
         this.title = title;
         this.address = address;
@@ -68,7 +67,7 @@ public class Station {
         this.url = url;
         this.numberOfPointsOfCharge = numberOfPointsOfCharge;
         this.pointsOfCharge = new ArrayList<PointOfCharge>();
-        this.stationImage = stationImage;
+        this.stationImageUrl = stationImageUrl;
     }
 
     @Ignore
@@ -164,11 +163,12 @@ public class Station {
         this.pointsOfCharge.addAll(pointOfChargeList);
     }
 
-    public Bitmap getStationImage() {
-        return stationImage;
+    public String getStationImageUrl() {
+
+        return stationImageUrl;
     }
 
-    public void setStationImage(Bitmap stationImage) {
-        this.stationImage = stationImage;
+    public void setStationImageUrl(String stationImageUrl) {
+        this.stationImageUrl = stationImageUrl;
     }
 }

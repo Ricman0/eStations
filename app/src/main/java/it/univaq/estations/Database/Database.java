@@ -12,7 +12,7 @@ import it.univaq.estations.model.PointOfCharge;
 import it.univaq.estations.model.Station;
 
 @androidx.room.Database(entities = { Station.class, PointOfCharge.class}, version = 1)
-@TypeConverters({LatLngConverter.class, BitmapConverter.class})
+@TypeConverters({LatLngConverter.class})
 public abstract class Database extends RoomDatabase {
 
     public abstract StationDao getStationDao();

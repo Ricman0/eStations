@@ -136,7 +136,6 @@ public class StationsList extends AppCompatActivity {
 
         VolleyRequest.getInstance(getApplicationContext())
                 .downloadStations(new Response.Listener<String>() {
-                    private Bitmap imageStation;
 
                     @Override
                     public void onResponse(String response) {
@@ -172,7 +171,6 @@ public class StationsList extends AppCompatActivity {
 
                                 String mediaUrl = null;
 
-
                                 if(mediaArray != null){
                                     int k=0;
                                     while (mediaUrl == null || k != mediaArray.length()){
@@ -184,24 +182,13 @@ public class StationsList extends AppCompatActivity {
                                         mediaUrl = mediaArray.getJSONObject(k).optString("ItemThumbnailURL", null);
                                         k++;
                                     }
-                                     if (mediaUrl != null)
-                                     {
-                                         VolleyRequest.getInstance(getApplicationContext()).downloadImage(new Response.Listener<Bitmap>(){
-                                             public void onResponse(Bitmap imageResp){
-                                                 imageStation = imageResp;
-
-                                             }
-                                         },mediaUrl);
-                                     }
                                 }
-
-
 
                                 JSONArray connections = item.optJSONArray("Connections");
 
                                 int numberOfPointsOfCharge = (connections != null ? connections.length() : 0 );
 
-                                Station station = new Station(id, title, address, town, stateOrProvince, position, url, numberOfPointsOfCharge, imageStation);
+                                Station station = new Station(id, title, address, town, stateOrProvince, position, url, numberOfPointsOfCharge, mediaUrl);
 
                                 for (int j = 0; j < numberOfPointsOfCharge; j++)
                                 {
