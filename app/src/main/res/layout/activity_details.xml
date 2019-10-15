@@ -11,9 +11,9 @@
         android:id="@+id/StationImageDetails"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:src="@drawable/no_available_image"
         android:adjustViewBounds="true"
         android:scaleType="fitStart"
-        tools:srcCompat="@tools:sample/backgrounds/scenic[4]"
         android:contentDescription="TODO" />
 
 

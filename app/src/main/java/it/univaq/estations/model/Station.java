@@ -7,6 +7,7 @@ import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
+import androidx.room.TypeConverter;
 import androidx.room.TypeConverters;
 
 import com.google.android.gms.maps.model.LatLng;
@@ -14,6 +15,7 @@ import com.google.android.gms.maps.model.LatLng;
 import java.util.ArrayList;
 import java.util.List;
 
+import it.univaq.estations.Database.BitmapConverter;
 import it.univaq.estations.Database.LatLngConverter;
 
 @Entity(tableName = "stations")
@@ -47,10 +49,13 @@ public class Station {
     @Ignore
     private ArrayList<PointOfCharge> pointsOfCharge;
 
+    @ColumnInfo(name = "image", typeAffinity = ColumnInfo.BLOB)
+    @TypeConverters(BitmapConverter.class)
     private Bitmap stationImage;
 
     @Ignore
     public Station(){}
+
 
     public Station(String id, String title, String address, String town, String stateOrProvince,
                    LatLng position, String url, int numberOfPointsOfCharge, Bitmap stationImage) {
@@ -157,5 +162,13 @@ public class Station {
 
     public void addPointOfChargeList(List<PointOfCharge> pointOfChargeList){
         this.pointsOfCharge.addAll(pointOfChargeList);
+    }
+
+    public Bitmap getStationImage() {
+        return stationImage;
+    }
+
+    public void setStationImage(Bitmap stationImage) {
+        this.stationImage = stationImage;
     }
 }

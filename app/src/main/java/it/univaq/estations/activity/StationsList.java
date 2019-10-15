@@ -64,12 +64,10 @@ public class StationsList extends AppCompatActivity {
         layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
 
-        // specify an adapter (see also next example)
+        // specify an adapter
         adapter = new StationsListAdapter(this, stations);
         recyclerView.setAdapter(adapter);
         appDB = Database.getInstance(getApplicationContext());
-
-
 
     }
 
@@ -135,6 +133,7 @@ public class StationsList extends AppCompatActivity {
     private void downloadData()
     {
 
+
         VolleyRequest.getInstance(getApplicationContext())
                 .downloadStations(new Response.Listener<String>() {
                     private Bitmap imageStation;
@@ -185,16 +184,19 @@ public class StationsList extends AppCompatActivity {
                                         mediaUrl = mediaArray.getJSONObject(k).optString("ItemThumbnailURL", null);
                                         k++;
                                     }
+                                     if (mediaUrl != null)
+                                     {
+                                         VolleyRequest.getInstance(getApplicationContext()).downloadImage(new Response.Listener<Bitmap>(){
+                                             public void onResponse(Bitmap imageResp){
+                                                 imageStation = imageResp;
+
+                                             }
+                                         },mediaUrl);
+                                     }
                                 }
 
 
 
-                                VolleyRequest.getInstance(getApplicationContext()).downloadImage(new Response.Listener<Bitmap>(){
-                                    public void onResponse(Bitmap imageResp){
-                                        imageStation = imageResp;
-
-                                    }
-                                },mediaUrl);
                                 JSONArray connections = item.optJSONArray("Connections");
 
                                 int numberOfPointsOfCharge = (connections != null ? connections.length() : 0 );
