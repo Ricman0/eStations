@@ -58,6 +58,7 @@ public class DetailsActivity extends AppCompatActivity {
             public void handleMessage(Message msg) {
                 super.handleMessage(msg);
                 if (msg.what == LOAD_STATION_COMPLETED) {
+                    // get Image from the urlImage and change ImageView element
                     if(urlImage != null ) {
                         VolleyRequest.getInstance(getApplicationContext()).downloadImage(new Response.Listener<Bitmap>() {
                             @Override
@@ -66,6 +67,7 @@ public class DetailsActivity extends AppCompatActivity {
                             }
                         }, urlImage);
                     }
+
                     fillDetailsLayout();
                     managePointsOfChargeRecyclerView();
                 }

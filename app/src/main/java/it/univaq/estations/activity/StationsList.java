@@ -6,6 +6,8 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.location.Location;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -44,6 +46,9 @@ public class StationsList extends AppCompatActivity {
     private LatLng currentPos;
     private Database appDB;
     private boolean shouldExecuteDownload;
+    Handler mHandler;
+    Thread threadToLoadAllStationsFromDB;
+    private static final int LOAD_STATIONS_COMPLETED = 101;
 
 
     @Override
@@ -68,6 +73,17 @@ public class StationsList extends AppCompatActivity {
         adapter = new StationsListAdapter(this, stations);
         recyclerView.setAdapter(adapter);
         appDB = Database.getInstance(getApplicationContext());
+
+        mHandler = new Handler() {
+
+            @Override
+            public void handleMessage(Message msg) {
+                super.handleMessage(msg);
+                if (msg.what == LOAD_STATIONS_COMPLETED) {
+                    //
+                }
+            }
+        };
 
     }
 
@@ -94,7 +110,7 @@ public class StationsList extends AppCompatActivity {
             // se fusedLocationClient.getLastLocation() == l'ultima posizione memorizzata allora recupero dal db altimenti richiedo; cancello e memorizzo nuove stazioni.
             boolean location_updated = Settings.loadBoolean(getApplicationContext(), Settings.LOCATION_UPDATED, true);
             if (location_updated == true) {
-
+                stations = null;
                 fusedLocationClient.getLastLocation()
                         .addOnSuccessListener(this, new OnSuccessListener<Location>() {
                             @Override
@@ -109,20 +125,30 @@ public class StationsList extends AppCompatActivity {
                                     //                    LocalBroadcastManager.getInstance(getApplicationContext())
                                     //                            .registerReceiver(myReceiver, new IntentFilter(RequestService.FILTER_REQUEST_DOWNLOAD));
                                     downloadData();
-                                    //Settings.save(getApplicationContext(), Settings.LOCATION_UPDATED, false);
-                                    Settings.save(getApplicationContext(), Settings.LOCATION_UPDATED, true);
+                                    Settings.save(getApplicationContext(), Settings.LOCATION_UPDATED, false);
                                 }
                             }
                         });
-            } else {
-                Settings.save(getApplicationContext(), Settings.LOCATION_UPDATED, true); // da eliminare quando usiamo la localizzazione che cambia
-                //get stations and all pointOFCharges from database
-                stations.addAll(appDB.getStationDao().getAllStations()); // get all stations without theirs pointOFCharges
-                for (int k = 0; k < stations.size(); k++) {
-                    Station stationToFill = stations.get(k);
-                    stationToFill.addPointOfChargeList(appDB.getPointOfChargeDao().getAllStationPointsOfCharge(stationToFill.getId()));
+            }
+            else {
 
-                }
+                threadToLoadAllStationsFromDB = new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        stations = null;
+                        //get stations and all pointOFCharges from database
+                        stations.addAll(appDB.getStationDao().getAllStations()); // get all stations without theirs pointOFCharges
+                        for (int k = 0; k < stations.size(); k++) {
+                            Station stationToFill = stations.get(k);
+                            stationToFill.addPointOfChargeList(appDB.getPointOfChargeDao().getAllStationPointsOfCharge(stationToFill.getId()));
+                        }
+                        Message message = new Message();
+                        message.what = LOAD_STATIONS_COMPLETED;
+                        mHandler.sendMessage(message);
+                    }
+                });
+
+                threadToLoadAllStationsFromDB.start();
             }
         }
 
