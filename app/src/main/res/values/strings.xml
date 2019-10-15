@@ -4,6 +4,9 @@
     <string name="title_activity_maps">Map</string>
     <string name="title_activity_stations_list">StationsList</string>
     <string name="title_details_activity">DetailsActivity</string>
+    <string name="point_of_charge_item_voltage">Voltaggio : </string>
+    <string name="point_of_charge_item_power">Potenza : </string>
+    <string name="point_of_charge_item_Status">Stato : </string>
     <string name="large_text">
         "Material is the metaphor.\n\n"
 
