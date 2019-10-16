@@ -1,8 +1,10 @@
 package it.univaq.estations.activity;
 
+import android.Manifest;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.location.Location;
 import android.os.Bundle;
@@ -10,6 +12,8 @@ import android.os.Handler;
 import android.os.Message;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -38,6 +42,7 @@ public class StationsList extends AppCompatActivity {
 
     private static final int MY_PERMISSIONS_REQUEST_INTERNET = 1;
     private static final int MY_PERMISSIONS_REQUEST_COARSE_LOCATION = 2;
+    private static final int MY_PERMISSIONS_REQUEST_FINE_LOCATION = 3;
     private ArrayList<Station> stations = new ArrayList<>();
     private RecyclerView recyclerView;
     private LinearLayoutManager layoutManager;
@@ -50,6 +55,7 @@ public class StationsList extends AppCompatActivity {
     Handler mHandler;
     Thread threadToLoadAllStationsFromDB;
     private static final int LOAD_STATIONS_COMPLETED = 101;
+    private static final int ALL_STATIONS_SAVED = 102;
 
 
     @Override
@@ -83,6 +89,10 @@ public class StationsList extends AppCompatActivity {
                 if (msg.what == LOAD_STATIONS_COMPLETED) {
                     //
                 }
+                if(msg.what == ALL_STATIONS_SAVED)
+                {
+                    //
+                }
             }
         };
 
@@ -104,16 +114,15 @@ public class StationsList extends AppCompatActivity {
 
     protected void onResume() {
         super.onResume();
-//        this.permissionCheck();
+//        this.permissionsCheck();
 
         if(shouldExecuteDownload) {
             shouldExecuteDownload = false;
             // se fusedLocationClient.getLastLocation() == l'ultima posizione memorizzata allora recupero dal db altimenti richiedo; cancello e memorizzo nuove stazioni.
-
             LocationService.getInstance().evaluateDistance(getApplicationContext(), currentPos,4000);
             boolean location_changed = Settings.loadBoolean(getApplicationContext(), Settings.LOCATION_CHANGED, true);
             if (location_changed == true) {
-                stations = null;
+                stations = new ArrayList<>();
                 fusedLocationClient.getLastLocation()
                         .addOnSuccessListener(this, new OnSuccessListener<Location>() {
                             @Override
@@ -139,7 +148,7 @@ public class StationsList extends AppCompatActivity {
                 threadToLoadAllStationsFromDB = new Thread(new Runnable() {
                     @Override
                     public void run() {
-                        stations = null;
+                        stations = new ArrayList<>();
                         //get stations and all pointOFCharges from database
                         stations.addAll(appDB.getStationDao().getAllStations()); // get all stations without theirs pointOFCharges
                         for (int k = 0; k < stations.size(); k++) {
@@ -238,6 +247,9 @@ public class StationsList extends AppCompatActivity {
                                 @Override
                                 public void run() {
                                     saveData();
+                                    Message message = new Message();
+                                    message.what = ALL_STATIONS_SAVED;
+                                    mHandler.sendMessage(message);
                                 }
                             }).start();
 
