@@ -30,6 +30,7 @@ import it.univaq.estations.R;
 import it.univaq.estations.activity.adapter.StationsListAdapter;
 import it.univaq.estations.model.PointOfCharge;
 import it.univaq.estations.model.Station;
+import it.univaq.estations.utility.LocationService;
 import it.univaq.estations.utility.Settings;
 import it.univaq.estations.utility.VolleyRequest;
 
@@ -43,9 +44,9 @@ public class StationsList extends AppCompatActivity {
     private StationsListAdapter adapter;
     //per la posizione
     private FusedLocationProviderClient fusedLocationClient;
-    private LatLng currentPos;
+    private LatLng currentPos = null;
     private Database appDB;
-    private boolean shouldExecuteDownload;
+    private boolean shouldExecuteDownload;//per evitare che tornando su questa attività si rifaccia il download NON FUNZIONA???
     Handler mHandler;
     Thread threadToLoadAllStationsFromDB;
     private static final int LOAD_STATIONS_COMPLETED = 101;
@@ -108,8 +109,10 @@ public class StationsList extends AppCompatActivity {
         if(shouldExecuteDownload) {
             shouldExecuteDownload = false;
             // se fusedLocationClient.getLastLocation() == l'ultima posizione memorizzata allora recupero dal db altimenti richiedo; cancello e memorizzo nuove stazioni.
-            boolean location_updated = Settings.loadBoolean(getApplicationContext(), Settings.LOCATION_UPDATED, true);
-            if (location_updated == true) {
+
+            LocationService.getInstance().evaluateDistance(getApplicationContext(), currentPos,4000);
+            boolean location_changed = Settings.loadBoolean(getApplicationContext(), Settings.LOCATION_CHANGED, true);
+            if (location_changed == true) {
                 stations = null;
                 fusedLocationClient.getLastLocation()
                         .addOnSuccessListener(this, new OnSuccessListener<Location>() {
@@ -120,12 +123,13 @@ public class StationsList extends AppCompatActivity {
                                     //                                appDB.clearAllTables(); // è asincrono
 
                                     currentPos = new LatLng(location.getLatitude(), location.getLongitude());
+                                    LocationService.getInstance().setPreviousLocation(currentPos);
 
                                     // Registering the receiver
                                     //                    LocalBroadcastManager.getInstance(getApplicationContext())
                                     //                            .registerReceiver(myReceiver, new IntentFilter(RequestService.FILTER_REQUEST_DOWNLOAD));
                                     downloadData();
-                                    Settings.save(getApplicationContext(), Settings.LOCATION_UPDATED, false);
+                                    Settings.save(getApplicationContext(), Settings.LOCATION_CHANGED, false);
                                 }
                             }
                         });
