@@ -23,6 +23,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import it.univaq.estations.Database.Database;
 import it.univaq.estations.R;
@@ -36,7 +37,7 @@ import it.univaq.estations.utility.PermissionService;
 
 public class StationsList extends AppCompatActivity {
 
-    private ArrayList<Station> stations = new ArrayList<>();
+    private List<Station> stations = new ArrayList<>();
     private RecyclerView recyclerView;
     private LinearLayoutManager layoutManager;
     private StationsListAdapter adapter;
@@ -47,23 +48,21 @@ public class StationsList extends AppCompatActivity {
     private boolean shouldExecuteDownload;//per evitare che tornando su questa attività si rifaccia il download NON FUNZIONA???
     Handler mHandler;
     Thread threadToLoadAllStationsFromDB;
-    private static final int LOAD_STATIONS_COMPLETED = 101;
+    private static final int ALL_STATIONS_LOADED = 101;
     private static final int ALL_STATIONS_SAVED = 102;
-
+    Context context;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        shouldExecuteDownload = true;
+        shouldExecuteDownload = true; // da vedere
 
+        // client per fare la richiesta per ottenere la locazione
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+
         setContentView(R.layout.activity_stations_list);
 
         recyclerView = findViewById(R.id.stations_list);
-
-        // use this setting to improve performance if you know that changes
-        // in content do not change the layout size of the RecyclerView
-        //recyclerView.setHasFixedSize(true);
 
         // use a linear layout manager
         layoutManager = new LinearLayoutManager(this);
@@ -72,6 +71,8 @@ public class StationsList extends AppCompatActivity {
         // specify an adapter
         adapter = new StationsListAdapter(this, stations);
         recyclerView.setAdapter(adapter);
+
+        context = this.getApplicationContext();
         appDB = Database.getInstance(getApplicationContext());
 
         mHandler = new Handler() {
@@ -79,31 +80,38 @@ public class StationsList extends AppCompatActivity {
             @Override
             public void handleMessage(Message msg) {
                 super.handleMessage(msg);
-                if (msg.what == LOAD_STATIONS_COMPLETED) {
-                    //
-                }
-                if(msg.what == ALL_STATIONS_SAVED)
-                {
-                    //
+                if (msg.what == ALL_STATIONS_LOADED || msg.what == ALL_STATIONS_SAVED) {
+                    // Refresh list because the adapter data are changed
+                    if(adapter != null) adapter.notifyDataSetChanged();
+//                    recyclerView = findViewById(R.id.stations_list);
+//
+//                    // use a linear layout manager
+//                    layoutManager = new LinearLayoutManager(context);
+//                    recyclerView.setLayoutManager(layoutManager);
+//
+//                    // specify an adapter
+//                    adapter = new StationsListAdapter(context, stations);
+//                    recyclerView.setAdapter(adapter);
+
                 }
             }
         };
 
     }
 
-    // The Broadcast Receiver can receive the sent intent by LocaleBroadcastManager.
-    private BroadcastReceiver myReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-
-            if(intent == null) return;
-            String response = intent.getStringExtra("response");
-            if(response == null) return;
-
-            // Refresh list because the adapter data are changed
-            if(adapter != null) adapter.notifyDataSetChanged();
-        }
-    };
+//    // The Broadcast Receiver can receive the sent intent by LocaleBroadcastManager.
+//    private BroadcastReceiver myReceiver = new BroadcastReceiver() {
+//        @Override
+//        public void onReceive(Context context, Intent intent) {
+//
+//            if(intent == null) return;
+//            String response = intent.getStringExtra("response");
+//            if(response == null) return;
+//
+//            // Refresh list because the adapter data are changed
+//            if(adapter != null) adapter.notifyDataSetChanged();
+//        }
+//    };
 
     protected void onResume() {
         super.onResume();
@@ -149,7 +157,7 @@ public class StationsList extends AppCompatActivity {
                             stationToFill.addPointOfChargeList(appDB.getPointOfChargeDao().getAllStationPointsOfCharge(stationToFill.getId()));
                         }
                         Message message = new Message();
-                        message.what = LOAD_STATIONS_COMPLETED;
+                        message.what = ALL_STATIONS_LOADED;
                         mHandler.sendMessage(message);
                     }
                 });
@@ -235,6 +243,7 @@ public class StationsList extends AppCompatActivity {
                                 stations.add(station);
                             }
 
+
                             new Thread(new Runnable() {
                                 @Override
                                 public void run() {
@@ -249,8 +258,7 @@ public class StationsList extends AppCompatActivity {
                             e.printStackTrace();
                         }
 
-                        // Refresh list because the adapter data are changed
-                        if(adapter != null) adapter.notifyDataSetChanged();
+
                     }
                 }, currentPos);
     }

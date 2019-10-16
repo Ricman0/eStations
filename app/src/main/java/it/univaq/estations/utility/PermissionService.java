@@ -1,6 +1,5 @@
 package it.univaq.estations.utility;
 
-
 import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
@@ -88,8 +87,6 @@ public class PermissionService {
                 // result of the request.
             }
         }
-
-
     }
 
 

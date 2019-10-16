@@ -47,7 +47,7 @@ public class VolleyRequest {
                 StringRequest.Method.GET,
                         "https://api.openchargemap.io/v3/poi/?output=json" +
                         "&countrycode=IT" +
-                        "&maxresults=20" +
+                        "&maxresults=4" +
                         "&latitude=" + curLat +
                         "&longitude=" + curLng + "&includecomments=true"+
                         "&compact=true&verbose=false",
