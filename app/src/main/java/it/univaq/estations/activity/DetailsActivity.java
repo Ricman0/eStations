@@ -51,6 +51,8 @@ public class DetailsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_details);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        context = getApplicationContext();
+        managePointsOfChargeRecyclerView();
 
         mHandler = new Handler() {
 
@@ -69,12 +71,13 @@ public class DetailsActivity extends AppCompatActivity {
                     }
 
                     fillDetailsLayout();
-                    managePointsOfChargeRecyclerView();
+                    pointsOfCharge = station.getPointsOfCharge();
+                    adapter.add(pointsOfCharge);
                 }
             }
         };
 
-        context = getApplicationContext();
+
 
         //get Extras from intent
         stationId = getIntent().getStringExtra("stationId");
@@ -163,7 +166,6 @@ public class DetailsActivity extends AppCompatActivity {
     }
 
     public void managePointsOfChargeRecyclerView(){
-        pointsOfCharge = station.getPointsOfCharge();
 
         recyclerView = findViewById(R.id.pointOfCharge_list);
         layoutManager = new LinearLayoutManager(context);

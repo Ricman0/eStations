@@ -101,4 +101,9 @@ public class StationsListAdapter extends RecyclerView.Adapter<StationsListAdapte
         return mDataset.size();
     }
 
+    public void add(List<Station> stations)
+    {
+        mDataset.addAll(stations);
+        notifyDataSetChanged();
+    }
 }

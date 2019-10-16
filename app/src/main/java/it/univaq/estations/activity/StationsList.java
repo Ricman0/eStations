@@ -81,18 +81,7 @@ public class StationsList extends AppCompatActivity {
             public void handleMessage(Message msg) {
                 super.handleMessage(msg);
                 if (msg.what == ALL_STATIONS_LOADED || msg.what == ALL_STATIONS_SAVED) {
-                    // Refresh list because the adapter data are changed
-                    if(adapter != null) adapter.notifyDataSetChanged();
-//                    recyclerView = findViewById(R.id.stations_list);
-//
-//                    // use a linear layout manager
-//                    layoutManager = new LinearLayoutManager(context);
-//                    recyclerView.setLayoutManager(layoutManager);
-//
-//                    // specify an adapter
-//                    adapter = new StationsListAdapter(context, stations);
-//                    recyclerView.setAdapter(adapter);
-
+                    adapter.add(stations);
                 }
             }
         };
@@ -179,6 +168,7 @@ public class StationsList extends AppCompatActivity {
                     @Override
                     public void onResponse(String response) {
                         try {
+                            recyclerView.setAdapter(adapter);
                             JSONArray jsonRoot = new JSONArray(response);
                             for (int i = 0; i < jsonRoot.length(); i++) {
 
@@ -241,8 +231,8 @@ public class StationsList extends AppCompatActivity {
                                 }
 
                                 stations.add(station);
-                            }
 
+                            }
 
                             new Thread(new Runnable() {
                                 @Override
