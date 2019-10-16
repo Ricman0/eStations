@@ -1,8 +1,10 @@
 package it.univaq.estations.activity;
 
+import android.Manifest;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.location.Location;
 import android.os.Bundle;
@@ -10,6 +12,8 @@ import android.os.Handler;
 import android.os.Message;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -37,6 +41,7 @@ public class StationsList extends AppCompatActivity {
 
     private static final int MY_PERMISSIONS_REQUEST_INTERNET = 1;
     private static final int MY_PERMISSIONS_REQUEST_COARSE_LOCATION = 2;
+    private static final int MY_PERMISSIONS_REQUEST_FINE_LOCATION = 3;
     private ArrayList<Station> stations = new ArrayList<>();
     private RecyclerView recyclerView;
     private LinearLayoutManager layoutManager;
@@ -49,6 +54,7 @@ public class StationsList extends AppCompatActivity {
     Handler mHandler;
     Thread threadToLoadAllStationsFromDB;
     private static final int LOAD_STATIONS_COMPLETED = 101;
+    private static final int ALL_STATIONS_SAVED = 102;
 
 
     @Override
@@ -82,6 +88,10 @@ public class StationsList extends AppCompatActivity {
                 if (msg.what == LOAD_STATIONS_COMPLETED) {
                     //
                 }
+                if(msg.what == ALL_STATIONS_SAVED)
+                {
+                    //
+                }
             }
         };
 
@@ -103,14 +113,14 @@ public class StationsList extends AppCompatActivity {
 
     protected void onResume() {
         super.onResume();
-//        this.permissionCheck();
+        this.permissionsCheck();
 
         if(shouldExecuteDownload) {
             shouldExecuteDownload = false;
             // se fusedLocationClient.getLastLocation() == l'ultima posizione memorizzata allora recupero dal db altimenti richiedo; cancello e memorizzo nuove stazioni.
             boolean location_updated = Settings.loadBoolean(getApplicationContext(), Settings.LOCATION_UPDATED, true);
             if (location_updated == true) {
-                stations = null;
+                stations = new ArrayList<>();
                 fusedLocationClient.getLastLocation()
                         .addOnSuccessListener(this, new OnSuccessListener<Location>() {
                             @Override
@@ -125,17 +135,18 @@ public class StationsList extends AppCompatActivity {
                                     //                    LocalBroadcastManager.getInstance(getApplicationContext())
                                     //                            .registerReceiver(myReceiver, new IntentFilter(RequestService.FILTER_REQUEST_DOWNLOAD));
                                     downloadData();
-                                    Settings.save(getApplicationContext(), Settings.LOCATION_UPDATED, false);
+                                   // Settings.save(getApplicationContext(), Settings.LOCATION_UPDATED, false);
+                                    Settings.save(getApplicationContext(), Settings.LOCATION_UPDATED, true);
                                 }
                             }
                         });
             }
             else {
-
+                Settings.save(getApplicationContext(), Settings.LOCATION_UPDATED, true);
                 threadToLoadAllStationsFromDB = new Thread(new Runnable() {
                     @Override
                     public void run() {
-                        stations = null;
+                        stations = new ArrayList<>();
                         //get stations and all pointOFCharges from database
                         stations.addAll(appDB.getStationDao().getAllStations()); // get all stations without theirs pointOFCharges
                         for (int k = 0; k < stations.size(); k++) {
@@ -158,7 +169,6 @@ public class StationsList extends AppCompatActivity {
 
     private void downloadData()
     {
-
 
         VolleyRequest.getInstance(getApplicationContext())
                 .downloadStations(new Response.Listener<String>() {
@@ -234,6 +244,9 @@ public class StationsList extends AppCompatActivity {
                                 @Override
                                 public void run() {
                                     saveData();
+                                    Message message = new Message();
+                                    message.what = ALL_STATIONS_SAVED;
+                                    mHandler.sendMessage(message);
                                 }
                             }).start();
 
@@ -245,8 +258,6 @@ public class StationsList extends AppCompatActivity {
                         if(adapter != null) adapter.notifyDataSetChanged();
                     }
                 }, currentPos);
-
-
     }
 
     private void saveData(){
@@ -263,65 +274,105 @@ public class StationsList extends AppCompatActivity {
         }
     }
 
-//    @Override
-//    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-//        switch (requestCode) {
-//            case MY_PERMISSIONS_REQUEST_INTERNET: {
-//                // If request is cancelled, the result arrays are empty.
-//                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-//                    // permission was granted, yay! Do the
-//                    // contacts-related task you need to do.
-//                } else {
-//                    // permission denied, boo! Disable the
-//                    // functionality that depends on this permission.
-//                }
-//                return;
-//            }
-//            case MY_PERMISSIONS_REQUEST_COARSE_LOCATION:{
-//
-//            }
-//
-//            // other 'case' lines to check for other
-//            // permissions this app might request.
-//            break;
-//            default:
-//                throw new IllegalStateException("Unexpected value: " + requestCode);
-//        }
-//    }
 
-//    private void permissionCheck(){
-//
-//            boolean permissionAccessCoarseLocationApproved =
-//                    ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
-//                            == PackageManager.PERMISSION_GRANTED;
-//            boolean permissionAccessFineLocationApproved =
-//                    ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-//                            == PackageManager.PERMISSION_GRANTED;
-//            boolean permissionAccessInternetApproved =
-//                    ContextCompat.checkSelfPermission(this, Manifest.permission.INTERNET)
-//                    == PackageManager.PERMISSION_GRANTED;
-//
-//            if (!permissionAccessCoarseLocationApproved) {
-//                // Permission is not granted
-////                if (ActivityCompat.shouldShowRequestPermissionRationale(this,
-////                        Manifest.permission.READ_CONTACTS)) {
-////                    // Show an explanation to the user *asynchronously* -- don't block
-////                    // this thread waiting for the user's response! After the user
-////                    // sees the explanation, try again to request the permission.
-////                } else {
-//                    // No explanation needed; request the permission
-//                    ActivityCompat.requestPermissions(this,
-//                            new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},
-//                            MY_PERMISSIONS_REQUEST_COARSE_LOCATION);
-//
-//                    // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
-//                    // app-defined int constant. The callback method gets the
-//                    // result of the request.
-//                //}
-//            } else {
-//                // Permission has already been granted        }
-//
-//        }
-//    }
+    private void permissionsCheck(){
+
+        //check if the user granted the permission yet
+
+        if(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
+                            != PackageManager.PERMISSION_GRANTED)
+        {
+            // permission is not granted yet
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this,
+                    Manifest.permission.ACCESS_COARSE_LOCATION)) {
+                // Show an explanation to the user *asynchronously* -- don't block
+                // this thread waiting for the user's response! After the user
+                // sees the explanation, try again to request the permission.
+            } else {
+                // No explanation needed; request the permission
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},
+                        MY_PERMISSIONS_REQUEST_COARSE_LOCATION);
+
+                // MY_PERMISSIONS_REQUEST_COARSE_LOCATION is an
+                // app-defined int constant. The callback method gets the
+                // result of the request.
+            }
+        }
+
+        if(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED)
+        {
+            // permission is not granted yet
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this,
+                    Manifest.permission.ACCESS_FINE_LOCATION)) {
+                // Show an explanation to the user *asynchronously* -- don't block
+                // this thread waiting for the user's response! After the user
+                // sees the explanation, try again to request the permission.
+            } else {
+                // No explanation needed; request the permission
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                        MY_PERMISSIONS_REQUEST_FINE_LOCATION);
+
+                // MY_PERMISSIONS_REQUEST_FINE_LOCATION is an
+                // app-defined int constant. The callback method gets the
+                // result of the request.
+            }
+        }
+
+        if(ContextCompat.checkSelfPermission(this, Manifest.permission.INTERNET)
+                != PackageManager.PERMISSION_GRANTED)
+        {
+            // permission is not granted yet
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this,
+                    Manifest.permission.INTERNET)) {
+                // Show an explanation to the user *asynchronously* -- don't block
+                // this thread waiting for the user's response! After the user
+                // sees the explanation, try again to request the permission.
+            } else {
+                // No explanation needed; request the permission
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.INTERNET},
+                        MY_PERMISSIONS_REQUEST_INTERNET);
+
+                // MY_PERMISSIONS_REQUEST_FINE_LOCATION is an
+                // app-defined int constant. The callback method gets the
+                // result of the request.
+            }
+        }
+
 
     }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        switch (requestCode) {
+            case MY_PERMISSIONS_REQUEST_INTERNET: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // permission was granted, yay! Do the
+                    // contacts-related task you need to do.
+                } else {
+                    // permission denied, boo! Disable the
+                    // functionality that depends on this permission.
+                }
+                return;
+            }
+            case MY_PERMISSIONS_REQUEST_COARSE_LOCATION:{
+
+            }
+            case MY_PERMISSIONS_REQUEST_FINE_LOCATION:{
+
+            }
+
+            // other 'case' lines to check for other
+            // permissions this app might request.
+            break;
+            default:
+                throw new IllegalStateException("Unexpected value: " + requestCode);
+        }
+    }
+
+
+}
