@@ -41,7 +41,7 @@ public class StationsList extends AppCompatActivity {
     private StationsListAdapter adapter;
     //per la posizione
     private FusedLocationProviderClient fusedLocationClient;
-    private LatLng currentPos = null;
+    private LatLng currentPos;
     private Database appDB;
     private boolean shouldExecuteDownload;//per evitare che tornando su questa attività si rifaccia il download NON FUNZIONA???
     Handler mHandler;
@@ -56,6 +56,7 @@ public class StationsList extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         shouldExecuteDownload = true; // da vedere
 
+        currentPos = null;
         // client per fare la richiesta per ottenere la locazione
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
@@ -109,8 +110,9 @@ public class StationsList extends AppCompatActivity {
         super.onResume();
         PermissionService.getInstance().permissionsCheck(this, this);
 
-        if(shouldExecuteDownload) {
-            shouldExecuteDownload = false;
+//        if(shouldExecuteDownload) {
+//            shouldExecuteDownload = false;
+//            currentPos = LocationService.getInstance().getPreviousLocation();
             // se fusedLocationClient.getLastLocation() == l'ultima posizione memorizzata allora recupero dal db altimenti richiedo; cancello e memorizzo nuove stazioni.
             LocationService.getInstance().evaluateDistance(getApplicationContext(), currentPos,4000);
 //            boolean location_changed = Settings.loadBoolean(getApplicationContext(), Settings.LOCATION_CHANGED, true);
@@ -144,7 +146,8 @@ public class StationsList extends AppCompatActivity {
                 threadToLoadAllStationsFromDB = new Thread(new Runnable() {
                     @Override
                     public void run() {
-                        stations = new ArrayList<>();
+                        //stations = new ArrayList<>();
+                        stations.clear();
                         //get stations and all pointOFCharges from database
                         stations.addAll(appDB.getStationDao().getAllStations()); // get all stations without theirs pointOFCharges
                         for (int k = 0; k < stations.size(); k++) {
@@ -159,7 +162,7 @@ public class StationsList extends AppCompatActivity {
 
                 threadToLoadAllStationsFromDB.start();
             }
-        }
+
     }
 
 
@@ -290,6 +293,28 @@ public class StationsList extends AppCompatActivity {
     }
 
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+    }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+    }
 
+    @Override
+    protected void onStop() {
+        super.onStop();
+    }
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+    }
 }
