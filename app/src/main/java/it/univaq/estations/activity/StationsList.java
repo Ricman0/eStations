@@ -113,8 +113,8 @@ public class StationsList extends AppCompatActivity {
             shouldExecuteDownload = false;
             // se fusedLocationClient.getLastLocation() == l'ultima posizione memorizzata allora recupero dal db altimenti richiedo; cancello e memorizzo nuove stazioni.
             LocationService.getInstance().evaluateDistance(getApplicationContext(), currentPos,4000);
-            boolean location_changed = Settings.loadBoolean(getApplicationContext(), Settings.LOCATION_CHANGED, true);
-            if (location_changed == true) {
+//            boolean location_changed = Settings.loadBoolean(getApplicationContext(), Settings.LOCATION_CHANGED, true);
+            if (LocationService.LOCATION_CHANGED == true) {
                 stations = new ArrayList<>();
                 fusedLocationClient.getLastLocation()
                         .addOnSuccessListener(this, new OnSuccessListener<Location>() {
@@ -134,7 +134,7 @@ public class StationsList extends AppCompatActivity {
                                     clearDataFromDB();
                                     // Avvio il downloadData() solo dopo che il database è stato avviato
                                     //downloadData();
-                                    Settings.save(getApplicationContext(), Settings.LOCATION_CHANGED, false);
+                                    LocationService.LOCATION_CHANGED = false;
                                 }
                             }
                         });
