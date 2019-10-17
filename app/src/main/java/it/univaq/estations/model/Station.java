@@ -1,13 +1,10 @@
 package it.univaq.estations.model;
 
-import android.graphics.Bitmap;
-
 import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.Ignore;
 import androidx.room.PrimaryKey;
-import androidx.room.TypeConverter;
 import androidx.room.TypeConverters;
 
 import com.google.android.gms.maps.model.LatLng;
@@ -15,7 +12,6 @@ import com.google.android.gms.maps.model.LatLng;
 import java.util.ArrayList;
 import java.util.List;
 
-import it.univaq.estations.Database.BitmapConverter;
 import it.univaq.estations.Database.LatLngConverter;
 
 @Entity(tableName = "stations")
