@@ -1,8 +1,6 @@
 package it.univaq.estations.activity;
 
-import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.Intent;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
@@ -50,6 +48,7 @@ public class StationsList extends AppCompatActivity {
     Thread threadToLoadAllStationsFromDB;
     private static final int ALL_STATIONS_LOADED = 101;
     private static final int ALL_STATIONS_SAVED = 102;
+    private static final int ALL_STATIONS_DELETED = 103;
     Context context;
 
     @Override
@@ -82,6 +81,10 @@ public class StationsList extends AppCompatActivity {
                 super.handleMessage(msg);
                 if (msg.what == ALL_STATIONS_LOADED || msg.what == ALL_STATIONS_SAVED) {
                     adapter.add(stations);
+                }
+                if (msg.what == ALL_STATIONS_DELETED) {
+                    downloadData();
+
                 }
             }
         };
@@ -127,7 +130,10 @@ public class StationsList extends AppCompatActivity {
                                     // Registering the receiver
                                     //                    LocalBroadcastManager.getInstance(getApplicationContext())
                                     //                            .registerReceiver(myReceiver, new IntentFilter(RequestService.FILTER_REQUEST_DOWNLOAD));
-                                    downloadData();
+
+                                    clearDataFromDB();
+                                    // Avvio il downloadData() solo dopo che il database è stato avviato
+                                    //downloadData();
                                     Settings.save(getApplicationContext(), Settings.LOCATION_CHANGED, false);
                                 }
                             }
@@ -154,8 +160,6 @@ public class StationsList extends AppCompatActivity {
                 threadToLoadAllStationsFromDB.start();
             }
         }
-
-
     }
 
 
@@ -227,22 +231,20 @@ public class StationsList extends AppCompatActivity {
                                             connection.optInt("PowerKW"), connection.optInt("StatusTypeID")
                                     );
                                     station.addPointOfCharge(pointOfCharge);
-
                                 }
-
                                 stations.add(station);
-
                             }
 
-                            new Thread(new Runnable() {
+                            Thread threadToSaveStationsInDB = new Thread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    saveData();
+                                    saveStationsDataInDB();
                                     Message message = new Message();
                                     message.what = ALL_STATIONS_SAVED;
                                     mHandler.sendMessage(message);
                                 }
-                            }).start();
+                            });
+                            threadToSaveStationsInDB.start();
 
                         } catch (JSONException e) {
                             e.printStackTrace();
@@ -253,7 +255,7 @@ public class StationsList extends AppCompatActivity {
                 }, currentPos);
     }
 
-    private void saveData(){
+    private void saveStationsDataInDB(){
         // per ogni stazione salva la stazione e tutti i suoi punti di ricarica
         for (int k = 0; k < stations.size(); k++)
         {
@@ -265,6 +267,26 @@ public class StationsList extends AppCompatActivity {
                 appDB.getPointOfChargeDao().save(pointOfChargeToSave); // salvo il punto di ricarica
             }
         }
+    }
+
+    /**
+     * Clear data from database
+     */
+    private void clearDataFromDB(){
+
+        stations.clear();
+
+        Thread ThreadToClearDataFromDB = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                Database.getInstance(getApplicationContext())
+                        .getStationDao().deleteAll(); // i points of charge associati dovrebbero essere eliminati on cascade
+                Message message = new Message();
+                message.what = ALL_STATIONS_DELETED;
+                mHandler.sendMessage(message);
+            }
+        });
+        ThreadToClearDataFromDB.start();
     }
 
 

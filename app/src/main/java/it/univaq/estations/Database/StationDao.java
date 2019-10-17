@@ -19,6 +19,9 @@ public interface StationDao {
     @Delete
     public void delete(Station station);
 
+    @Query("DELETE FROM stations")
+    public void deleteAll();
+
     @Update
     public void update(Station station);
 
