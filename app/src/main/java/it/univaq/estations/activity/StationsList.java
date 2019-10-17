@@ -85,7 +85,6 @@ public class StationsList extends AppCompatActivity {
                 }
                 if (msg.what == ALL_STATIONS_DELETED) {
                     downloadData();
-
                 }
             }
         };
@@ -123,9 +122,6 @@ public class StationsList extends AppCompatActivity {
                             @Override
                             public void onSuccess(Location location) {
                                 if (location != null) {
-                                    //delete all database table
-                                    //                                appDB.clearAllTables(); // è asincrono
-
                                     currentPos = new LatLng(location.getLatitude(), location.getLongitude());
                                     LocationService.getInstance().setPreviousLocation(currentPos);
 
@@ -165,7 +161,9 @@ public class StationsList extends AppCompatActivity {
 
     }
 
-
+    /**
+     * @author Claudia Di Marco & Riccardo Mantini
+     */
     private void downloadData()
     {
 
@@ -258,6 +256,11 @@ public class StationsList extends AppCompatActivity {
                 }, currentPos);
     }
 
+    /**
+     * Function to save Stations and associated points of charge in the database.
+     *
+     * @author Claudia Di Marco & Riccardo Mantini
+     */
     private void saveStationsDataInDB(){
         // per ogni stazione salva la stazione e tutti i suoi punti di ricarica
         for (int k = 0; k < stations.size(); k++)
@@ -273,7 +276,9 @@ public class StationsList extends AppCompatActivity {
     }
 
     /**
-     * Clear data from database
+     * Function to clear all stations and associated Points of charges from database.
+     *
+     * @author Claudia Di Marco & Riccardo Mantini
      */
     private void clearDataFromDB(){
 
@@ -283,7 +288,7 @@ public class StationsList extends AppCompatActivity {
             @Override
             public void run() {
                 Database.getInstance(getApplicationContext())
-                        .getStationDao().deleteAll(); // i points of charge associati dovrebbero essere eliminati on cascade
+                        .getStationDao().deleteAll(); // i points of charge associati dovrebbero essere eliminati con on cascade
                 Message message = new Message();
                 message.what = ALL_STATIONS_DELETED;
                 mHandler.sendMessage(message);
