@@ -7,6 +7,7 @@ import com.google.android.gms.maps.model.LatLng;
 public class LocationService {
 
     private static LocationService instance = null;
+    public static boolean LOCATION_CHANGED; // Used to remember if the location is changed
 
     //location registered during last server request
     private LatLng previousLocation;
@@ -36,7 +37,7 @@ public class LocationService {
     public void evaluateDistance(Context context, LatLng currentLocation, int targetDistanceInMeter)
     {
         if (currentLocation == null) {
-            Settings.save(context, Settings.LOCATION_CHANGED, true);
+            this.LOCATION_CHANGED = true;
             return;
         }
 
@@ -45,9 +46,11 @@ public class LocationService {
                 previousLocation.latitude, previousLocation.longitude, dist);
 
         if (dist[0] < targetDistanceInMeter) {
-            Settings.save(context, Settings.LOCATION_CHANGED, false);
+
+            this.LOCATION_CHANGED = false;
+
         } else {
-            Settings.save(context, Settings.LOCATION_CHANGED, true);
+            this.LOCATION_CHANGED = true;
             this.previousLocation = currentLocation;
         }
 

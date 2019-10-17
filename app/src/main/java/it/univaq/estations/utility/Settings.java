@@ -14,7 +14,7 @@ public class Settings {
     public static final String LAST_ACCESS = "last_access_time"; // Used to save the last timestamp when the user open the app
     public static final String FIRST_TIME = "first_time"; // Used to remember if is the first time that the user open the app
 
-    public static final String LOCATION_CHANGED = "location_changed"; // Used to remember if the location is changed
+//    public static final String LOCATION_CHANGED = "location_changed"; // Used to remember if the location is changed
 
     public static void save(Context context, String key, long value){
 
