@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">estations</string>
+    <string name="power">Potenza :</string>
+    <string name="status">Stato :</string>
+    <string name="voltage">Voltaggio :</string>
+    <string name="cost">Costo :</string>
+    <string name="pointOfCharge">Punto di Ricarica</string>
+    <string name="numPointOfCharge">Numero Punti di Ricarica</string>
+</resources>

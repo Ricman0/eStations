@@ -190,6 +190,8 @@ public class StationsList extends AppCompatActivity {
 
                                 String id = item.optString("ID");
 
+                                String usageCost = item.optString("UsageCost");
+
                                 JSONObject addressInfo = item.optJSONObject("AddressInfo");
 
                                 String title = "", address = "", town = "", stateOrProvince = "", url = "";
@@ -231,7 +233,7 @@ public class StationsList extends AppCompatActivity {
 
                                 int numberOfPointsOfCharge = (connections != null ? connections.length() : 0 );
 
-                                Station station = new Station(id, title, address, town, stateOrProvince, position, url, numberOfPointsOfCharge, mediaUrl);
+                                Station station = new Station(id, title, usageCost,address, town, stateOrProvince, position, url, numberOfPointsOfCharge, mediaUrl);
 
                                 for (int j = 0; j < numberOfPointsOfCharge; j++)
                                 {

@@ -27,9 +27,8 @@
                 android:id="@+id/labelPointOfChargeNum"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Punto di ricarica"
+                android:text="@string/pointOfCharge"
                 android:textStyle="bold"
-                android:layout_marginTop="@dimen/listMarginTop"
                 android:layout_marginHorizontal="@dimen/listMarginSide"
                 android:textAppearance="@style/TextAppearance.AppCompat.Large" />
             <TextView
@@ -38,7 +37,6 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:textStyle="bold"
-                android:layout_marginTop="@dimen/listMarginTop"
                 android:text="num"
                 android:textAppearance="@style/TextAppearance.AppCompat.Large" />
 
