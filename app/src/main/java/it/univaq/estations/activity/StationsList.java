@@ -43,7 +43,7 @@ public class StationsList extends AppCompatActivity {
     private FusedLocationProviderClient fusedLocationClient;
     private LatLng currentPos;
     private Database appDB;
-    private boolean shouldExecuteDownload;//per evitare che tornando su questa attività si rifaccia il download NON FUNZIONA???
+    //private boolean shouldExecuteDownload;//per evitare che tornando su questa attività si rifaccia il download NON FUNZIONA???
     Handler mHandler;
     Thread threadToLoadAllStationsFromDB;
     private static final int ALL_STATIONS_LOADED = 101;
@@ -54,14 +54,10 @@ public class StationsList extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        shouldExecuteDownload = true; // da vedere
-
-        currentPos = null;
-        // client per fare la richiesta per ottenere la locazione
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+       // shouldExecuteDownload = true; // da vedere
 
         setContentView(R.layout.activity_stations_list);
-
+        PermissionService.getInstance().permissionsCheck(this, this);
         recyclerView = findViewById(R.id.stations_list);
 
         // use a linear layout manager
@@ -72,8 +68,12 @@ public class StationsList extends AppCompatActivity {
         adapter = new StationsListAdapter(this, stations);
         recyclerView.setAdapter(adapter);
 
+        currentPos = null;
+        // client per fare la richiesta per ottenere la locazione
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
         context = this.getApplicationContext();
         appDB = Database.getInstance(getApplicationContext());
+        stations = new ArrayList<>();
 
         mHandler = new Handler() {
 
@@ -88,6 +88,8 @@ public class StationsList extends AppCompatActivity {
                 }
             }
         };
+
+
 
     }
 
@@ -107,7 +109,7 @@ public class StationsList extends AppCompatActivity {
 
     protected void onResume() {
         super.onResume();
-        PermissionService.getInstance().permissionsCheck(this, this);
+        //PermissionService.getInstance().permissionsCheck(this, this);
 
 //        if(shouldExecuteDownload) {
 //            shouldExecuteDownload = false;
@@ -116,7 +118,7 @@ public class StationsList extends AppCompatActivity {
             LocationService.getInstance().evaluateDistance(getApplicationContext(), currentPos,4000);
 //            boolean location_changed = Settings.loadBoolean(getApplicationContext(), Settings.LOCATION_CHANGED, true);
             if (LocationService.LOCATION_CHANGED == true) {
-                stations = new ArrayList<>();
+
                 fusedLocationClient.getLastLocation()
                         .addOnSuccessListener(this, new OnSuccessListener<Location>() {
                             @Override
@@ -142,7 +144,6 @@ public class StationsList extends AppCompatActivity {
                 threadToLoadAllStationsFromDB = new Thread(new Runnable() {
                     @Override
                     public void run() {
-                        //stations = new ArrayList<>();
                         stations.clear();
                         //get stations and all pointOFCharges from database
                         stations.addAll(appDB.getStationDao().getAllStations()); // get all stations without theirs pointOFCharges
@@ -282,8 +283,6 @@ public class StationsList extends AppCompatActivity {
      */
     private void clearDataFromDB(){
 
-        stations.clear();
-
         Thread ThreadToClearDataFromDB = new Thread(new Runnable() {
             @Override
             public void run() {
@@ -300,6 +299,7 @@ public class StationsList extends AppCompatActivity {
 
     @Override
     protected void onPause() {
+
         super.onPause();
     }
 
@@ -316,10 +316,13 @@ public class StationsList extends AppCompatActivity {
     @Override
     protected void onRestart() {
         super.onRestart();
+        adapter.clear();
+
     }
 
     @Override
     protected void onStart() {
+
         super.onStart();
     }
 }
