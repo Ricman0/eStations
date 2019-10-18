@@ -10,6 +10,7 @@ import androidx.room.TypeConverters;
 import com.google.android.gms.maps.model.LatLng;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import it.univaq.estations.Database.LatLngConverter;
@@ -174,6 +175,16 @@ public class Station {
     public String getStationImageUrl() {
 
         return stationImageUrl;
+    }
+
+    public Boolean isFree(){
+        boolean isFree = false;
+        Iterator<PointOfCharge> it =  this.pointsOfCharge.iterator();
+        while (it.hasNext()){
+            PointOfCharge p = it.next();
+            if(p.getStatusTypeId() == 50) isFree=true;
+        }
+        return isFree;
     }
 
     public void setStationImageUrl(String stationImageUrl) {

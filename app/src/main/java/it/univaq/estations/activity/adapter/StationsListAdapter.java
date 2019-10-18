@@ -3,8 +3,10 @@ package it.univaq.estations.activity.adapter;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.view.View;
 import androidx.annotation.NonNull;
@@ -30,12 +32,14 @@ public class StationsListAdapter extends RecyclerView.Adapter<StationsListAdapte
         TextView title;
         TextView town;
         TextView km;
+        ImageView statusIcon;
         ItemListViewHolder(@NonNull View itemView) {
 
             super(itemView);
             title = itemView.findViewById(R.id.stationName);
             town = itemView.findViewById(R.id.stationTown);
             km = itemView.findViewById(R.id.distanceFromStation);
+            statusIcon = itemView.findViewById(R.id.statusIcon);
 
             // Define the click event on item (creating Anonymous View.OnClickListener)
             itemView.setOnClickListener(new View.OnClickListener() {
@@ -88,6 +92,8 @@ public class StationsListAdapter extends RecyclerView.Adapter<StationsListAdapte
         if(getItemCount()!=0) {
             holder.title.setText(mDataset.get(position).getName());
             holder.town.setText(mDataset.get(position).getTown());
+            if(!mDataset.get(position).isFree())
+            holder.statusIcon.setImageResource(R.drawable.presence_busy);
             float[] dist = new float[1];
             android.location.Location.distanceBetween( 42.360205, 13.377868,
                     mDataset.get(position).getPosition().latitude, mDataset.get(position).getPosition().longitude, dist);
