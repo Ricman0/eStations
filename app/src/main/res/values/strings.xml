@@ -97,9 +97,10 @@
     <string name="voltage">"Voltage : "</string>
     <string name="power">"Power : "</string>
     <string name="status">"Status : "</string>
-    <string name="cost">Cost : </string>
+    <string name="cost">"Cost : "</string>
     <string name="pointOfCharge">"Point of Charge "</string>
     <string name="numPointOfCharge">"Number of Point of Charge : "</string>
 
+    <string name="iconToStationListActivity_description">"icon to reach the StationsList activity"</string>
 
 </resources>

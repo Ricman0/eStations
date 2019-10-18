@@ -1,6 +1,10 @@
 package it.univaq.estations.activity;
 
+import android.app.ActionBar;
+import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.ImageView;
 
 import androidx.fragment.app.FragmentActivity;
 
@@ -31,7 +35,25 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this); //Objects.requireNonNull(mapFragment).getMapAsync(this);
+
+//add click listener to the navigationToStation button
+        ImageView icon = findViewById(R.id.iconToStationListActivity);
+        icon.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                // Open another Activity and pass to it the right station
+                //new Intent object: Il costruttore, in caso di intent esplicito, richiede due parametri: il Context (che, nel nostro caso, è l’activity che vuole chiamare la seconda) e la classe che riceverà l’intent, cioè l’activity che vogliamo richiamare.
+                Intent intent = new Intent(v.getContext(), StationsList.class);
+
+                //add extras to intent
+                //Station station = mDataset.get(getAdapterPosition());
+                //intent.putExtra("stationId", station.getId());
+
+                //Avendo l’intent, per avviare la nuova activity
+                v.getContext().startActivity(intent);
+            }
+        });
     }
+
 
     /**
      * Manipulates the map once available.

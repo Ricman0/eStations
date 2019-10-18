@@ -1,9 +1,63 @@
 <?xml version="1.0" encoding="utf-8"?>
-<fragment xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:map="http://schemas.android.com/apk/res-auto"
+
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/map"
-    android:name="com.google.android.gms.maps.SupportMapFragment"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".activity.MapsActivity" />
+    tools:context=".activity.MapsActivity" >
+
+    <fragment xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:map="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/map"
+        android:name="com.google.android.gms.maps.SupportMapFragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context=".activity.MapsActivity" />
+
+    <ImageView
+        android:id="@+id/iconToStationListActivity"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:contentDescription="@string/iconToStationListActivity_description"
+        android:layout_gravity="bottom|right"
+        style="@style/Widget.AppCompat.ActionButton"
+        android:background="@color/transparent_white"
+        android:src="@drawable/ic_list_black_24dp" />
+<!--
+    <RadioGroup
+        android:id="@+id/radio_group_list_selector"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="#80000000"
+        android:padding="4dp" >
+
+        <ImageView
+            android:id="@+id/imageView1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:src="@drawable/ic_list_black_24dp" />
+
+
+        <RadioButton
+            android:id="@+id/radioPopular"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:text="ciao"
+            android:gravity="center_horizontal|center_vertical"
+            android:layout_weight="1"
+            android:button="@null"
+            android:background="@android:color/darker_gray"
+            android:textColor="@android:color/black" />
+        <View
+            android:id="@+id/VerticalLin"
+            android:layout_width="1dip"
+            android:layout_height="match_parent"
+            android:background="#aaa" />
+
+
+  </RadioGroup> -->
+</FrameLayout>
