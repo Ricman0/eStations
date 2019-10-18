@@ -51,6 +51,11 @@ public class DetailsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_details);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
+        getSupportActionBar().setTitle("E-stations");
+        getSupportActionBar().setSubtitle("Station Details");
+
+
         context = getApplicationContext();
         managePointsOfChargeRecyclerView();
 
@@ -208,5 +213,19 @@ public class DetailsActivity extends AppCompatActivity {
     {
         ImageView imageStation = findViewById(R.id.StationImageDetails);
         imageStation.setImageBitmap(newImage);
+    }
+
+
+
+    /**
+     * Function to define a custom behaviour for the actionBar arrow back.
+     *
+     * @Override
+     * @return boolean
+     * @author Claudia Di Marco & Riccardo Mantini
+     */
+    public boolean onSupportNavigateUp(){
+        finish();
+        return true;
     }
 }

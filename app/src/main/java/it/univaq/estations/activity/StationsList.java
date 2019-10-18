@@ -58,6 +58,11 @@ public class StationsList extends AppCompatActivity {
 
         setContentView(R.layout.activity_stations_list);
         PermissionService.getInstance().permissionsCheck(this, this);
+
+
+        getSupportActionBar().setTitle("E-stations");
+        getSupportActionBar().setSubtitle("Stations List");
+
         recyclerView = findViewById(R.id.stations_list);
 
         // use a linear layout manager
@@ -163,6 +168,8 @@ public class StationsList extends AppCompatActivity {
     }
 
     /**
+     *
+     *
      * @author Claudia Di Marco & Riccardo Mantini
      */
     private void downloadData()
@@ -313,7 +320,13 @@ public class StationsList extends AppCompatActivity {
         super.onStop();
     }
 
-    @Override
+
+    /**
+     * Function to restart the activity and clear the StationsListAdapter.
+     *
+     * @Override
+     * @author Claudia Di Marco & Riccardo Mantini
+     */
     protected void onRestart() {
         super.onRestart();
         adapter.clear();
