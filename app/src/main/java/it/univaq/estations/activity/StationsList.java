@@ -59,7 +59,8 @@ public class StationsList extends AppCompatActivity {
         setContentView(R.layout.activity_stations_list);
         PermissionService.getInstance().permissionsCheck(this, this);
 
-
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
         getSupportActionBar().setTitle("E-stations");
         getSupportActionBar().setSubtitle("Stations List");
 
@@ -337,5 +338,17 @@ public class StationsList extends AppCompatActivity {
     protected void onStart() {
 
         super.onStart();
+    }
+
+    /**
+     * Function to define a custom behaviour for the actionBar arrow back.
+     *
+     * @Override
+     * @return boolean
+     * @author Claudia Di Marco & Riccardo Mantini
+     */
+    public boolean onSupportNavigateUp(){
+        finish();
+        return true;
     }
 }

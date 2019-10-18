@@ -100,5 +100,6 @@
     <string name="voltage">"Voltaggio: "</string>
     <string name="power">"Potenza: "</string>
     <string name="status">"Stato: "</string>
+    <string name="iconToStationListActivity_description">"icon to reach the StationsList activity"</string>
 
 </resources>
