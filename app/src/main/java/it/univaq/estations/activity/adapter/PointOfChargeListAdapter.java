@@ -84,4 +84,5 @@ public class PointOfChargeListAdapter extends RecyclerView.Adapter<PointOfCharge
         pointsOfCharge.addAll(stations);
         notifyDataSetChanged();
     }
+
 }

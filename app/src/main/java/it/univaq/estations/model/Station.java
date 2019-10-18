@@ -23,6 +23,9 @@ public class Station {
     @ColumnInfo(name = "name")
     private String title;
 
+    @ColumnInfo(name = "usageCost")
+    private String usageCost;
+
     @ColumnInfo(name = "address")
     private String address;
 
@@ -52,10 +55,11 @@ public class Station {
     public Station(){}
 
 
-    public Station(String id, String title, String address, String town, String stateOrProvince,
+    public Station(String id, String title, String usageCost,String address, String town, String stateOrProvince,
                    LatLng position, String url, int numberOfPointsOfCharge, String stationImageUrl) {
         this.id = id;
         this.title = title;
+        this.usageCost = usageCost;
         this.address = address;
         this.town = town;
         this.stateOrProvince = stateOrProvince;
@@ -93,6 +97,14 @@ public class Station {
 
     public void setTitle(String title) {
         this.title = title;
+    }
+
+    public String getUsageCost() {
+        return usageCost;
+    }
+
+    public void setUsageCost(String usageCost) {
+        this.usageCost = usageCost;
     }
 
     public String getAddress() {

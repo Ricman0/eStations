@@ -19,6 +19,8 @@ import android.widget.TextView;
 import com.android.volley.Response;
 
 import java.util.ArrayList;
+import java.util.Currency;
+import java.util.Locale;
 
 import it.univaq.estations.Database.Database;
 import it.univaq.estations.R;
@@ -153,12 +155,14 @@ public class DetailsActivity extends AppCompatActivity {
 
         //fill the layout with the station data
         TextView stationName = findViewById(R.id.stationNameDetails);
+        TextView stationUsageCost = findViewById(R.id.usageCostDetails);
         TextView stationTown = findViewById(R.id.stationTownDetails);
         TextView stationAddress = findViewById(R.id.stationAddressDetails);
         TextView stationUrl = findViewById(R.id.stationUrlDetails);
         TextView stationNumPointsOfCharge = findViewById(R.id.numPointsOfChargeDetails);
 
         stationName.setText(station.getTitle());
+        stationUsageCost.setText(station.getUsageCost().substring(0,4));
         stationTown.setText(station.getTown());
         stationAddress.setText(station.getAddress());
         stationUrl.setText(station.getUrl());
