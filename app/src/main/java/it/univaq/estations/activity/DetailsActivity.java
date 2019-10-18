@@ -106,6 +106,7 @@ public class DetailsActivity extends AppCompatActivity {
 
         threadToLoadStationFromDB.start();
 
+
         //add click listener to the navigationToStation button
         ImageButton button = findViewById(R.id.navigateToStation);
         button.setOnClickListener(new View.OnClickListener() {
@@ -167,7 +168,8 @@ public class DetailsActivity extends AppCompatActivity {
         TextView stationNumPointsOfCharge = findViewById(R.id.numPointsOfChargeDetails);
 
         stationName.setText(station.getTitle());
-        stationUsageCost.setText(station.getUsageCost().substring(0,4));
+        //TODO mostrare euro se in europa dollaro se in usa e così via
+        stationUsageCost.setText(station.getUsageCost());
         stationTown.setText(station.getTown());
         stationAddress.setText(station.getAddress());
         stationUrl.setText(station.getUrl());

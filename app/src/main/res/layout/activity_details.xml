@@ -10,11 +10,11 @@
     <ImageView
         android:id="@+id/StationImageDetails"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="200dp"
         android:src="@drawable/no_available_image"
         android:adjustViewBounds="true"
-        android:scaleType="fitStart"
-        android:maxHeight="400dp"
+        android:scaleType="centerCrop"
+        android:clickable="true"
         android:contentDescription="TODO" />
 
     <androidx.core.widget.NestedScrollView

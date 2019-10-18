@@ -189,7 +189,7 @@ public class StationsList extends AppCompatActivity {
 
                                 String id = item.optString("ID");
 
-                                String usageCost = item.optString("UsageCost");
+                                String usageCost = item.optString("UsageCost", " N/A");
 
                                 JSONObject addressInfo = item.optJSONObject("AddressInfo");
 
@@ -220,10 +220,10 @@ public class StationsList extends AppCompatActivity {
                                     while (mediaUrl == null || k != mediaArray.length()){
 
                                         //big image
-                                        //mediaUrl = mediaArray.getJSONObject(k).optString("ItemURL", null);
+                                        mediaUrl = mediaArray.getJSONObject(k).optString("ItemURL", null);
 
                                         //small image
-                                        mediaUrl = mediaArray.getJSONObject(k).optString("ItemThumbnailURL", null);
+                                        //mediaUrl = mediaArray.getJSONObject(k).optString("ItemThumbnailURL", null);
                                         k++;
                                     }
                                 }
