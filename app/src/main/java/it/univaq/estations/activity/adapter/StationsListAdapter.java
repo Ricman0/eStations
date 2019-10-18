@@ -21,6 +21,9 @@ public class StationsListAdapter extends RecyclerView.Adapter<StationsListAdapte
     private List<Station> mDataset;
     private LayoutInflater mInflater;
 
+
+
+
     //inner class
     class ItemListViewHolder extends RecyclerView.ViewHolder {
 
@@ -98,12 +101,31 @@ public class StationsListAdapter extends RecyclerView.Adapter<StationsListAdapte
     // Return the size of your dataset (invoked by the layout manager)
     @Override
     public int getItemCount() {
+
         return mDataset.size();
     }
 
+
+    /**
+     * Function to add a station list to RecyclerView.
+     *
+     * @param stations Stations list to add to RecyclerView
+     * @author Claudia Di Marco & Riccardo Mantini
+     */
     public void add(List<Station> stations)
     {
         mDataset.addAll(stations);
         notifyDataSetChanged();
+    }
+
+    /**
+     * Function to clear/remove all items from RecyclerView.
+     *
+     * @author Claudia Di Marco & Riccardo Mantini
+     */
+    public void clear() {
+        int size = mDataset.size();
+        mDataset.clear();
+        notifyItemRangeRemoved(0, size);
     }
 }
