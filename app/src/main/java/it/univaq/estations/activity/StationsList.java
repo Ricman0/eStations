@@ -71,7 +71,7 @@ public class StationsList extends AppCompatActivity {
         recyclerView.setLayoutManager(layoutManager);
 
         // specify an adapter
-        adapter = new StationsListAdapter(this, stations);
+        adapter = new StationsListAdapter(this, stations, recyclerView);
         recyclerView.setAdapter(adapter);
 
         currentPos = null;
