@@ -23,9 +23,6 @@ public class StationsListAdapter extends RecyclerView.Adapter<StationsListAdapte
     private List<Station> mDataset;
     private LayoutInflater mInflater;
 
-
-
-
     //inner class
     class ItemListViewHolder extends RecyclerView.ViewHolder {
 
