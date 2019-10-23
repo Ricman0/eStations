@@ -171,7 +171,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
            estationMarker.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
         }
         else{
-            estationMarker.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_MAGENTA));
+            estationMarker.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
         }
         estationMarker.setTag(n.getId());
 
@@ -187,7 +187,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 intent.putExtra("stationId", stationId);
 
                 //Avendo l’intent, per avviare la nuova activity
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 context.startActivity(intent);
                 return false;
             }
@@ -293,7 +293,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                         clearDataFromDB();
                                         LocationService.LOCATION_CHANGED = false;
                                         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentPos, DEFAULT_ZOOM));
-                                        mMap.addMarker(new MarkerOptions().position(currentPos).title("You are here"));
+                                        //mMap.addMarker(new MarkerOptions().position(currentPos).title("You are here"));
                                     }
                                     else {
                                         //Log.d(TAG, "Current location is null. Using defaults.");
@@ -302,7 +302,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                         mMap.moveCamera(CameraUpdateFactory.newLatLng(mDefaultLocation));
                                         mMap.animateCamera(CameraUpdateFactory.zoomTo(12.0f));
                                         mMap.getUiSettings().setMyLocationButtonEnabled(false);
-                                        mMap.addMarker(new MarkerOptions().position(mDefaultLocation).title("You are in L'Aquila"));
+                                        //mMap.addMarker(new MarkerOptions().position(mDefaultLocation).title("You are in L'Aquila"));
 
                                     }
                                 }
