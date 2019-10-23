@@ -95,7 +95,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             public void handleMessage(Message msg) {
                 super.handleMessage(msg);
                 if (msg.what == ALL_STATIONS_LOADED || msg.what == ALL_STATIONS_SAVED) {
-                   // adapter.add(stations);
+                    // per ogni stazione aggiungi un marker
+                    for (int y = 0; y < stations.size(); y++)
+                    {
+                        addEStationMarker(stations.get(y));
+                    }
+                    
+                    
                 }
                 if (msg.what == ALL_STATIONS_DELETED) {
                     downloadData();
@@ -122,9 +128,21 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         });
     }
 
+    /**
+     * Function to add a marker for the estation passed as parameter on the Map.
+     *
+     * @param n Station eStation to add on the map
+     * @author Claudia Di Marco & Riccardo Mantini
+     */
+    private void addEStationMarker(Station n) {
+        mMap.addMarker(new MarkerOptions().position(n.getPosition()).title("E-Station : "+ n.getName()));
+    }
+
+
     @Override
     protected void onDestroy(){
         super.onDestroy();
+        LocationService.LOCATION_CHANGED = true;
 
     }
 
@@ -180,7 +198,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
          */
         try {
             if (PermissionService.getInstance().isFineLocationPermissionGranted()) {
-                if (LocationService.LOCATION_CHANGED == true)
+                if (LocationService.LOCATION_CHANGED == true || LocationService.getInstance().getPreviousLocation() == null)
                 {
                     mfusedLocationClient.getLastLocation()
                             .addOnSuccessListener(this, new OnSuccessListener<Location>() {
@@ -193,7 +211,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                         LocationService.LOCATION_CHANGED = false;
                                         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentPos, DEFAULT_ZOOM));
                                         mMap.addMarker(new MarkerOptions().position(currentPos).title("You are here"));
-
                                     }
                                     else {
                                         //Log.d(TAG, "Current location is null. Using defaults.");
@@ -202,7 +219,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                         mMap.moveCamera(CameraUpdateFactory.newLatLng(mDefaultLocation));
                                         mMap.animateCamera(CameraUpdateFactory.zoomTo(12.0f));
                                         mMap.getUiSettings().setMyLocationButtonEnabled(false);
-                                        mMap.addMarker(new MarkerOptions().position(mDefaultLocation));
+                                        mMap.addMarker(new MarkerOptions().position(mDefaultLocation).title("You are in L'Aquila"));
 
                                     }
                                 }
@@ -210,6 +227,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 }
                 else{
                     currentPos = LocationService.getInstance().getPreviousLocation();
+
                     mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentPos, DEFAULT_ZOOM));
 
                     threadToLoadAllStationsFromDB = new Thread(new Runnable() {
