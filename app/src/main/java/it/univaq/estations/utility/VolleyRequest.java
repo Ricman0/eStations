@@ -2,6 +2,7 @@ package it.univaq.estations.utility;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.net.Uri;
 
 import androidx.annotation.StringRes;
 
@@ -29,12 +30,11 @@ public class VolleyRequest {
         queue = Volley.newRequestQueue(context);
     }
 
-    public void downloadStations(Response.Listener<String> listener, LatLng currentPosition, int kmDistance){
+    public void downloadStations(Response.Listener<String> listener, LatLng currentPosition, int kmDistance,
+                                 LatLng topLeftCorner, LatLng bottomRightCorner){
 
         double curLat;
         double curLng;
-        String url = "";
-
 
         if (currentPosition != null) {
 
@@ -45,26 +45,33 @@ public class VolleyRequest {
             curLat = 42;
             curLng = 13;}
 
-        if(kmDistance == 0) {
-            url = "https://api.openchargemap.io/v3/poi/?output=json" +
-                    "&countrycode=IT" +
-                    "&latitude=" + curLat +
-                    "&longitude=" + curLng +
-                    "&includecomments=true"+
-                    "&compact=true&verbose=false";}
-        else {
-            url = "https://api.openchargemap.io/v3/poi/?output=json" +
-                    "&countrycode=IT" +
-                    "&latitude=" + curLat +
-                    "&longitude=" + curLng +
-                    "&includecomments=true"+
-                    "&distance=" + kmDistance +
-                    "&distanceunit=KM" +
-                    "&compact=true&verbose=false";}
+        Uri.Builder builder = new Uri.Builder();
+        builder.scheme("https")
+                .authority("api.openchargemap.io")
+                .appendPath("v3")
+                .appendPath("poi")
+                .appendQueryParameter("output", "json")
+                .appendQueryParameter("countrycode", "IT")
+                .appendQueryParameter("latitude", String.valueOf(curLat))
+                .appendQueryParameter("longitude", String.valueOf(curLng))
+                .appendQueryParameter("includecomments", "true")
+                .appendQueryParameter("compact", "true")
+                .appendQueryParameter("verbose", "false");
+
+        if (kmDistance != 0){
+            builder.appendQueryParameter("distance", String.valueOf(kmDistance))
+                    .appendQueryParameter("distanceunit", "KM");
+        }
+
+        if (topLeftCorner != null && bottomRightCorner !=null){
+            builder.appendQueryParameter("boundingbox", "(" + topLeftCorner.latitude +","+ topLeftCorner.longitude +")," +
+                    "("+bottomRightCorner.latitude + "," + bottomRightCorner.longitude + ")");
+        }
+        String myUrl = builder.build().toString();
 
         StringRequest request = new StringRequest(
                 StringRequest.Method.GET,
-                url,
+                myUrl,
                 listener,
                 null);
         queue.add(request);

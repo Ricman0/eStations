@@ -412,7 +412,7 @@ marker.icon(bitmapDescriptorFromVector(this, R.drawable.ic_battery_charging_90_b
 
 
                     }
-                }, currentPos, kmDistance);
+                }, currentPos, kmDistance, null, null);
     }
 
     /**

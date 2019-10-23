@@ -264,7 +264,7 @@ public class StationsList extends AppCompatActivity {
                         }
 
                     }
-                }, currentPos, kmDistance);
+                }, currentPos, kmDistance, null, null);
     }
 
     /**
