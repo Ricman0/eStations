@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
 
+import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
@@ -14,6 +15,9 @@ public class PermissionService {
     private static final int MY_PERMISSIONS_REQUEST_COARSE_LOCATION = 2;
     private static final int MY_PERMISSIONS_REQUEST_FINE_LOCATION = 3;
 
+    private static boolean fineLocationPermissionGranted = false;
+    private static boolean coarseLocationPermissionGranted = false;
+    private static boolean internetPermissionGranted = false;
 
     private static PermissionService instance = null;
 
@@ -45,6 +49,9 @@ public class PermissionService {
                 // result of the request.
             }
         }
+        else{
+            coarseLocationPermissionGranted = true;
+        }
 
         if(ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED)
@@ -65,6 +72,9 @@ public class PermissionService {
                 // app-defined int constant. The callback method gets the
                 // result of the request.
             }
+        }
+        else{
+            fineLocationPermissionGranted = true;
         }
 
         if(ContextCompat.checkSelfPermission(context, Manifest.permission.INTERNET)
@@ -87,17 +97,24 @@ public class PermissionService {
                 // result of the request.
             }
         }
+        else
+        {
+            internetPermissionGranted = true;
+        }
+
     }
 
 
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+
+
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         switch (requestCode) {
             case MY_PERMISSIONS_REQUEST_INTERNET: {
                 // If request is cancelled, the result arrays are empty.
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     // permission was granted, yay! Do the
                     // contacts-related task you need to do.
-                    int x = 0;
+                    setInternetPermissionGranted(true);
                 } else {
                     // permission denied, boo! Disable the
                     // functionality that depends on this permission.
@@ -105,12 +122,20 @@ public class PermissionService {
                 return;
             }
             case MY_PERMISSIONS_REQUEST_COARSE_LOCATION:{
-                int y= 0;
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // permission was granted, yay! Do the
+                    // contacts-related task you need to do.
+                    setCoarseLocationPermissionGranted(true);
+                }
 
             }
             case MY_PERMISSIONS_REQUEST_FINE_LOCATION:{
-                int z =0 ;
-
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // permission was granted, yay! Do the
+                    // contacts-related task you need to do.
+                    setFineLocationPermissionGranted(true);
+                   // updateLocationUI(); funzione in MapsActivity
+                }
             }
 
             // other 'case' lines to check for other
@@ -121,4 +146,27 @@ public class PermissionService {
         }
     }
 
+    public static boolean isFineLocationPermissionGranted() {
+        return fineLocationPermissionGranted;
+    }
+
+    public static void setFineLocationPermissionGranted(boolean fineLocationPermissionGranted) {
+        PermissionService.fineLocationPermissionGranted = fineLocationPermissionGranted;
+    }
+
+    public static boolean isCoarseLocationPermissionGranted() {
+        return coarseLocationPermissionGranted;
+    }
+
+    public static void setCoarseLocationPermissionGranted(boolean coarseLocationPermissionGranted) {
+        PermissionService.coarseLocationPermissionGranted = coarseLocationPermissionGranted;
+    }
+
+    public static boolean isInternetPermissionGranted() {
+        return internetPermissionGranted;
+    }
+
+    public static void setInternetPermissionGranted(boolean internetPermissionGranted) {
+        PermissionService.internetPermissionGranted = internetPermissionGranted;
+    }
 }
