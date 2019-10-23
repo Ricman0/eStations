@@ -121,9 +121,9 @@ public class StationsList extends AppCompatActivity {
 //            shouldExecuteDownload = false;
 //            currentPos = LocationService.getInstance().getPreviousLocation();
             // se fusedLocationClient.getLastLocation() == l'ultima posizione memorizzata allora recupero dal db altimenti richiedo; cancello e memorizzo nuove stazioni.
-            LocationService.getInstance().evaluateDistance(getApplicationContext(),4000);
+            LocationService.getInstance().evaluateDistance(context,4000);
 //            boolean location_changed = Settings.loadBoolean(getApplicationContext(), Settings.LOCATION_CHANGED, true);
-            if (LocationService.LOCATION_CHANGED == true) {
+            if (LocationService.LOCATION_CHANGED == true || LocationService.getInstance().getCurrentLocation() == null) {
 
                 fusedLocationClient.getLastLocation()
                         .addOnSuccessListener(this, new OnSuccessListener<Location>() {
@@ -131,6 +131,11 @@ public class StationsList extends AppCompatActivity {
                             public void onSuccess(Location location) {
                                 if (location != null) {
                                     currentPos = new LatLng(location.getLatitude(), location.getLongitude());
+                                    if(LocationService.getInstance().getPreviousLocation() == null)
+                                    {
+                                        // inizialmente pongo previous e current position alla stessa posizione
+                                        LocationService.getInstance().setPreviousLocation(currentPos);
+                                    }
                                     LocationService.getInstance().setCurrentLocation(currentPos);
 
                                     // Registering the receiver
@@ -178,7 +183,6 @@ public class StationsList extends AppCompatActivity {
 
         VolleyRequest.getInstance(getApplicationContext())
                 .downloadStations(new Response.Listener<String>() {
-                    int c = 9;
                     @Override
                     public void onResponse(String response) {
                         try {
@@ -244,7 +248,6 @@ public class StationsList extends AppCompatActivity {
                                     );
                                     station.addPointOfCharge(pointOfCharge);
                                 }
-                                int y = 0;
                                 stations.add(station);
                             }
 
@@ -269,6 +272,7 @@ public class StationsList extends AppCompatActivity {
 
     /**
      * Function to save Stations and associated points of charge in the database.
+     *
      *
      * @author Claudia Di Marco & Riccardo Mantini
      */

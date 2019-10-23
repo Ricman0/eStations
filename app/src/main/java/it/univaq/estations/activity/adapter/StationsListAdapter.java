@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -15,6 +16,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.util.Comparator;
 import java.util.List;
 
 import it.univaq.estations.R;
@@ -87,16 +89,19 @@ public class StationsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
 
-        //Station station = mDataset.get(position);  // superfluo??
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            mDataset.sort(Comparator.comparingDouble(Station::getDistanceFromUser).reversed());
+        }
         // - get element from your dataset at this position
         // - replace the contents of the view with that element
-        StationsListAdapter.ItemListViewHolder itemHolder = (ItemListViewHolder) holder;
+        ItemListViewHolder itemHolder = (ItemListViewHolder) holder;
         if (getItemCount() != 0) {
             itemHolder.title.setText(mDataset.get(position).getName());
             itemHolder.town.setText(mDataset.get(position).getTown());
             if (!mDataset.get(position).isFree())
                 itemHolder.statusIcon.setImageResource(R.drawable.presence_busy);
-            itemHolder.km.setText(mDataset.get(position).distanceFromCurrentLocation() + " km");
+            itemHolder.km.setText(mDataset.get(position).getDistanceFromUser() + " km");
         }
     }
 

@@ -53,6 +53,9 @@ public class Station {
     @ColumnInfo(name = "urlImage")
     private String stationImageUrl;
 
+    @ColumnInfo(name = "distanceFromUser")
+    private double distanceFromUser;
+
     @Ignore
     public Station(){}
 
@@ -70,6 +73,7 @@ public class Station {
         this.numberOfPointsOfCharge = numberOfPointsOfCharge;
         this.pointsOfCharge = new ArrayList<PointOfCharge>();
         this.stationImageUrl = stationImageUrl;
+        calcDistanceFromUser();
     }
 
     @Ignore
@@ -188,13 +192,21 @@ public class Station {
         return isFree;
     }
 
-    public double distanceFromCurrentLocation(){
+    public double getDistanceFromUser(){
+        return distanceFromUser;
+    }
 
+    public void setDistanceFromUser(double distanceFromUser) {
+        calcDistanceFromUser();
+        this.distanceFromUser = distanceFromUser;
+    }
+
+    private void calcDistanceFromUser(){
         LatLng currentPosition = LocationService.getInstance().getCurrentLocation();
         float[] dist = new float[1];
         android.location.Location.distanceBetween(currentPosition.latitude, currentPosition.longitude,
                 this.position.latitude, this.position.longitude, dist);
-        return (((int) dist[0] / 100) / 10.0);
+        setDistanceFromUser (((int) dist[0] / 100) / 10.0);
     }
 
     public void setStationImageUrl(String stationImageUrl) {

@@ -38,7 +38,7 @@ public class LocationService {
 //    Set LOCATION_UPDATED false in Settings if currentLocation is less than targetDistanceInMeter away from previousLocation
     public void evaluateDistance(Context context, int targetDistanceInMeter)
     {
-        if (currentLocation == null) {
+        if (currentLocation == null || previousLocation == null) {
             this.LOCATION_CHANGED = true;
             return;
         }

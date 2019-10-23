@@ -280,7 +280,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
          */
         try {
             if (PermissionService.getInstance().isFineLocationPermissionGranted()) {
-                if (LocationService.LOCATION_CHANGED == true || LocationService.getInstance().getPreviousLocation() == null)
+                if (LocationService.LOCATION_CHANGED == true || LocationService.getInstance().getCurrentLocation() == null)
                 {
                     mfusedLocationClient.getLastLocation()
                             .addOnSuccessListener(this, new OnSuccessListener<Location>() {
@@ -288,7 +288,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                 public void onSuccess(Location location) {
                                     if (location != null) {
                                         currentPos = new LatLng(location.getLatitude(), location.getLongitude());
-                                        LocationService.getInstance().setPreviousLocation(currentPos);
+                                        LocationService.getInstance().setCurrentLocation(currentPos);
                                         clearDataFromDB();
                                         LocationService.LOCATION_CHANGED = false;
                                         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentPos, DEFAULT_ZOOM));
@@ -308,7 +308,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                             });
                 }
                 else{
-                    currentPos = LocationService.getInstance().getPreviousLocation();
+                    currentPos = LocationService.getInstance().getCurrentLocation();
 
                     mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentPos, DEFAULT_ZOOM));
 
