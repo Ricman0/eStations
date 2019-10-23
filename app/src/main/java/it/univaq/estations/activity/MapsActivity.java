@@ -17,9 +17,12 @@ import android.view.View;
 import android.widget.CheckBox;
 import android.widget.ImageView;
 
+import androidx.annotation.ColorInt;
 import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
+import androidx.core.content.res.ResourcesCompat;
+import androidx.core.graphics.drawable.DrawableCompat;
 import androidx.fragment.app.FragmentActivity;
 
 import com.android.volley.Response;
@@ -33,6 +36,7 @@ import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -147,22 +151,45 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
      */
     private void addEStationMarker(Station n) {
 
-        // create marker
-        MarkerOptions marker = new MarkerOptions().position(n.getPosition()).title("E-Station : "+ n.getName());
+//        // create marker
+//        MarkerOptions marker = new MarkerOptions().position(n.getPosition()).title("E-Station : "+ n.getName());
+//
+//        Bitmap battery_charging_icon = BitmapFactory.decodeResource(context.getResources(),
+//                R.drawable.ic_battery_charging_90_black_24dp);
+//
+//// Changing marker icon
+//        //marker.icon(BitmapDescriptorFactory.fromBitmap(battery_charging_icon));
+//        //marker.icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_battery_charging_90_black_18dp));
+//marker.icon(bitmapDescriptorFromVector(this, R.drawable.ic_battery_charging_90_black_24dp));
+//// adding marker
+//        mMap.addMarker(marker);
 
-        Bitmap battery_charging_icon = BitmapFactory.decodeResource(context.getResources(),
-                R.drawable.ic_battery_charging_90_black_24dp);
+        Marker estationMarker =  mMap.addMarker(new MarkerOptions().position(n.getPosition()).title("E-Station : " + n.getName()));
+        if(n.isFree() == true) {
+           estationMarker.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
+        }
+        else{
+            estationMarker.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_MAGENTA));
+        }
+        estationMarker.setTag(n.getId());
 
-// Changing marker icon
-        //marker.icon(BitmapDescriptorFactory.fromBitmap(battery_charging_icon));
-        //marker.icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_battery_charging_90_black_18dp));
-marker.icon(bitmapDescriptorFromVector(this, R.drawable.ic_battery_charging_90_black_24dp));
-// adding marker
-        mMap.addMarker(marker);
+        mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+            @Override
+            public boolean onMarkerClick(final Marker marker) {
+                String stationId = (String) marker.getTag();
 
-        //mMap.addMarker(new MarkerOptions().position(n.getPosition()).title("E-Station : "+ n.getName()));
-                //.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.ic_battery_charging_90_black_18dp));
+                //new Intent object: Il costruttore, in caso di intent esplicito, richiede due parametri: il Context (che, nel nostro caso, è l’activity che vuole chiamare la seconda) e la classe che riceverà l’intent, cioè l’activity che vogliamo richiamare.
+                Intent intent = new Intent(context, DetailsActivity.class);
 
+                //add extras to intent
+                intent.putExtra("stationId", stationId);
+
+                //Avendo l’intent, per avviare la nuova activity
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                context.startActivity(intent);
+                return false;
+            }
+        });
     }
 
     private BitmapDescriptor bitmapDescriptorFromVector(Context context, @DrawableRes int vectorDrawableResourceId) {
@@ -173,6 +200,21 @@ marker.icon(bitmapDescriptorFromVector(this, R.drawable.ic_battery_charging_90_b
         Bitmap bitmap = Bitmap.createBitmap(background.getIntrinsicWidth(), background.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(bitmap);
         background.draw(canvas);
+        vectorDrawable.draw(canvas);
+        return BitmapDescriptorFactory.fromBitmap(bitmap);
+    }
+
+    /**
+     * Demonstrates converting a {@link Drawable} to a {@link BitmapDescriptor},
+     * for use as a marker icon.
+     */
+    private BitmapDescriptor vectorToBitmap(@DrawableRes int id, @ColorInt int color) {
+        Drawable vectorDrawable = ResourcesCompat.getDrawable(getResources(), id, null);
+        Bitmap bitmap = Bitmap.createBitmap(vectorDrawable.getIntrinsicWidth(),
+                vectorDrawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        vectorDrawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+        DrawableCompat.setTint(vectorDrawable, color);
         vectorDrawable.draw(canvas);
         return BitmapDescriptorFactory.fromBitmap(bitmap);
     }
