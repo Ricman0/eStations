@@ -29,10 +29,11 @@ public class VolleyRequest {
         queue = Volley.newRequestQueue(context);
     }
 
-    public void downloadStations(Response.Listener<String> listener, LatLng currentPosition){
+    public void downloadStations(Response.Listener<String> listener, LatLng currentPosition, int kmDistance){
 
         double curLat;
         double curLng;
+        String url = "";
 
 
         if (currentPosition != null) {
@@ -43,15 +44,28 @@ public class VolleyRequest {
         else {
             curLat = 42;
             curLng = 13;}
+
+        if(kmDistance == 0) {
+            url = "https://api.openchargemap.io/v3/poi/?output=json" +
+                    "&countrycode=IT" +
+                    "&latitude=" + curLat +
+                    "&longitude=" + curLng +
+                    "&includecomments=true"+
+                    "&compact=true&verbose=false";}
+        else {
+            url = "https://api.openchargemap.io/v3/poi/?output=json" +
+                    "&countrycode=IT" +
+                    "&latitude=" + curLat +
+                    "&longitude=" + curLng +
+                    "&includecomments=true"+
+                    "&distance=" + kmDistance +
+                    "&distanceunit=KM" +
+                    "&compact=true&verbose=false";}
+
         StringRequest request = new StringRequest(
                 StringRequest.Method.GET,
-                        "https://api.openchargemap.io/v3/poi/?output=json" +
-                        "&countrycode=IT" +
-                        "&maxresults=4" +
-                        "&latitude=" + curLat +
-                        "&longitude=" + curLng + "&includecomments=true"+
-                        "&compact=true&verbose=false",
-                 listener,
+                url,
+                listener,
                 null);
         queue.add(request);
     }

@@ -121,7 +121,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
      */
     private boolean checkReady() {
         if (mMap == null) {
-            Toast.makeText(this, R.string.map_not_ready, Toast.LENGTH_SHORT).show();
+//            Toast.makeText(this, R.string.map_not_ready, Toast.LENGTH_SHORT).show();
             return false;
         }
         return true;

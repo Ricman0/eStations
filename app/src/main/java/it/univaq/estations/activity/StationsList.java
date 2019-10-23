@@ -81,6 +81,8 @@ public class StationsList extends AppCompatActivity {
         appDB = Database.getInstance(getApplicationContext());
         stations = new ArrayList<>();
 
+        final int kmDistance = 0;
+
         mHandler = new Handler() {
 
             @Override
@@ -90,12 +92,10 @@ public class StationsList extends AppCompatActivity {
                     adapter.add(stations);
                 }
                 if (msg.what == ALL_STATIONS_DELETED) {
-                    downloadData();
+                        downloadData(kmDistance);
                 }
             }
         };
-
-
 
     }
 
@@ -121,7 +121,7 @@ public class StationsList extends AppCompatActivity {
 //            shouldExecuteDownload = false;
 //            currentPos = LocationService.getInstance().getPreviousLocation();
             // se fusedLocationClient.getLastLocation() == l'ultima posizione memorizzata allora recupero dal db altimenti richiedo; cancello e memorizzo nuove stazioni.
-            LocationService.getInstance().evaluateDistance(getApplicationContext(), currentPos,4000);
+            LocationService.getInstance().evaluateDistance(getApplicationContext(),4000);
 //            boolean location_changed = Settings.loadBoolean(getApplicationContext(), Settings.LOCATION_CHANGED, true);
             if (LocationService.LOCATION_CHANGED == true) {
 
@@ -131,7 +131,7 @@ public class StationsList extends AppCompatActivity {
                             public void onSuccess(Location location) {
                                 if (location != null) {
                                     currentPos = new LatLng(location.getLatitude(), location.getLongitude());
-                                    LocationService.getInstance().setPreviousLocation(currentPos);
+                                    LocationService.getInstance().setCurrentLocation(currentPos);
 
                                     // Registering the receiver
                                     //                    LocalBroadcastManager.getInstance(getApplicationContext())
@@ -173,12 +173,12 @@ public class StationsList extends AppCompatActivity {
      *
      * @author Claudia Di Marco & Riccardo Mantini
      */
-    private void downloadData()
+    private void downloadData(int kmDistance)
     {
 
         VolleyRequest.getInstance(getApplicationContext())
                 .downloadStations(new Response.Listener<String>() {
-
+                    int c = 9;
                     @Override
                     public void onResponse(String response) {
                         try {
@@ -244,6 +244,7 @@ public class StationsList extends AppCompatActivity {
                                     );
                                     station.addPointOfCharge(pointOfCharge);
                                 }
+                                int y = 0;
                                 stations.add(station);
                             }
 
@@ -262,9 +263,8 @@ public class StationsList extends AppCompatActivity {
                             e.printStackTrace();
                         }
 
-
                     }
-                }, currentPos);
+                }, currentPos, kmDistance);
     }
 
     /**

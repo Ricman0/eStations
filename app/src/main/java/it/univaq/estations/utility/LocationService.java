@@ -11,15 +11,16 @@ public class LocationService {
 
     //location registered during last server request
     private LatLng previousLocation;
+    private LatLng currentLocation;
 
     private LocationService() {
+        this.currentLocation = null;
         this.previousLocation = null;
     }
 
     public static LocationService getInstance() {
         if(instance == null)
             synchronized(LocationService.class) {
-                if( instance == null )
                     instance = new LocationService();
             }
         return instance;
@@ -34,7 +35,7 @@ public class LocationService {
     }
 
 //    Set LOCATION_UPDATED false in Settings if currentLocation is less than targetDistanceInMeter away from previousLocation
-    public void evaluateDistance(Context context, LatLng currentLocation, int targetDistanceInMeter)
+    public void evaluateDistance(Context context, int targetDistanceInMeter)
     {
         if (currentLocation == null) {
             this.LOCATION_CHANGED = true;
@@ -54,5 +55,13 @@ public class LocationService {
             this.previousLocation = currentLocation;
         }
 
+    }
+
+    public LatLng getCurrentLocation() {
+        return currentLocation;
+    }
+
+    public void setCurrentLocation(LatLng currentLocation) {
+        this.currentLocation = currentLocation;
     }
 }
