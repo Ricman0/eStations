@@ -81,7 +81,7 @@ public class StationsList extends AppCompatActivity {
         appDB = Database.getInstance(getApplicationContext());
         stations = new ArrayList<>();
 
-        final int kmDistance = 0;
+
 
         mHandler = new Handler() {
 
@@ -92,7 +92,7 @@ public class StationsList extends AppCompatActivity {
                     adapter.add(stations);
                 }
                 if (msg.what == ALL_STATIONS_DELETED) {
-                        downloadData(kmDistance);
+                        downloadData();
                 }
             }
         };
@@ -173,7 +173,7 @@ public class StationsList extends AppCompatActivity {
      *
      * @author Claudia Di Marco & Riccardo Mantini
      */
-    private void downloadData(int kmDistance)
+    private void downloadData()
     {
 
         VolleyRequest.getInstance(getApplicationContext())
@@ -264,7 +264,7 @@ public class StationsList extends AppCompatActivity {
                         }
 
                     }
-                }, currentPos, kmDistance, null, null);
+                }, currentPos, null, null, null);
     }
 
     /**
