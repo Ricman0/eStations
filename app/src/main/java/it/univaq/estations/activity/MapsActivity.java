@@ -105,7 +105,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
             @Override
             public void handleMessage(Message msg) {
-                final int kmDistance = 0;
 
                 super.handleMessage(msg);
                 if (msg.what == ALL_STATIONS_LOADED || msg.what == ALL_STATIONS_SAVED) {
@@ -117,7 +116,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                 }
                 if (msg.what == ALL_STATIONS_DELETED) {
-                    downloadData(kmDistance);
+                    downloadData();
                     for (int y = 0; y < stations.size(); y++)
                     {
                         addEStationMarker(stations.get(y));
@@ -363,7 +362,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         ThreadToClearDataFromDB.start();
     }
 
-    private void downloadData(int kmDistance)
+    private void downloadData()
     {
 
         VolleyRequest.getInstance(getApplicationContext())
@@ -454,7 +453,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
 
                     }
-                }, currentPos, kmDistance, null, null);
+                }, currentPos, null, null, null);
     }
 
     /**

@@ -30,7 +30,7 @@ public class VolleyRequest {
         queue = Volley.newRequestQueue(context);
     }
 
-    public void downloadStations(Response.Listener<String> listener, LatLng currentPosition, int kmDistance,
+    public void downloadStations(Response.Listener<String> listener, LatLng currentPosition, Integer kmDistance,
                                  LatLng topLeftCorner, LatLng bottomRightCorner){
 
         double curLat;
@@ -58,7 +58,7 @@ public class VolleyRequest {
                 .appendQueryParameter("compact", "true")
                 .appendQueryParameter("verbose", "false");
 
-        if (kmDistance != 0){
+        if (kmDistance != null){
             builder.appendQueryParameter("distance", String.valueOf(kmDistance))
                     .appendQueryParameter("distanceunit", "KM");
         }
