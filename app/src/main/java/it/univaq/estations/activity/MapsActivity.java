@@ -101,6 +101,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
             @Override
             public void handleMessage(Message msg) {
+                final int kmDistance = 0;
+
                 super.handleMessage(msg);
                 if (msg.what == ALL_STATIONS_LOADED || msg.what == ALL_STATIONS_SAVED) {
                     // per ogni stazione aggiungi un marker
@@ -111,7 +113,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                 }
                 if (msg.what == ALL_STATIONS_DELETED) {
-                    downloadData();
+                    downloadData(kmDistance);
                     for (int y = 0; y < stations.size(); y++)
                     {
                         addEStationMarker(stations.get(y));
@@ -319,7 +321,7 @@ marker.icon(bitmapDescriptorFromVector(this, R.drawable.ic_battery_charging_90_b
         ThreadToClearDataFromDB.start();
     }
 
-    private void downloadData()
+    private void downloadData(int kmDistance)
     {
 
         VolleyRequest.getInstance(getApplicationContext())
@@ -410,7 +412,7 @@ marker.icon(bitmapDescriptorFromVector(this, R.drawable.ic_battery_charging_90_b
 
 
                     }
-                }, currentPos);
+                }, currentPos, kmDistance);
     }
 
     /**
