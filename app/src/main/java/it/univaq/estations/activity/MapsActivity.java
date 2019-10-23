@@ -4,6 +4,10 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
@@ -13,7 +17,9 @@ import android.view.View;
 import android.widget.CheckBox;
 import android.widget.ImageView;
 
+import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentActivity;
 
 import com.android.volley.Response;
@@ -24,6 +30,8 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.UiSettings;
+import com.google.android.gms.maps.model.BitmapDescriptor;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -100,11 +108,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     {
                         addEStationMarker(stations.get(y));
                     }
-                    
-                    
+
                 }
                 if (msg.what == ALL_STATIONS_DELETED) {
                     downloadData();
+                    for (int y = 0; y < stations.size(); y++)
+                    {
+                        addEStationMarker(stations.get(y));
+                    }
                 }
             }
         };
@@ -135,14 +146,42 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
      * @author Claudia Di Marco & Riccardo Mantini
      */
     private void addEStationMarker(Station n) {
-        mMap.addMarker(new MarkerOptions().position(n.getPosition()).title("E-Station : "+ n.getName()));
+
+        // create marker
+        MarkerOptions marker = new MarkerOptions().position(n.getPosition()).title("E-Station : "+ n.getName());
+
+        Bitmap battery_charging_icon = BitmapFactory.decodeResource(context.getResources(),
+                R.drawable.ic_battery_charging_90_black_24dp);
+
+// Changing marker icon
+        //marker.icon(BitmapDescriptorFactory.fromBitmap(battery_charging_icon));
+        //marker.icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_battery_charging_90_black_18dp));
+marker.icon(bitmapDescriptorFromVector(this, R.drawable.ic_battery_charging_90_black_24dp));
+// adding marker
+        mMap.addMarker(marker);
+
+        //mMap.addMarker(new MarkerOptions().position(n.getPosition()).title("E-Station : "+ n.getName()));
+                //.setIcon(BitmapDescriptorFactory.fromResource(R.drawable.ic_battery_charging_90_black_18dp));
+
+    }
+
+    private BitmapDescriptor bitmapDescriptorFromVector(Context context, @DrawableRes int vectorDrawableResourceId) {
+        Drawable background = ContextCompat.getDrawable(context, R.drawable.ic_battery_charging_90_black_24dp);
+        background.setBounds(0, 0, background.getIntrinsicWidth(), background.getIntrinsicHeight());
+        Drawable vectorDrawable = ContextCompat.getDrawable(context, vectorDrawableResourceId);
+        vectorDrawable.setBounds(40, 20, vectorDrawable.getIntrinsicWidth() + 40, vectorDrawable.getIntrinsicHeight() + 20);
+        Bitmap bitmap = Bitmap.createBitmap(background.getIntrinsicWidth(), background.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        background.draw(canvas);
+        vectorDrawable.draw(canvas);
+        return BitmapDescriptorFactory.fromBitmap(bitmap);
     }
 
 
     @Override
     protected void onDestroy(){
         super.onDestroy();
-        LocationService.LOCATION_CHANGED = true;
+       // LocationService.LOCATION_CHANGED = true;
 
     }
 
