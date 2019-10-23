@@ -25,25 +25,6 @@ public class StationsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
     private List<Station> mDataset;
     private LayoutInflater mInflater;
-    private Activity mactivity;
-
-
-    // for load more
-    private final int VIEW_TYPE_ITEM = 0;
-    private final int VIEW_TYPE_LOADING = 1;
-    private OnLoadMoreListener onLoadMoreListener;
-
-    // The minimum amount of items to have below your current scroll position
-    // before loading more.
-    private boolean isLoading;
-    private int visibleThreshold = 5;
-    private int lastVisibleItem, totalItemCount;
-
-
-
-    public interface OnLoadMoreListener {
-        void onLoadMore();
-    }
 
 
     //inner class
@@ -86,23 +67,6 @@ public class StationsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
         mDataset = myDataset;
         this.mInflater = LayoutInflater.from(context);
-
-        // load more
-        final LinearLayoutManager linearLayoutManager = (LinearLayoutManager) recyclerView.getLayoutManager();
-        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
-            @Override
-            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-                super.onScrolled(recyclerView, dx, dy);
-                totalItemCount = linearLayoutManager.getItemCount();
-                lastVisibleItem = linearLayoutManager.findLastVisibleItemPosition();
-                if (!isLoading && totalItemCount <= (lastVisibleItem + visibleThreshold)) {
-                    if (onLoadMoreListener != null) {
-                        onLoadMoreListener.onLoadMore();
-                    }
-                    isLoading = true;
-                }
-            }
-        });
     }
 
 
@@ -111,25 +75,8 @@ public class StationsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     @NonNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        if (viewType == VIEW_TYPE_ITEM) {
-            View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.recycler_view_item, parent, false);
-            return new ItemListViewHolder(v);
-        }
-        else if (viewType == VIEW_TYPE_LOADING) {
-            View view = LayoutInflater.from(mactivity).inflate(R.layout.item_progressbar, parent, false);
-            return new ViewHolderLoading(view);
-        }
-        return null;
-
-    }
-
-    private class ViewHolderLoading extends RecyclerView.ViewHolder {
-        public ProgressBar progressBar;
-
-        public ViewHolderLoading(View view) {
-            super(view);
-            progressBar = (ProgressBar) view.findViewById(R.id.itemProgressbar);
-        }
+        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.recycler_view_item, parent, false);
+        return new ItemListViewHolder(v);
     }
 
 
@@ -143,27 +90,14 @@ public class StationsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         //Station station = mDataset.get(position);  // superfluo??
         // - get element from your dataset at this position
         // - replace the contents of the view with that element
-        if (holder instanceof StationsListAdapter.ItemListViewHolder) {
-
-            StationsListAdapter.ItemListViewHolder itemHolder = (ItemListViewHolder) holder;
-            if (getItemCount() != 0) {
-                itemHolder.title.setText(mDataset.get(position).getName());
-                itemHolder.town.setText(mDataset.get(position).getTown());
-                if (!mDataset.get(position).isFree())
-                    itemHolder.statusIcon.setImageResource(R.drawable.presence_busy);
-                float[] dist = new float[1];
-                //TODO prendere posizione attuale
-                android.location.Location.distanceBetween(42.360205, 13.377868,
-                        mDataset.get(position).getPosition().latitude, mDataset.get(position).getPosition().longitude, dist);
-                @SuppressWarnings("IntegerDivisionInFloatingPointContext") double km = ((int) dist[0] / 100) / 10.0;
-                itemHolder.km.setText(km + " km");
-            }
-        }else if (holder instanceof StationsListAdapter.ViewHolderLoading) {
-            StationsListAdapter.ViewHolderLoading loadingViewHolder = (StationsListAdapter.ViewHolderLoading) holder;
-            loadingViewHolder.progressBar.setIndeterminate(true);
+        StationsListAdapter.ItemListViewHolder itemHolder = (ItemListViewHolder) holder;
+        if (getItemCount() != 0) {
+            itemHolder.title.setText(mDataset.get(position).getName());
+            itemHolder.town.setText(mDataset.get(position).getTown());
+            if (!mDataset.get(position).isFree())
+                itemHolder.statusIcon.setImageResource(R.drawable.presence_busy);
+            itemHolder.km.setText(mDataset.get(position).distanceFromCurrentLocation() + " km");
         }
-
-
     }
 
     // Return the size of your dataset (invoked by the layout manager)
@@ -172,7 +106,6 @@ public class StationsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
         return mDataset.size();
     }
-
 
     /**
      * Function to add a station list to RecyclerView.

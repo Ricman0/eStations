@@ -14,6 +14,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import it.univaq.estations.Database.LatLngConverter;
+import it.univaq.estations.utility.LocationService;
 
 @Entity(tableName = "stations")
 public class Station {
@@ -185,6 +186,15 @@ public class Station {
             if(p.getStatusTypeId() == 50) isFree=true;
         }
         return isFree;
+    }
+
+    public double distanceFromCurrentLocation(){
+
+        LatLng currentPosition = LocationService.getInstance().getCurrentLocation();
+        float[] dist = new float[1];
+        android.location.Location.distanceBetween(currentPosition.latitude, currentPosition.longitude,
+                this.position.latitude, this.position.longitude, dist);
+        return (((int) dist[0] / 100) / 10.0);
     }
 
     public void setStationImageUrl(String stationImageUrl) {
