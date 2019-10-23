@@ -35,12 +35,11 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -58,21 +57,10 @@ import it.univaq.estations.utility.PermissionService;
 import it.univaq.estations.utility.VolleyRequest;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
-//public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback {
     private GoogleMap mMap;
     private List<Station> stations = new ArrayList<>();
 
     private UiSettings mUiSettings;
-
-    private CheckBox mMyLocationButtonCheckbox;
-
-    private CheckBox mMyLocationLayerCheckbox;
-
-    private static final int MY_LOCATION_PERMISSION_REQUEST_CODE = 1;
-
-    private static final int LOCATION_LAYER_PERMISSION_REQUEST_CODE = 2;
-
-    private boolean mLocationPermissionDenied = false;
 
     private FusedLocationProviderClient mfusedLocationClient;
     private LatLng currentPos;
@@ -116,7 +104,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                 }
                 if (msg.what == ALL_STATIONS_DELETED) {
-                    downloadData();
+
+                    downloadDataBoundedInBoundingBox();
                     for (int y = 0; y < stations.size(); y++)
                     {
                         addEStationMarker(stations.get(y));
@@ -142,7 +131,27 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 v.getContext().startActivity(intent);
             }
         });
+
     }
+
+    /**
+     * Function to find the bounding box coordinates and then download estation bounded in the boundingBox
+     * created by topLeftCorner and bottomRightCorner coordinates.
+     *
+     * @author Claudia Di Marco & Riccardo Mantini
+     */
+    public void downloadDataBoundedInBoundingBox()
+    {
+        // get topLeftCorner and bottomRightCorner coordinates
+        LatLng topLeftCorner = new LatLng(mMap.getProjection().getVisibleRegion().latLngBounds.northeast.latitude,
+                mMap.getProjection().getVisibleRegion().latLngBounds.southwest.longitude );
+        LatLng bottomRightCorner = new LatLng(mMap.getProjection().getVisibleRegion().latLngBounds.southwest.latitude,
+                mMap.getProjection().getVisibleRegion().latLngBounds.northeast.longitude);
+
+        // downloadData
+        downloadData(topLeftCorner, bottomRightCorner);
+    }
+
 
     /**
      * Function to add a marker for the estation passed as parameter on the Map.
@@ -252,6 +261,18 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         // Get the current location of the device and set the position of the map.
         getDeviceLocation();
+
+        // add listener to know if the zoom level change
+        mMap.setOnCameraMoveListener(new GoogleMap.OnCameraMoveListener() {
+            @Override
+            public void onCameraMove() {
+                CameraPosition cameraPosition = mMap.getCameraPosition();
+                if(cameraPosition.zoom <  DEFAULT_ZOOM ) {
+                    // get bounding box and download data
+                    downloadDataBoundedInBoundingBox();
+                }
+            }
+        });
     }
 
     private void updateLocationUI() {
@@ -362,9 +383,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         ThreadToClearDataFromDB.start();
     }
 
-    private void downloadData()
+    /**
+     * Function to download estation bounded in the boundingBox created by topLeftCorner and bottomRightCorner.
+     *
+     * @param topLeftCorner LatLng top left corner of the bounding box map
+     * @param bottomRightCorner LatLng bottom right corner of the bounding box map
+     * @author Claudia Di Marco & Riccardo Mantini
+     */
+    private void downloadData(LatLng topLeftCorner, LatLng bottomRightCorner)
     {
-
         VolleyRequest.getInstance(getApplicationContext())
                 .downloadStations(new Response.Listener<String>() {
 
@@ -453,7 +480,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
 
                     }
-                }, currentPos, null, null, null);
+                }, currentPos, null, topLeftCorner, bottomRightCorner);
     }
 
     /**
@@ -474,6 +501,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
         }
     }
+
+
+
+
+
+
+
+
 
 //    /**
 //     * Returns whether the checkbox with the given id is checked.
