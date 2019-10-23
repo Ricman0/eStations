@@ -14,6 +14,7 @@ public class LocationService {
 
     private LocationService() {
         this.previousLocation = null;
+        this.LOCATION_CHANGED = true;
     }
 
     public static LocationService getInstance() {
