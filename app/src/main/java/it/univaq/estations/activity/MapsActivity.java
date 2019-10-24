@@ -233,7 +233,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     protected void onDestroy(){
         super.onDestroy();
-       // LocationService.LOCATION_CHANGED = true;
 
     }
 
@@ -309,20 +308,21 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                 public void onSuccess(Location location) {
                                     if (location != null) {
                                         currentPos = new LatLng(location.getLatitude(), location.getLongitude());
+                                        if(LocationService.getInstance().getPreviousLocation() == null)
+                                        {
+                                            // inizialmente pongo previous e current position alla stessa posizione
+                                            LocationService.getInstance().setPreviousLocation(currentPos);
+                                        }
                                         LocationService.getInstance().setCurrentLocation(currentPos);
                                         clearDataFromDB();
                                         LocationService.LOCATION_CHANGED = false;
                                         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentPos, DEFAULT_ZOOM));
-                                        //mMap.addMarker(new MarkerOptions().position(currentPos).title("You are here"));
                                     }
                                     else {
-                                        //Log.d(TAG, "Current location is null. Using defaults.");
-                                        //Log.e(TAG, "Exception: %s", task.getException());
                                         // move the camera and add a marker in my position
                                         mMap.moveCamera(CameraUpdateFactory.newLatLng(mDefaultLocation));
                                         mMap.animateCamera(CameraUpdateFactory.zoomTo(12.0f));
                                         mMap.getUiSettings().setMyLocationButtonEnabled(false);
-                                        //mMap.addMarker(new MarkerOptions().position(mDefaultLocation).title("You are in L'Aquila"));
 
                                     }
                                 }
