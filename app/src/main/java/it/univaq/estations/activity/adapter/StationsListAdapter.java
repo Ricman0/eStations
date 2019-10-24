@@ -42,21 +42,18 @@ public class StationsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             statusIcon = itemView.findViewById(R.id.statusIcon);
 
             // Define the click event on item (creating Anonymous View.OnClickListener)
-            itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
+            itemView.setOnClickListener(v -> {
 
-                    // Open another Activity and pass to it the right station
-                    //new Intent object: Il costruttore, in caso di intent esplicito, richiede due parametri: il Context (che, nel nostro caso, è l’activity che vuole chiamare la seconda) e la classe che riceverà l’intent, cioè l’activity che vogliamo richiamare.
-                    Intent intent = new Intent(v.getContext(), DetailsActivity.class);
+                // Open another Activity and pass to it the right station
+                //new Intent object: Il costruttore, in caso di intent esplicito, richiede due parametri: il Context (che, nel nostro caso, è l’activity che vuole chiamare la seconda) e la classe che riceverà l’intent, cioè l’activity che vogliamo richiamare.
+                Intent intent = new Intent(v.getContext(), DetailsActivity.class);
 
-                    //add extras to intent
-                    Station station = mDataset.get(getAdapterPosition());
-                    intent.putExtra("stationId", station.getId());
+                //add extras to intent
+                Station station = mDataset.get(getAdapterPosition());
+                intent.putExtra("stationId", station.getId());
 
-                    //Avendo l’intent, per avviare la nuova activity
-                    v.getContext().startActivity(intent);
-                }
+                //Avendo l’intent, per avviare la nuova activity
+                v.getContext().startActivity(intent);
             });
         }
     }
@@ -78,25 +75,6 @@ public class StationsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         return new ItemListViewHolder(v);
     }
 
-    private class sortStationsTask extends AsyncTask<String, Object, Object>{
-
-        @Override
-        protected Object doInBackground(String[] type) {
-            //sort by distance from user ASC
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-
-                if ("DSC".equals(type)) {
-                    mDataset.sort(Comparator.comparingDouble(Station::getDistanceFromUser).reversed());
-                } else {
-                    mDataset.sort(Comparator.comparingDouble(Station::getDistanceFromUser));
-                }
-
-            }
-            return null;
-        }
-
-    }
-
     // Replace the contents of a view (invoked by the layout manager)
     //come parametro prende in ingresso un oggetto di tipo View, ossia il layout list_item
     //binds the daa to the textview in each row
@@ -104,7 +82,9 @@ public class StationsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
 
-        new sortStationsTask().execute();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            mDataset.sort(Comparator.comparingDouble(Station::getDistanceFromUser));
+        }
         // - get element from your dataset at this position
         // - replace the contents of the view with that element
         ItemListViewHolder itemHolder = (ItemListViewHolder) holder;
