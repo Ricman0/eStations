@@ -29,7 +29,6 @@ import it.univaq.estations.activity.adapter.StationsListAdapter;
 import it.univaq.estations.model.PointOfCharge;
 import it.univaq.estations.model.Station;
 import it.univaq.estations.utility.LocationService;
-import it.univaq.estations.utility.Settings;
 import it.univaq.estations.utility.VolleyRequest;
 import it.univaq.estations.utility.PermissionService;
 
@@ -117,12 +116,7 @@ public class StationsList extends AppCompatActivity {
         super.onResume();
         //PermissionService.getInstance().permissionsCheck(this, this);
 
-//        if(shouldExecuteDownload) {
-//            shouldExecuteDownload = false;
-//            currentPos = LocationService.getInstance().getPreviousLocation();
-            // se fusedLocationClient.getLastLocation() == l'ultima posizione memorizzata allora recupero dal db altimenti richiedo; cancello e memorizzo nuove stazioni.
             LocationService.getInstance().evaluateDistance(context,4000);
-//            boolean location_changed = Settings.loadBoolean(getApplicationContext(), Settings.LOCATION_CHANGED, true);
             if (LocationService.LOCATION_CHANGED == true || LocationService.getInstance().getCurrentLocation() == null) {
 
                 fusedLocationClient.getLastLocation()

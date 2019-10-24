@@ -249,15 +249,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         // Get the current location of the device and set the position of the map.
         getDeviceLocation();
 
-        // add listener to know if the zoom level change
-        mMap.setOnCameraMoveListener(new GoogleMap.OnCameraMoveListener() {
+        // add listener to know if the camera movement has ended
+        mMap.setOnCameraIdleListener(new GoogleMap.OnCameraIdleListener() {
             @Override
-            public void onCameraMove() {
-                CameraPosition cameraPosition = mMap.getCameraPosition();
-                if(cameraPosition.zoom <  DEFAULT_ZOOM ) {
+            public void onCameraIdle() {
                     // get bounding box and download data
                     downloadDataBoundedInBoundingBox();
-                }
             }
         });
     }
