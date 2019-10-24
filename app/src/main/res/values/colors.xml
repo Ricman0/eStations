@@ -5,6 +5,13 @@
     <color name="colorAccent">#D81B60</color>
     <color name="transparent_white">#BFFFFFFF</color>
     <color name="green">#FFADFF2F</color>
+
+    <color name="primary_color">#4392F1</color>
+    <color name="primary_dark_color">#356AC3</color>
+
+    <color name="accent_color">#82FF9E</color>
+    <color name="background_color">#FEFFFE</color>
+    <color name="grigio_color">#666666</color>
     <!--
     <color name="colorPrimary">#3F51B5</color>
     <color name="colorPrimaryDark">#303F9F</color>
