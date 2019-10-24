@@ -14,10 +14,8 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 import android.view.View;
-import android.widget.CheckBox;
 import android.widget.ImageView;
 
-import androidx.annotation.ColorInt;
 import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
@@ -160,25 +158,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
      * @author Claudia Di Marco & Riccardo Mantini
      */
     private void addEStationMarker(Station n) {
-
-//        // create marker
-//        MarkerOptions marker = new MarkerOptions().position(n.getPosition()).title("E-Station : "+ n.getName());
-//
-//        Bitmap battery_charging_icon = BitmapFactory.decodeResource(context.getResources(),
-//                R.drawable.ic_battery_charging_90_black_24dp);
-//
-//// Changing marker icon
-//        //marker.icon(BitmapDescriptorFactory.fromBitmap(battery_charging_icon));
-//        //marker.icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_battery_charging_90_black_18dp));
-//marker.icon(bitmapDescriptorFromVector(this, R.drawable.ic_battery_charging_90_black_24dp));
-//// adding marker
-//        mMap.addMarker(marker);
-
+        // create and add marker to the map
         Marker estationMarker =  mMap.addMarker(new MarkerOptions().position(n.getPosition()).title("E-Station : " + n.getName()));
+        // Changing marker icon_green
         if(n.isFree() == true) {
-           estationMarker.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
+            //estationMarker.setIcon(vectorToBitmap(R.drawable.icon_green));
+            estationMarker.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
         }
         else{
+            //estationMarker.setIcon(vectorToBitmap(R.drawable.icon_red));
             estationMarker.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
         }
         estationMarker.setTag(n.getId());
@@ -216,15 +204,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     /**
      * Demonstrates converting a {@link Drawable} to a {@link BitmapDescriptor},
-     * for use as a marker icon.
+     * for use as a marker icon_green.
      */
-    private BitmapDescriptor vectorToBitmap(@DrawableRes int id, @ColorInt int color) {
+    private BitmapDescriptor vectorToBitmap(@DrawableRes int id) {
         Drawable vectorDrawable = ResourcesCompat.getDrawable(getResources(), id, null);
-        Bitmap bitmap = Bitmap.createBitmap(vectorDrawable.getIntrinsicWidth(),
-                vectorDrawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+        Bitmap bitmap = Bitmap.createBitmap((vectorDrawable.getIntrinsicWidth()),
+                (vectorDrawable.getIntrinsicHeight()), Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(bitmap);
         vectorDrawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
-        DrawableCompat.setTint(vectorDrawable, color);
+        //DrawableCompat.setTint(vectorDrawable, color);
         vectorDrawable.draw(canvas);
         return BitmapDescriptorFactory.fromBitmap(bitmap);
     }
@@ -542,7 +530,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 //        if (!checkReady()) {
 //            return;
 //        }
-//        // Enables/disables the compass (icon in the top-left for LTR locale or top-right for RTL
+//        // Enables/disables the compass (icon_green in the top-left for LTR locale or top-right for RTL
 //        // locale that indicates the orientation of the map).
 //        mUiSettings.setCompassEnabled(((CheckBox) v).isChecked());
 //    }
