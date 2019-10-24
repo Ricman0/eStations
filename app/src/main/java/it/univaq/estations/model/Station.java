@@ -197,8 +197,11 @@ public class Station {
     }
 
     public void setDistanceFromUser(double distanceFromUser) {
-        calcDistanceFromUser();
         this.distanceFromUser = distanceFromUser;
+    }
+
+    public void updateDistanceFromUser() {
+        calcDistanceFromUser();
     }
 
     private void calcDistanceFromUser(){
@@ -206,7 +209,7 @@ public class Station {
         float[] dist = new float[1];
         android.location.Location.distanceBetween(currentPosition.latitude, currentPosition.longitude,
                 this.position.latitude, this.position.longitude, dist);
-        setDistanceFromUser (((int) dist[0] / 100) / 10.0);
+        this.distanceFromUser = (((int) dist[0] / 100) / 10.0);
     }
 
     public void setStationImageUrl(String stationImageUrl) {
