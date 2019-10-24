@@ -1,19 +1,16 @@
 package it.univaq.estations.activity.adapter;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.drawable.Drawable;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.view.View;
 import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.Comparator;
@@ -81,6 +78,24 @@ public class StationsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         return new ItemListViewHolder(v);
     }
 
+    private class sortStationsTask extends AsyncTask<String, Object, Object>{
+
+        @Override
+        protected Object doInBackground(String[] type) {
+            //sort by distance from user ASC
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+
+                if ("DSC".equals(type)) {
+                    mDataset.sort(Comparator.comparingDouble(Station::getDistanceFromUser).reversed());
+                } else {
+                    mDataset.sort(Comparator.comparingDouble(Station::getDistanceFromUser));
+                }
+
+            }
+            return null;
+        }
+
+    }
 
     // Replace the contents of a view (invoked by the layout manager)
     //come parametro prende in ingresso un oggetto di tipo View, ossia il layout list_item
@@ -89,10 +104,7 @@ public class StationsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
 
-        //sort by distance from user ASC
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            mDataset.sort(Comparator.comparingDouble(Station::getDistanceFromUser));
-        }
+        new sortStationsTask().execute();
         // - get element from your dataset at this position
         // - replace the contents of the view with that element
         ItemListViewHolder itemHolder = (ItemListViewHolder) holder;
