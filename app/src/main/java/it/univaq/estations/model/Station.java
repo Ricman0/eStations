@@ -200,6 +200,7 @@ public class Station {
         this.distanceFromUser = distanceFromUser;
     }
 
+    //TODO richiamare questa funzione ogni qual volta che l'utente cambia la sua posizione
     public void updateDistanceFromUser() {
         calcDistanceFromUser();
     }
