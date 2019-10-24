@@ -89,9 +89,9 @@ public class StationsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
 
-
+        //sort by distance from user ASC
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            mDataset.sort(Comparator.comparingDouble(Station::getDistanceFromUser).reversed());
+            mDataset.sort(Comparator.comparingDouble(Station::getDistanceFromUser));
         }
         // - get element from your dataset at this position
         // - replace the contents of the view with that element
