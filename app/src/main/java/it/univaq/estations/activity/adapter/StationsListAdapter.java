@@ -1,8 +1,12 @@
 package it.univaq.estations.activity.adapter;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.ColorStateList;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.view.LayoutInflater;
@@ -24,6 +28,7 @@ public class StationsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
     private List<Station> mDataset;
     private LayoutInflater mInflater;
+    private static Activity activity;
 
 
     //inner class
@@ -54,6 +59,8 @@ public class StationsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
                 //Avendo l’intent, per avviare la nuova activity
                 v.getContext().startActivity(intent);
+                activity.overridePendingTransition(R.anim.slide_in_right,R.anim.slide_out_left);
+
             });
         }
     }
@@ -63,6 +70,7 @@ public class StationsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
         mDataset = myDataset;
         this.mInflater = LayoutInflater.from(context);
+        activity = (Activity) context;
     }
 
 
@@ -83,16 +91,21 @@ public class StationsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            //ordina in senso crescente
             mDataset.sort(Comparator.comparingDouble(Station::getDistanceFromUser));
         }
+
         // - get element from your dataset at this position
         // - replace the contents of the view with that element
         ItemListViewHolder itemHolder = (ItemListViewHolder) holder;
         if (getItemCount() != 0) {
             itemHolder.title.setText(mDataset.get(position).getName());
             itemHolder.town.setText(mDataset.get(position).getTown());
-            if (!mDataset.get(position).isFree())
-                itemHolder.statusIcon.setImageResource(R.drawable.presence_busy);
+            if (mDataset.get(position).isFree() == true){
+                itemHolder.statusIcon.setColorFilter(Color.argb(255, 80, 200, 120));
+            }
+            else
+            { itemHolder.statusIcon.setColorFilter(Color.argb(255, 226, 110, 110));}
             itemHolder.km.setText(mDataset.get(position).getDistanceFromUser() + " km");
         }
     }

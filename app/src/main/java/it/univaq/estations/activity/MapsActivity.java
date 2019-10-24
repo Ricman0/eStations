@@ -127,6 +127,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                 //Avendo l’intent, per avviare la nuova activity
                 v.getContext().startActivity(intent);
+                overridePendingTransition(R.anim.slide_in_right,R.anim.slide_out_left);
             }
         });
 
@@ -185,6 +186,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 //Avendo l’intent, per avviare la nuova activity
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 context.startActivity(intent);
+                overridePendingTransition(R.anim.slide_in_right,R.anim.slide_out_left);
                 return false;
             }
         });

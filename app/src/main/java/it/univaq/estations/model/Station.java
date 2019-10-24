@@ -105,8 +105,54 @@ public class Station {
         this.title = title;
     }
 
-    public String getUsageCost() {
+    public String getUsageCost() { return usageCost; }
+
+    public Object usageCost(){
+
+        String[] cost = usageCost.split(",");
+        int intPart;
+        int fractPart;
+        float c = 0;
+
+        System.out.println("vedo " + cost[0]);
+
+        if (cost[0].length() == 1)
+        {
+            //String[] costFract = cost[1].split(" ");
+            String costFract = cost[1].substring(0,1);
+            System.out.println("vedo2 " + costFract);
+            if(costFract.length() == 2)
+            try {
+                intPart = Integer.parseInt(cost[0]);
+                fractPart = Integer.valueOf(costFract);
+                c = intPart + ((float)fractPart/100);
+            } catch(NumberFormatException nfe) {
+                System.out.println("Could not parse " + nfe);
+            }
+            return c;
+        }
+        else{
+            // fare con il try ...
+            String[] cost2 = usageCost.split(".");
+            System.out.println("vedo4 " + cost2);
+            if (cost2[0].length() == 1)
+            {
+                //String[] costFract = cost[1].split(" ");
+                String costFract = cost2[1].substring(0,1);
+                System.out.println("vedo3 " + costFract);
+                if(costFract.length() == 2)
+                    try {
+                        intPart = Integer.parseInt(cost[0]);
+                        fractPart = Integer.valueOf(costFract);
+                        c = intPart + ((float)fractPart/100);
+                    } catch(NumberFormatException nfe) {
+                        System.out.println("Could not parse " + nfe);
+                    }
+                return c;
+            }
+        }
         return usageCost;
+
     }
 
     public void setUsageCost(String usageCost) {

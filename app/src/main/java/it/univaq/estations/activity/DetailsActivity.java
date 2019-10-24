@@ -169,7 +169,12 @@ public class DetailsActivity extends AppCompatActivity {
 
         stationName.setText(station.getTitle());
         //TODO mostrare euro se in europa dollaro se in usa e così via
-        stationUsageCost.setText(station.getUsageCost());
+        Object o = station.usageCost();
+        if (o instanceof Number) {
+            stationUsageCost.setText(o + " €/KWh");
+        } else  {
+            stationUsageCost.setText((String)o);
+        }
         stationTown.setText(station.getTown());
         stationAddress.setText(station.getAddress());
         stationUrl.setText(station.getUrl());
@@ -211,6 +216,7 @@ public class DetailsActivity extends AppCompatActivity {
         if (mapIntent.resolveActivity(getPackageManager()) != null) {
             //launch the necessary app (in this case Google Maps) and start the corresponding Activity
             startActivity(mapIntent);
+            overridePendingTransition(R.anim.slide_in_right,R.anim.slide_out_left);
         }
 
     }
@@ -232,6 +238,7 @@ public class DetailsActivity extends AppCompatActivity {
      */
     public boolean onSupportNavigateUp(){
         finish();
+        overridePendingTransition(android.R.anim.slide_in_left,android.R.anim.slide_out_right);
         return true;
     }
 }

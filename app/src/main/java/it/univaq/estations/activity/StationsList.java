@@ -132,13 +132,7 @@ public class StationsList extends AppCompatActivity {
                                     }
                                     LocationService.getInstance().setCurrentLocation(currentPos);
 
-                                    // Registering the receiver
-                                    //                    LocalBroadcastManager.getInstance(getApplicationContext())
-                                    //                            .registerReceiver(myReceiver, new IntentFilter(RequestService.FILTER_REQUEST_DOWNLOAD));
-
-                                    clearDataFromDB();
-                                    // Avvio il downloadData() solo dopo che il database è stato avviato
-                                    //downloadData();
+                                    clearDataFromDB(); // Avvio il downloadData() solo dopo che il database è stato avviato
                                     LocationService.LOCATION_CHANGED = false;
                                 }
                             }
@@ -349,6 +343,7 @@ public class StationsList extends AppCompatActivity {
      */
     public boolean onSupportNavigateUp(){
         finish();
+        overridePendingTransition(android.R.anim.slide_in_left,android.R.anim.slide_out_right);
         return true;
     }
 }
