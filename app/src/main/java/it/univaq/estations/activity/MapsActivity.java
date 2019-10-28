@@ -1,5 +1,6 @@
 package it.univaq.estations.activity;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -15,9 +16,11 @@ import android.os.Message;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.core.graphics.drawable.DrawableCompat;
@@ -72,20 +75,20 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private  static final float DEFAULT_ZOOM = 12;
     private Context context;
     private Activity activity;
+    private static final int MY_PERMISSIONS_REQUEST_COARSE_LOCATION = 2;
+    private static final int MY_PERMISSIONS_REQUEST_FINE_LOCATION = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        this.setContentView(R.layout.activity_maps);
         context = this.getApplicationContext();
-        activity = this;
-        mDefaultLocation = new LatLng(42.367422, 13.349200);
-        currentPos = null;
-        // client per fare la richiesta per ottenere la locazione
-        mfusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
+        activity = this;
         appDB = Database.getInstance(getApplicationContext());
         stations = new ArrayList<>();
+
+        getPermission();
+
 
         mHandler = new Handler() {
 
@@ -95,8 +98,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 super.handleMessage(msg);
                 if (msg.what == ALL_STATIONS_LOADED || msg.what == ALL_STATIONS_SAVED) {
                     // per ogni stazione aggiungi un marker
-                    for (int y = 0; y < stations.size(); y++)
-                    {
+                    for (int y = 0; y < stations.size(); y++) {
                         addEStationMarker(stations.get(y));
                     }
 
@@ -104,19 +106,29 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 if (msg.what == ALL_STATIONS_DELETED) {
 
                     downloadDataBoundedInBoundingBox();
-                    for (int y = 0; y < stations.size(); y++)
-                    {
+                    for (int y = 0; y < stations.size(); y++) {
                         addEStationMarker(stations.get(y));
                     }
                 }
             }
         };
-        //this.setContentView(R.layout.ui_setting_demo);
-        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.map);
-        mapFragment.getMapAsync(this); //Objects.requireNonNull(mapFragment).getMapAsync(this);
 
+
+    }
+
+    /**
+     * Function to set activity map layout, create a client to make the request to obtain the location,
+     * load the map, add click listener to the navigationToStation button.
+     *
+     */
+    private void loadMapLayout() {
+        // client per fare la richiesta per ottenere la locazione
+        mfusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+        this.setContentView(R.layout.activity_maps);
+        mDefaultLocation = new LatLng(42.367422, 13.349200);
+        currentPos = null;
+
+        createMap();
         //add click listener to the navigationToStation button
         ImageView icon = findViewById(R.id.iconToStationListActivity);
         icon.setOnClickListener(new View.OnClickListener() {
@@ -130,6 +142,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 overridePendingTransition(R.anim.slide_in_right,R.anim.slide_out_left);
             }
         });
+    }
+
+    private void createMap() {
+
+        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.map);
+        mapFragment.getMapAsync(this); //Objects.requireNonNull(mapFragment).getMapAsync(this);
 
     }
 
@@ -255,45 +275,111 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap.setOnCameraIdleListener(new GoogleMap.OnCameraIdleListener() {
             @Override
             public void onCameraIdle() {
-                    // get bounding box and download data
-                    downloadDataBoundedInBoundingBox();
+                // get bounding box and download data
+                downloadDataBoundedInBoundingBox();
             }
         });
     }
 
     private void updateLocationUI() {
+        System.out.println("AAAAAAAAa");
         if (mMap == null) {
+            System.out.println("BBBBBBBB");
             return;
         }
-        try {
-            PermissionService.getInstance().permissionsCheck(context, activity);
-            if (PermissionService.getInstance().isFineLocationPermissionGranted()) {
-                mMap.setMyLocationEnabled(true); // richiede i permetti di access_fine o coarse
-                mUiSettings.setMyLocationButtonEnabled(true); //Sets the preference for whether rotate gestures should be enabled or disabled.
-            } else {
-                mMap.setMyLocationEnabled(false);
-                mMap.getUiSettings().setMyLocationButtonEnabled(false);
-                PermissionService.getInstance().permissionsCheck(context, activity);
+        mMap.setMyLocationEnabled(true); // richiede i permessi di access_fine o coarse
+        mUiSettings.setMyLocationButtonEnabled(true); //Sets the preference for whether rotate gestures should be enabled or disabled.
+
+        System.out.println(mMap.getUiSettings().isMyLocationButtonEnabled()+ " |||||||||||||||| ");
+//        try {
+//            PermissionService.getInstance().permissionsCheck(context, activity);
+//            if (PermissionService.getInstance().isFineLocationPermissionGranted()) {
+//                mMap.setMyLocationEnabled(true); // richiede i permetti di access_fine o coarse
+//                mUiSettings.setMyLocationButtonEnabled(true); //Sets the preference for whether rotate gestures should be enabled or disabled.
+//            } else {
+//                mMap.setMyLocationEnabled(false);
+//                mMap.getUiSettings().setMyLocationButtonEnabled(false);
+//                PermissionService.getInstance().permissionsCheck(context, activity);
+//            }
+//        } catch (SecurityException e)  {
+//            Log.e("Exception: %s", e.getMessage());
+//        }
+    }
+
+    private void getPermission() {
+
+        if (ContextCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+
+            // Permission is not granted
+            ActivityCompat.requestPermissions(activity,
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, MY_PERMISSIONS_REQUEST_FINE_LOCATION);
+        }
+        else {
+
+            // Permission is granted
+            PermissionService.getInstance().setFineLocationPermissionGranted(true);
+            loadMapLayout();
+        }
+
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String[] permissions, int[] grantResults) {
+        switch (requestCode) {
+            case MY_PERMISSIONS_REQUEST_FINE_LOCATION: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // permission was granted, yay! Do the
+                    // contacts-related task you need to do.
+
+                    System.out.println("PERMESSI RILASCIATI");
+                    PermissionService.getInstance().setFineLocationPermissionGranted(true);
+                    loadMapLayout();
+
+                } else {
+                    // permission denied, boo! Disable the
+                    // functionality that depends on this permission.
+                    System.out.println("PERMESSI NEGATI");
+                    PermissionService.getInstance().setFineLocationPermissionGranted(false);
+                    this.setContentView(R.layout.allow_permission_please_activity);
+                    //todo add button to launch Settings
+
+                }
+                return;
             }
-        } catch (SecurityException e)  {
-            Log.e("Exception: %s", e.getMessage());
+
+            // other 'case' lines to check for other
+            // permissions this app might request.
         }
     }
 
     private void getDeviceLocation() {
+        System.out.println("11111111");
+
         /*
          * Get the best and most recent location of the device, which may be null in rare
          * cases when a location is not available.
          */
         try {
             if (PermissionService.getInstance().isFineLocationPermissionGranted()) {
+                System.out.println("1111122222");
+
                 if (LocationService.LOCATION_CHANGED == true || LocationService.getInstance().getCurrentLocation() == null)
                 {
+                    System.out.println("22222222");
+
                     mfusedLocationClient.getLastLocation()
                             .addOnSuccessListener(this, new OnSuccessListener<Location>() {
                                 @Override
                                 public void onSuccess(Location location) {
-                                    if (location != null) {
+                                    System.out.println("33333333");
+
+                                    if (location != null) { // richiede fine location per ottenerla velocemente
+                                        System.out.println("4444444");
+
                                         currentPos = new LatLng(location.getLatitude(), location.getLongitude());
                                         if(LocationService.getInstance().getPreviousLocation() == null)
                                         {
@@ -306,6 +392,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentPos, DEFAULT_ZOOM));
                                     }
                                     else {
+                                        System.out.println("5555555");
+
                                         // move the camera and add a marker in my position
                                         mMap.moveCamera(CameraUpdateFactory.newLatLng(mDefaultLocation));
                                         mMap.animateCamera(CameraUpdateFactory.zoomTo(12.0f));
@@ -316,6 +404,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                             });
                 }
                 else{
+                    System.out.println("66666666");
+
                     currentPos = LocationService.getInstance().getCurrentLocation();
 
                     mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentPos, DEFAULT_ZOOM));
