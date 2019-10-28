@@ -226,9 +226,10 @@ public class Station {
     private void calcDistanceFromUser(){
         LatLng currentPosition = LocationService.getInstance().getCurrentLocation();
         float[] dist = new float[1];
+        if(currentPosition != null){
         android.location.Location.distanceBetween(currentPosition.latitude, currentPosition.longitude,
                 this.position.latitude, this.position.longitude, dist);
-        this.distanceFromUser = (((int) dist[0] / 100) / 10.0);
+        this.distanceFromUser = (((int) dist[0] / 100) / 10.0);}
     }
 
     public void setStationImageUrl(String stationImageUrl) {
