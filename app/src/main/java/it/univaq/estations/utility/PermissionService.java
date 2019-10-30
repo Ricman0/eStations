@@ -2,14 +2,20 @@ package it.univaq.estations.utility;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.IntentService;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
-public class PermissionService {
+public class PermissionService{
+    //public class PermissionService extends IntentService{
+
+    public static final String PERMISSION_GRANTED = "PermissionService_PermissionGranted";
 
     private static final int MY_PERMISSIONS_REQUEST_INTERNET = 1;
     private static final int MY_PERMISSIONS_REQUEST_COARSE_LOCATION = 2;
@@ -20,6 +26,8 @@ public class PermissionService {
     private static boolean internetPermissionGranted = false;
 
     private static PermissionService instance = null;
+
+
 
     public static PermissionService getInstance(){
         return instance == null ? instance = new PermissionService() : instance;
@@ -33,12 +41,7 @@ public class PermissionService {
                 != PackageManager.PERMISSION_GRANTED)
         {
             // permission is not granted yet
-            if (ActivityCompat.shouldShowRequestPermissionRationale(activity,
-                    Manifest.permission.ACCESS_COARSE_LOCATION)) {
-                // Show an explanation to the user *asynchronously* -- don't block
-                // this thread waiting for the user's response! After the user
-                // sees the explanation, try again to request the permission.
-            } else {
+
                 // No explanation needed; request the permission
                 ActivityCompat.requestPermissions(activity,
                         new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},
@@ -47,7 +50,7 @@ public class PermissionService {
                 // MY_PERMISSIONS_REQUEST_COARSE_LOCATION is an
                 // app-defined int constant. The callback method gets the
                 // result of the request.
-            }
+
         }
         else{
             coarseLocationPermissionGranted = true;
@@ -57,21 +60,12 @@ public class PermissionService {
                 != PackageManager.PERMISSION_GRANTED)
         {
             // permission is not granted yet
-            if (ActivityCompat.shouldShowRequestPermissionRationale(activity,
-                    Manifest.permission.ACCESS_FINE_LOCATION)) {
-                // Show an explanation to the user *asynchronously* -- don't block
-                // this thread waiting for the user's response! After the user
-                // sees the explanation, try again to request the permission.
-            } else {
+
                 // No explanation needed; request the permission
                 ActivityCompat.requestPermissions(activity,
                         new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                         MY_PERMISSIONS_REQUEST_FINE_LOCATION);
 
-                // MY_PERMISSIONS_REQUEST_FINE_LOCATION is an
-                // app-defined int constant. The callback method gets the
-                // result of the request.
-            }
         }
         else{
             fineLocationPermissionGranted = true;
@@ -81,12 +75,7 @@ public class PermissionService {
                 != PackageManager.PERMISSION_GRANTED)
         {
             // permission is not granted yet
-            if (ActivityCompat.shouldShowRequestPermissionRationale(activity,
-                    Manifest.permission.INTERNET)) {
-                // Show an explanation to the user *asynchronously* -- don't block
-                // this thread waiting for the user's response! After the user
-                // sees the explanation, try again to request the permission.
-            } else {
+
                 // No explanation needed; request the permission
                 ActivityCompat.requestPermissions(activity,
                         new String[]{Manifest.permission.INTERNET},
@@ -95,7 +84,7 @@ public class PermissionService {
                 // MY_PERMISSIONS_REQUEST_FINE_LOCATION is an
                 // app-defined int constant. The callback method gets the
                 // result of the request.
-            }
+
         }
         else
         {
@@ -134,6 +123,10 @@ public class PermissionService {
                     // permission was granted, yay! Do the
                     // contacts-related task you need to do.
                     setFineLocationPermissionGranted(true);
+                    Intent i = new Intent(PERMISSION_GRANTED);
+                    //todo: cancellare??
+                    //sendBroadcast(i);
+
                    // updateLocationUI(); funzione in MapsActivity
                 }
             }
@@ -169,4 +162,9 @@ public class PermissionService {
     public static void setInternetPermissionGranted(boolean internetPermissionGranted) {
         PermissionService.internetPermissionGranted = internetPermissionGranted;
     }
+
+//    @Override
+//    protected void onHandleIntent(@Nullable Intent intent) {
+//
+//    }
 }
