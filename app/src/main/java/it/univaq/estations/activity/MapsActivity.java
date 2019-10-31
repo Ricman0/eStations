@@ -2,10 +2,8 @@ package it.univaq.estations.activity;
 
 import android.Manifest;
 import android.app.Activity;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -18,6 +16,7 @@ import android.os.Message;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
@@ -54,67 +53,43 @@ import it.univaq.estations.Database.Database;
 import it.univaq.estations.R;
 import it.univaq.estations.model.PointOfCharge;
 import it.univaq.estations.model.Station;
-import it.univaq.estations.utility.GoogleLocationService;
 import it.univaq.estations.utility.LocationService;
-import it.univaq.estations.utility.GoogleLocationService;
 import it.univaq.estations.utility.PermissionService;
 import it.univaq.estations.utility.VolleyRequest;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, GoogleLocationService.LocationListener {
-
-    private static final int PERMISSIONS_REQUEST_FINE_LOCATION = 1 ;
+public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
     private GoogleMap mMap;
-    private UiSettings mUiSettings;
-
     private List<Station> stations = new ArrayList<>();
 
-    //private MyListener listener = new MyListener(); se serve decommentare
+    private UiSettings mUiSettings;
 
-    private GoogleLocationService locationService;
-
-    //private FusedLocationProviderClient mfusedLocationClient; il client è nella classe di utility
-
+    private FusedLocationProviderClient mfusedLocationClient;
     private LatLng currentPos;
-    private LatLng  mDefaultLocation;
-
-    private Context context;
-    private Activity activity;
     private Database appDB;
-
     Handler mHandler;
     Thread threadToLoadAllStationsFromDB;
     private static final int ALL_STATIONS_LOADED = 101;
     private static final int ALL_STATIONS_SAVED = 102;
     private static final int ALL_STATIONS_DELETED = 103;
-
+    private LatLng  mDefaultLocation;
     private  static final float DEFAULT_ZOOM = 12;
-
-
-    private BroadcastReceiver mReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            // do what i need
-        }
-    };
+    private Context context;
+    private Activity activity;
+    private static final int MY_PERMISSIONS_REQUEST_COARSE_LOCATION = 2;
+    private static final int MY_PERMISSIONS_REQUEST_FINE_LOCATION = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        this.setContentView(R.layout.activity_maps);
-
-        mDefaultLocation = new LatLng( 42.4584, 14.216090);
-        currentPos = null;
-
         context = this.getApplicationContext();
+
         activity = this;
         appDB = Database.getInstance(getApplicationContext());
         stations = new ArrayList<>();
 
-        //todo: da cancellare se tutto andrà per il meglio
-//        // client per fare la richiesta per ottenere la locazione
-//        mfusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+        getPermission();
 
-        // todo: mHandler da cancellare se si può usare il receveir
+
         mHandler = new Handler() {
 
             @Override
@@ -123,8 +98,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 super.handleMessage(msg);
                 if (msg.what == ALL_STATIONS_LOADED || msg.what == ALL_STATIONS_SAVED) {
                     // per ogni stazione aggiungi un marker
-                    for (int y = 0; y < stations.size(); y++)
-                    {
+                    for (int y = 0; y < stations.size(); y++) {
                         addEStationMarker(stations.get(y));
                     }
 
@@ -132,8 +106,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 if (msg.what == ALL_STATIONS_DELETED) {
 
                     downloadDataBoundedInBoundingBox();
-                    for (int y = 0; y < stations.size(); y++)
-                    {
+                    for (int y = 0; y < stations.size(); y++) {
                         addEStationMarker(stations.get(y));
                     }
                 }
@@ -141,11 +114,21 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         };
 
 
-        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.map);
-        if(mapFragment != null ) mapFragment.getMapAsync(this); //Objects.requireNonNull(mapFragment).getMapAsync(this);
+    }
 
+    /**
+     * Function to set activity map layout, create a client to make the request to obtain the location,
+     * load the map, add click listener to the navigationToStation button.
+     *
+     */
+    private void loadMapLayout() {
+        // client per fare la richiesta per ottenere la locazione
+        mfusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+        this.setContentView(R.layout.activity_maps);
+        mDefaultLocation = new LatLng(42.367422, 13.349200);
+        currentPos = null;
+
+        createMap();
         //add click listener to the navigationToStation button
         ImageView icon = findViewById(R.id.iconToStationListActivity);
         icon.setOnClickListener(new View.OnClickListener() {
@@ -159,6 +142,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 overridePendingTransition(R.anim.slide_in_right,R.anim.slide_out_left);
             }
         });
+    }
+
+    private void createMap() {
+
+        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.map);
+        mapFragment.getMapAsync(this); //Objects.requireNonNull(mapFragment).getMapAsync(this);
 
     }
 
@@ -251,8 +242,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     @Override
     protected void onDestroy(){
-        unregisterReceiver(mReceiver);
         super.onDestroy();
+
     }
 
     /**
@@ -269,36 +260,37 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         mMap = googleMap;
         mUiSettings = mMap.getUiSettings();
+        //mUiSettings.setCompassEnabled(true); //Enables (or disables) the compass.
         mUiSettings.setZoomControlsEnabled(true); //Enables (or disables if we pass false) the zoom controls.
         mUiSettings.setZoomGesturesEnabled(true); //Sets the preference for whether zoom gestures should be enabled or disabled.
+        //mUiSettings.setTiltGesturesEnabled(true); //Sets the preference for whether tilt gestures should be enabled or disabled.
         mUiSettings.setRotateGesturesEnabled(true); //Sets the preference for whether rotate gestures should be enabled or disabled.
+        // Turn on the My Location layer and the related control on the map.
+        updateLocationUI();
 
-        // todo: forse da eliminare
-//        // Turn on the My Location layer and the related control on the map.
-//        updateLocationUI();
-//        // Get the current location of the device and set the position of the map.
-//        getDeviceLocation();
+        // Get the current location of the device and set the position of the map.
+        getDeviceLocation();
 
         // add listener to know if the camera movement has ended
         mMap.setOnCameraIdleListener(new GoogleMap.OnCameraIdleListener() {
             @Override
             public void onCameraIdle() {
-                    // get bounding box and download data
-                    downloadDataBoundedInBoundingBox();
+                // get bounding box and download data
+                downloadDataBoundedInBoundingBox();
             }
         });
-        locationService = new GoogleLocationService();
-        locationService.onCreate(this, this);
-        locationService.requestLastLocation(this);
     }
 
+    private void updateLocationUI() {
+        System.out.println("AAAAAAAAa");
+        if (mMap == null) {
+            System.out.println("BBBBBBBB");
+            return;
+        }
+        mMap.setMyLocationEnabled(true); // richiede i permessi di access_fine o coarse
+        mUiSettings.setMyLocationButtonEnabled(true); //Sets the preference for whether rotate gestures should be enabled or disabled.
 
-
-
-//    private void updateLocationUI() {
-//        if (mMap == null) {
-//            return;
-//        }
+        System.out.println(mMap.getUiSettings().isMyLocationButtonEnabled()+ " |||||||||||||||| ");
 //        try {
 //            PermissionService.getInstance().permissionsCheck(context, activity);
 //            if (PermissionService.getInstance().isFineLocationPermissionGranted()) {
@@ -312,100 +304,141 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 //        } catch (SecurityException e)  {
 //            Log.e("Exception: %s", e.getMessage());
 //        }
-//    }
+    }
 
-//    private void getDeviceLocation() {
-//        /*
-//         * Get the best and most recent location of the device, which may be null in rare
-//         * cases when a location is not available.
-//         */
-//        try {
-//            PermissionService.getInstance().permissionsCheck(context, activity);
-//            if (PermissionService.getInstance().isFineLocationPermissionGranted()) {
-//                if (LocationService.LOCATION_CHANGED == true || LocationService.getInstance().getCurrentLocation() == null)
-//                {
-//                    mfusedLocationClient.getLastLocation()
-//                            .addOnSuccessListener(this, new OnSuccessListener<Location>() {
-//                                @Override
-//                                public void onSuccess(Location location) {
-//                                    if (location != null) {
-//                                        currentPos = new LatLng(location.getLatitude(), location.getLongitude());
-//                                        if(LocationService.getInstance().getPreviousLocation() == null)
-//                                        {
-//                                            // inizialmente pongo previous e current position alla stessa posizione
-//                                            LocationService.getInstance().setPreviousLocation(currentPos);
-//                                        }
-//                                        LocationService.getInstance().setCurrentLocation(currentPos);
-//                                        clearDataFromDB();
-//                                        LocationService.LOCATION_CHANGED = false;
-//                                        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentPos, DEFAULT_ZOOM));
-//                                    }
-//                                    else {
-//                                        // move the camera and add a marker in my position
-//                                        mMap.moveCamera(CameraUpdateFactory.newLatLng(mDefaultLocation));
-//                                        mMap.animateCamera(CameraUpdateFactory.zoomTo(12.0f));
-//                                       // mMap.getUiSettings().setMyLocationButtonEnabled(false);
-//
-//                                    }
-//                                }
-//                            });
-//                }
-//                else{
-//                    currentPos = LocationService.getInstance().getCurrentLocation();
-//
-//                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentPos, DEFAULT_ZOOM));
-//
-//                    threadToLoadAllStationsFromDB = new Thread(new Runnable() {
-//                        @Override
-//                        public void run() {
-//                            stations.clear();
-//                            //get stations and all pointOFCharges from database
-//                            stations.addAll(appDB.getStationDao().getAllStations()); // get all stations without theirs pointOFCharges
-//                            for (int k = 0; k < stations.size(); k++) {
-//                                Station stationToFill = stations.get(k);
-//                                stationToFill.addPointOfChargeList(appDB.getPointOfChargeDao().getAllStationPointsOfCharge(stationToFill.getId()));
-//                            }
-//                            Message message = new Message();
-//                            message.what = ALL_STATIONS_LOADED;
-//                            mHandler.sendMessage(message);
-//                        }
-//                    });
-//
-//                    threadToLoadAllStationsFromDB.start();
-//                }
-//
-//            }
-//            else
-//            {
-//                currentPos = mDefaultLocation;
-//                if(LocationService.getInstance().getPreviousLocation() == null)
-//                {
-//                    // inizialmente pongo previous e current position alla stessa posizione
-//                    LocationService.getInstance().setPreviousLocation(currentPos);
-//                }
-//                LocationService.getInstance().setCurrentLocation(currentPos);
-//                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mDefaultLocation, DEFAULT_ZOOM));
-//            }
-//        } catch(SecurityException e)  {
-//            Log.e("Exception: %s", e.getMessage());
-//        }
-//    }
+    private void getPermission() {
 
-    protected void onResume() {
-        super.onResume();
-        if(mMap != null) {
-            locationService = new GoogleLocationService();
-            locationService.onCreate(this, this);
-            locationService.requestLastLocation(this);
-            //todo: da eliminare ??
-//        registerReceiver(mReceiver, new IntentFilter(PermissionService.PERMISSION_GRANTED));
+        if (ContextCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+
+            // Permission is not granted
+            ActivityCompat.requestPermissions(activity,
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, MY_PERMISSIONS_REQUEST_FINE_LOCATION);
         }
+        else {
+
+            // Permission is granted
+            PermissionService.getInstance().setFineLocationPermissionGranted(true);
+            loadMapLayout();
+        }
+
     }
 
     @Override
-    protected void onPause() {
-        super.onPause();
+    public void onRequestPermissionsResult(int requestCode,
+                                           String[] permissions, int[] grantResults) {
+        switch (requestCode) {
+            case MY_PERMISSIONS_REQUEST_FINE_LOCATION: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // permission was granted, yay! Do the
+                    // contacts-related task you need to do.
+
+                    System.out.println("PERMESSI RILASCIATI");
+                    PermissionService.getInstance().setFineLocationPermissionGranted(true);
+                    loadMapLayout();
+
+                } else {
+                    // permission denied, boo! Disable the
+                    // functionality that depends on this permission.
+                    System.out.println("PERMESSI NEGATI");
+                    PermissionService.getInstance().setFineLocationPermissionGranted(false);
+                    this.setContentView(R.layout.allow_permission_please_activity);
+                    //todo add button to launch Settings
+
+                }
+                return;
+            }
+
+            // other 'case' lines to check for other
+            // permissions this app might request.
+        }
     }
+
+    private void getDeviceLocation() {
+        System.out.println("11111111");
+
+        /*
+         * Get the best and most recent location of the device, which may be null in rare
+         * cases when a location is not available.
+         */
+        try {
+            if (PermissionService.getInstance().isFineLocationPermissionGranted()) {
+                System.out.println("1111122222");
+
+                if (LocationService.LOCATION_CHANGED == true || LocationService.getInstance().getCurrentLocation() == null)
+                {
+                    System.out.println("22222222");
+
+                    mfusedLocationClient.getLastLocation()
+                            .addOnSuccessListener(this, new OnSuccessListener<Location>() {
+                                @Override
+                                public void onSuccess(Location location) {
+                                    System.out.println("33333333");
+
+                                    if (location != null) { // richiede fine location per ottenerla velocemente
+                                        System.out.println("4444444");
+
+                                        currentPos = new LatLng(location.getLatitude(), location.getLongitude());
+                                        if(LocationService.getInstance().getPreviousLocation() == null)
+                                        {
+                                            // inizialmente pongo previous e current position alla stessa posizione
+                                            LocationService.getInstance().setPreviousLocation(currentPos);
+                                        }
+                                        LocationService.getInstance().setCurrentLocation(currentPos);
+                                        clearDataFromDB();
+                                        LocationService.LOCATION_CHANGED = false;
+                                        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentPos, DEFAULT_ZOOM));
+                                    }
+                                    else {
+                                        System.out.println("5555555");
+
+                                        // move the camera and add a marker in my position
+                                        mMap.moveCamera(CameraUpdateFactory.newLatLng(mDefaultLocation));
+                                        mMap.animateCamera(CameraUpdateFactory.zoomTo(12.0f));
+                                        mMap.getUiSettings().setMyLocationButtonEnabled(false);
+
+                                    }
+                                }
+                            });
+                }
+                else{
+                    System.out.println("66666666");
+
+                    currentPos = LocationService.getInstance().getCurrentLocation();
+
+                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentPos, DEFAULT_ZOOM));
+
+                    threadToLoadAllStationsFromDB = new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            stations.clear();
+                            //get stations and all pointOFCharges from database
+                            stations.addAll(appDB.getStationDao().getAllStations()); // get all stations without theirs pointOFCharges
+                            for (int k = 0; k < stations.size(); k++) {
+                                Station stationToFill = stations.get(k);
+                                stationToFill.addPointOfChargeList(appDB.getPointOfChargeDao().getAllStationPointsOfCharge(stationToFill.getId()));
+                            }
+                            Message message = new Message();
+                            message.what = ALL_STATIONS_LOADED;
+                            mHandler.sendMessage(message);
+                        }
+                    });
+
+                    threadToLoadAllStationsFromDB.start();
+                }
+
+            }
+        } catch(SecurityException e)  {
+            Log.e("Exception: %s", e.getMessage());
+        }
+    }
+
+    protected void onResume() {
+        super.onResume();
+    }
+
 
     /**
      * Function to clear all stations and associated Points of charges from database.
@@ -546,90 +579,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
     }
 
-    @Override
-    public void onLastLocationResult(Location location) {
-        currentPos = new LatLng(location.getLatitude(), location.getLongitude());
-        if(LocationService.getInstance().getPreviousLocation() == null)
-        {
-            // inizialmente pongo previous e current position alla stessa posizione
-            LocationService.getInstance().setPreviousLocation(currentPos);
-        }
-        LocationService.getInstance().setCurrentLocation(currentPos);
-        clearDataFromDB();
-        LocationService.LOCATION_CHANGED = false;
-        mMap.setMyLocationEnabled(true); // richiede i permetti di access_fine o coarse
-        mUiSettings.setMyLocationButtonEnabled(true);
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentPos, DEFAULT_ZOOM));
-    }
-
-    @Override
-    public void onLastLocationNullResult() {
-        mMap.setMyLocationEnabled(true); // richiede i permetti di access_fine o coarse
-        mUiSettings.setMyLocationButtonEnabled(true);
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mDefaultLocation, DEFAULT_ZOOM));
-    }
-
-    @Override
-    public void onPermissionNotGranted() {
-        currentPos = mDefaultLocation;
-        if(LocationService.getInstance().getPreviousLocation() == null)
-        {
-            // inizialmente pongo previous e current position alla stessa posizione
-            LocationService.getInstance().setPreviousLocation(currentPos);
-        }
-        LocationService.getInstance().setCurrentLocation(currentPos);
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mDefaultLocation, DEFAULT_ZOOM));
-        ActivityCompat.requestPermissions(MapsActivity.this, new String[] {
-                Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSIONS_REQUEST_FINE_LOCATION);
-    }
-
-    @Override
-    public void onLoadAllStationFromDB() {
-        currentPos = LocationService.getInstance().getCurrentLocation();
-        mMap.setMyLocationEnabled(true); // richiede i permetti di access_fine o coarse
-        mUiSettings.setMyLocationButtonEnabled(true);
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentPos, DEFAULT_ZOOM));
-
-        threadToLoadAllStationsFromDB = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                stations.clear();
-                //get stations and all pointOFCharges from database
-                stations.addAll(appDB.getStationDao().getAllStations()); // get all stations without theirs pointOFCharges
-                for (int k = 0; k < stations.size(); k++) {
-                    Station stationToFill = stations.get(k);
-                    stationToFill.addPointOfChargeList(appDB.getPointOfChargeDao().getAllStationPointsOfCharge(stationToFill.getId()));
-                }
-                Message message = new Message();
-                message.what = ALL_STATIONS_LOADED;
-                mHandler.sendMessage(message);
-            }
-        });
-
-        threadToLoadAllStationsFromDB.start();
-
-    }
-
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        switch (requestCode) {
-            case PERMISSIONS_REQUEST_FINE_LOCATION:
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    //allow
-                    // on resume viene richiamato non appena il popup sparisce
-
-                }
-                else{
-                    // deny
-                }
-                break;
-
-                default:break;
-
-        }
 
 
-    }
+
+
+
+
 
 
 //    /**
@@ -789,12 +744,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 //            mLocationPermissionDenied = false;
 //        }
 //    }
-
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-    }
 }
 
 
