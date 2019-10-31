@@ -396,7 +396,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         if(mMap != null) {
             locationService = new GoogleLocationService();
             locationService.onCreate(this, this);
-            locationService.requestLastLocation(this);
+            if (!locationService.requestLastLocation(this)){
+                // richiedo permessi
+                ActivityCompat.requestPermissions(MapsActivity.this, new String[] {
+                        Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSIONS_REQUEST_FINE_LOCATION);
+            }
             //todo: da eliminare ??
 //        registerReceiver(mReceiver, new IntentFilter(PermissionService.PERMISSION_GRANTED));
         }
@@ -579,8 +583,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
         LocationService.getInstance().setCurrentLocation(currentPos);
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mDefaultLocation, DEFAULT_ZOOM));
-        ActivityCompat.requestPermissions(MapsActivity.this, new String[] {
-                Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSIONS_REQUEST_FINE_LOCATION);
+//        ActivityCompat.requestPermissions(MapsActivity.this, new String[] {
+//                Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSIONS_REQUEST_FINE_LOCATION);
     }
 
     @Override
