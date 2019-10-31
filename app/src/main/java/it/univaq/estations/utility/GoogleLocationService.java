@@ -11,10 +11,6 @@ import androidx.core.content.ContextCompat;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationAvailability;
-import com.google.android.gms.location.LocationCallback;
-import com.google.android.gms.location.LocationRequest;
-import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnSuccessListener;
 
@@ -23,21 +19,6 @@ public class GoogleLocationService {
     private FusedLocationProviderClient providerClient;
 
     private GoogleLocationService.LocationListener listener;
-
-//    private LocationCallback locationCallback = new LocationCallback() {
-//
-//        @Override
-//        public void onLocationResult(LocationResult locationResult) {
-//            super.onLocationResult(locationResult);
-//            if(listener != null) listener.onLocationChanged(locationResult.getLastLocation());
-//        }
-//
-//        @Override
-//        public void onLocationAvailability(LocationAvailability locationAvailability) {
-//            super.onLocationAvailability(locationAvailability);
-//            System.out.println("Is location available? " + locationAvailability.isLocationAvailable());
-//        }
-//    };
 
     public void onCreate(Activity activity, GoogleLocationService.LocationListener listener){
         // client per fare la richiesta per ottenere la locazione
@@ -59,7 +40,7 @@ public class GoogleLocationService {
 
 
     /**
-     * Get last known location
+     * Get the last known location
      *
      * @param activity the instance of the Activity
      * @return true if the permissions are granted, false otherwise
@@ -83,7 +64,6 @@ public class GoogleLocationService {
                                             else
                                                 listener.onLastLocationNullResult();
                                         }
-
                                     }
                                 });
                     }

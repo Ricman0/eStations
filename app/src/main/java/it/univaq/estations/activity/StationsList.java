@@ -42,7 +42,6 @@ public class StationsList extends AppCompatActivity {
     private FusedLocationProviderClient fusedLocationClient;
     private LatLng currentPos;
     private Database appDB;
-    //private boolean shouldExecuteDownload;//per evitare che tornando su questa attività si rifaccia il download NON FUNZIONA???
     Handler mHandler;
     Thread threadToLoadAllStationsFromDB;
     private static final int ALL_STATIONS_LOADED = 101;
@@ -53,7 +52,6 @@ public class StationsList extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-       // shouldExecuteDownload = true; // da vedere
 
         setContentView(R.layout.activity_stations_list);
         PermissionService.getInstance().permissionsCheck(this, this);
@@ -80,8 +78,6 @@ public class StationsList extends AppCompatActivity {
         appDB = Database.getInstance(getApplicationContext());
         stations = new ArrayList<>();
 
-
-
         mHandler = new Handler() {
 
             @Override
@@ -97,20 +93,6 @@ public class StationsList extends AppCompatActivity {
         };
 
     }
-
-//    // The Broadcast Receiver can receive the sent intent by LocaleBroadcastManager.
-//    private BroadcastReceiver myReceiver = new BroadcastReceiver() {
-//        @Override
-//        public void onReceive(Context context, Intent intent) {
-//
-//            if(intent == null) return;
-//            String response = intent.getStringExtra("response");
-//            if(response == null) return;
-//
-//            // Refresh list because the adapter data are changed
-//            if(adapter != null) adapter.notifyDataSetChanged();
-//        }
-//    };
 
     protected void onResume() {
         super.onResume();

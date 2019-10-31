@@ -402,6 +402,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
     }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+    }
 
     /**
      * Function to clear all stations and associated Points of charges from database.
@@ -575,7 +579,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
         LocationService.getInstance().setCurrentLocation(currentPos);
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mDefaultLocation, DEFAULT_ZOOM));
-        ActivityCompat.requestPermissions(MapsActivity.this, new String[] {Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSIONS_REQUEST_FINE_LOCATION);
+        ActivityCompat.requestPermissions(MapsActivity.this, new String[] {
+                Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSIONS_REQUEST_FINE_LOCATION);
     }
 
     @Override
@@ -784,6 +789,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 //            mLocationPermissionDenied = false;
 //        }
 //    }
+
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+    }
 }
 
 
