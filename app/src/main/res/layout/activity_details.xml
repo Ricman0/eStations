@@ -87,6 +87,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="TextView"
+                android:textColor="@color/primary_color"
                 android:layout_marginTop="@dimen/listMarginTop"
                 android:layout_marginHorizontal="@dimen/listMarginSide"
                 android:textAppearance="@style/TextAppearance.AppCompat.Large" />

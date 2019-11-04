@@ -6,6 +6,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -16,6 +17,9 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.text.SpannableString;
+import android.text.style.UnderlineSpan;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -176,6 +180,7 @@ public class DetailsActivity extends AppCompatActivity {
 
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     public void fillDetailsLayout(){
 
         //fill the layout with the station data
@@ -198,6 +203,22 @@ public class DetailsActivity extends AppCompatActivity {
         stationAddress.setText(station.getAddress());
         stationUrl.setText(station.getUrl());
         stationNumPointsOfCharge.setText(String.valueOf(station.getNumberOfPointsOfCharge()));
+
+        //underline the station url
+        SpannableString content = new SpannableString(station.getUrl());
+        content.setSpan(new UnderlineSpan(), 0, content.length(), 0);
+        stationUrl.setText(content);
+
+        // to reach the web page
+        stationUrl.setOnTouchListener(new View.OnTouchListener() {
+
+            @Override
+            public boolean onTouch(View arg0, MotionEvent arg1) {
+                goToUrl(station.getUrl());
+                // return true if you don't want it handled by any other touch/click events after this
+                return false;
+            }
+        });
 
         // disable navigateToStation button when permission is disabled
         int permissionFineLocation = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
@@ -254,7 +275,7 @@ public class DetailsActivity extends AppCompatActivity {
         imageStation.setImageBitmap(newImage);
     }
 
-    
+
     /**
      * Function to define a custom behaviour for the actionBar arrow back.
      *
@@ -267,4 +288,12 @@ public class DetailsActivity extends AppCompatActivity {
         overridePendingTransition(android.R.anim.slide_in_left,android.R.anim.slide_out_right);
         return true;
     }
+
+
+    private void goToUrl (String url) {
+        Uri uriUrl = Uri.parse(url);
+        Intent launchBrowser = new Intent(Intent.ACTION_VIEW, uriUrl);
+        startActivity(launchBrowser);
+    }
+
 }
