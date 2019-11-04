@@ -28,7 +28,7 @@ public abstract class Database extends RoomDatabase {
             instance = Room.databaseBuilder(
                     context,
                     Database.class,
-                    "myRoomDatabase").build();
+                    "EstationsRoomDatabase").build();
         }
         return instance;
     }

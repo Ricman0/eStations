@@ -22,6 +22,9 @@ public interface StationDao {
     @Query("DELETE FROM stations")
     public void deleteAll();
 
+    @Query("SELECT COUNT(*) FROM stations")
+    public int howManyStationInDB();
+
     @Update
     public void update(Station station);
 

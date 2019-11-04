@@ -1,9 +1,11 @@
 package it.univaq.estations.activity.adapter;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
@@ -15,6 +17,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.view.View;
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.Comparator;
@@ -106,7 +109,16 @@ public class StationsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             }
             else
             { itemHolder.statusIcon.setColorFilter(Color.argb(255, 226, 110, 110));}
-            itemHolder.km.setText(mDataset.get(position).getDistanceFromUser() + " km");
+
+            int permissionFineLocation = ContextCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_FINE_LOCATION);
+            if(permissionFineLocation != PackageManager.PERMISSION_GRANTED) {
+                // permissions not granted
+                itemHolder.km.setText("");
+            }
+            else {
+                itemHolder.km.setText(mDataset.get(position).getDistanceFromUser() + " km");
+            }
+
         }
     }
 

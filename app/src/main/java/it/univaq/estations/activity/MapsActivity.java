@@ -2,23 +2,17 @@ package it.univaq.estations.activity;
 
 import android.Manifest;
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.provider.Settings;
-import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 
@@ -27,12 +21,9 @@ import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.res.ResourcesCompat;
-import androidx.core.graphics.drawable.DrawableCompat;
 import androidx.fragment.app.FragmentActivity;
 
 import com.android.volley.Response;
-import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -40,11 +31,9 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
-import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.tasks.OnSuccessListener;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -59,8 +48,6 @@ import it.univaq.estations.model.PointOfCharge;
 import it.univaq.estations.model.Station;
 import it.univaq.estations.utility.GoogleLocationService;
 import it.univaq.estations.utility.LocationService;
-import it.univaq.estations.utility.GoogleLocationService;
-import it.univaq.estations.utility.PermissionService;
 import it.univaq.estations.utility.VolleyRequest;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, GoogleLocationService.LocationListener {
@@ -134,12 +121,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                 }
                 if (msg.what == ALL_STATIONS_DELETED) {
-
+                    stations.clear();
+                    System.out.println("All station deleted 2");
                     downloadDataBoundedInBoundingBox();
                     for (int y = 0; y < stations.size(); y++)
                     {
                         addEStationMarker(stations.get(y));
                     }
+                    System.out.println("added marker");
                 }
             }
         };
@@ -165,7 +154,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             public void onClick(View v) {
                 // Open another Activity and pass to it the right station
                 //new Intent object: Il costruttore, in caso di intent esplicito, richiede due parametri: il Context (che, nel nostro caso, è l’activity che vuole chiamare la seconda) e la classe che riceverà l’intent, cioè l’activity che vogliamo richiamare.
-                Intent intent = new Intent(v.getContext(), StationsList.class);
+                Intent intent = new Intent(v.getContext(), StationsListActivity.class);
 
                 //Avendo l’intent, per avviare la nuova activity
                 v.getContext().startActivity(intent);
@@ -190,6 +179,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 mMap.getProjection().getVisibleRegion().latLngBounds.northeast.longitude);
 
         // downloadData
+
         downloadData(topLeftCorner, bottomRightCorner);
     }
 
@@ -298,18 +288,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mUiSettings.setZoomGesturesEnabled(true); //Sets the preference for whether zoom gestures should be enabled or disabled.
         mUiSettings.setRotateGesturesEnabled(true); //Sets the preference for whether rotate gestures should be enabled or disabled.
 
-        // todo: forse da eliminare
-//        // Turn on the My Location layer and the related control on the map.
-//        updateLocationUI();
-//        // Get the current location of the device and set the position of the map.
-//        getDeviceLocation();
-
         // add listener to know if the camera movement has ended
         mMap.setOnCameraIdleListener(new GoogleMap.OnCameraIdleListener() {
             @Override
             public void onCameraIdle() {
-                    // get bounding box and download data
-                    downloadDataBoundedInBoundingBox();
+                // clear data in  the DB and then get bounding box and download data
+                System.out.println("onCameraIdle clear db");
+                 clearDataFromDB();
+//                    // get bounding box and download data
+//                    downloadDataBoundedInBoundingBox();
             }
         });
         locationService = new GoogleLocationService();
@@ -418,6 +405,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     protected void onResume() {
         super.onResume();
+        stations.clear();
         if(mMap != null) {
             System.out.println("NMAP NOT NULL ");
             locationService = new GoogleLocationService();
@@ -445,14 +433,20 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
      */
     private void clearDataFromDB(){
 
+        stations.clear();
+        System.out.println("clearDataFromDB");
         Thread ThreadToClearDataFromDB = new Thread(new Runnable() {
             @Override
             public void run() {
                 Database.getInstance(getApplicationContext())
-                        .getStationDao().deleteAll(); // i points of charge associati dovrebbero essere eliminati con on cascade
+                        .getStationDao().deleteAll();// i points of charge associati dovrebbero essere eliminati con on cascade
                 Message message = new Message();
                 message.what = ALL_STATIONS_DELETED;
                 mHandler.sendMessage(message);
+                int x = Database.getInstance(getApplicationContext())
+                        .getStationDao().howManyStationInDB();
+                System.out.println("station on db : " + x);
+                System.out.println("All station deleted");
             }
         });
         ThreadToClearDataFromDB.start();
@@ -538,13 +532,23 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                 stations.add(station);
                             }
 
+
                             Thread threadToSaveStationsInDB = new Thread(new Runnable() {
                                 @Override
                                 public void run() {
+                                    int x = Database.getInstance(getApplicationContext())
+                                            .getStationDao().howManyStationInDB();
+                                    System.out.println(" downloadData3 station on db : " + x);
                                     saveStationsDataInDB();
+                                     x = Database.getInstance(getApplicationContext())
+                                            .getStationDao().howManyStationInDB();
+                                    System.out.println(" downloadData4 station on db : " + x);
                                     Message message = new Message();
                                     message.what = ALL_STATIONS_SAVED;
                                     mHandler.sendMessage(message);
+                                     x = Database.getInstance(getApplicationContext())
+                                            .getStationDao().howManyStationInDB();
+                                    System.out.println(" downloadData5 station on db : " + x);
                                 }
                             });
                             threadToSaveStationsInDB.start();
@@ -564,6 +568,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
      * @author Claudia Di Marco & Riccardo Mantini
      */
     private void saveStationsDataInDB(){
+        System.out.println(" saveStationsDataInDB stations.size() : " + stations.size());
         // per ogni stazione salva la stazione e tutti i suoi punti di ricarica
         for (int k = 0; k < stations.size(); k++)
         {
@@ -575,6 +580,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 appDB.getPointOfChargeDao().save(pointOfChargeToSave); // salvo il punto di ricarica
             }
         }
+        int x = Database.getInstance(getApplicationContext())
+                .getStationDao().howManyStationInDB();
+        System.out.println(" saveStationsDataInDB station on db : " + x);
     }
 
     @Override

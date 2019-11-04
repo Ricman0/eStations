@@ -126,7 +126,7 @@ public class DetailsActivity extends AppCompatActivity {
                 if(permissionFineLocation != PackageManager.PERMISSION_GRANTED) {
                     // explain to activate permission
                     Context context = getApplicationContext();
-                    CharSequence text = "To reach the destination, you have to granted location permission!";
+                    CharSequence text = "To reach the destination, you have to grant location permission!";
                     int duration = Toast.LENGTH_SHORT;
 
                     Toast toast = Toast.makeText(context, text, duration);
@@ -290,6 +290,12 @@ public class DetailsActivity extends AppCompatActivity {
     }
 
 
+    /**
+     * Function to reach the web page associated to the url
+     *
+     * @param url The url to reach
+     * @author Claudia Di Marco & Riccardo Mantini
+     */
     private void goToUrl (String url) {
         Uri uriUrl = Uri.parse(url);
         Intent launchBrowser = new Intent(Intent.ACTION_VIEW, uriUrl);
