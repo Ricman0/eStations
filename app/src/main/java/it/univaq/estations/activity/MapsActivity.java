@@ -2,8 +2,10 @@ package it.univaq.estations.activity;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
@@ -15,6 +17,7 @@ import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
@@ -96,6 +99,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             // do what i need
         }
     };
+    private boolean stopAsking = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -145,6 +149,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         if(mapFragment != null ) mapFragment.getMapAsync(this); //Objects.requireNonNull(mapFragment).getMapAsync(this);
+
+        int permissionFineLocation = ContextCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_FINE_LOCATION);
+        if(permissionFineLocation != PackageManager.PERMISSION_GRANTED) {
+                // No explanation needed, we can request the permission.
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                        PERMISSIONS_REQUEST_FINE_LOCATION);
+        }
+
 
         //add click listener to the navigationToStation button
         ImageView icon = findViewById(R.id.iconToStationListActivity);
@@ -201,6 +214,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
         estationMarker.setTag(n.getId());
 
+        // Lister to add custom behaviour to click on a marker
         mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
             @Override
             public boolean onMarkerClick(final Marker marker) {
@@ -216,7 +230,18 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 context.startActivity(intent);
                 overridePendingTransition(R.anim.slide_in_right,R.anim.slide_out_left);
-                return false;
+
+                // check permission to add or not navigation elements
+                int permissionFineLocation = ContextCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_FINE_LOCATION);
+                if(permissionFineLocation != PackageManager.PERMISSION_GRANTED) {
+                    // don't add navigation elements but show marker title
+                    marker.showInfoWindow();
+                    return true;
+                }
+                else{
+                    // to add navigation elements
+                    return false;
+                }
             }
         });
     }
@@ -394,16 +419,18 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     protected void onResume() {
         super.onResume();
         if(mMap != null) {
+            System.out.println("NMAP NOT NULL ");
             locationService = new GoogleLocationService();
             locationService.onCreate(this, this);
-            if (!locationService.requestLastLocation(this)){
+            if (!locationService.requestLastLocation(this) && !stopAsking){
                 // richiedo permessi
                 ActivityCompat.requestPermissions(MapsActivity.this, new String[] {
                         Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSIONS_REQUEST_FINE_LOCATION);
             }
             //todo: da eliminare ??
 //        registerReceiver(mReceiver, new IntentFilter(PermissionService.PERMISSION_GRANTED));
-        }
+        }    else {        System.out.println("NMAP NULL ");}
+
     }
 
     @Override
@@ -625,6 +652,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 }
                 else{
                     // deny
+                    stopAsking = true;
                 }
                 break;
 
