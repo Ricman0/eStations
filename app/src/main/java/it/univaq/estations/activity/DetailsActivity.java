@@ -1,12 +1,17 @@
 package it.univaq.estations.activity;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.Manifest;
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -15,6 +20,7 @@ import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.android.volley.Response;
 
@@ -46,6 +52,7 @@ public class DetailsActivity extends AppCompatActivity {
     Thread threadToLoadStationFromDB;
     private static final int LOAD_STATION_COMPLETED = 100;
     private String urlImage = "";
+    private Activity activity;
 
 
     @Override
@@ -57,7 +64,7 @@ public class DetailsActivity extends AppCompatActivity {
         getSupportActionBar().setTitle("E-stations");
         getSupportActionBar().setSubtitle("Station Details");
 
-
+        activity = this;
         context = getApplicationContext();
         managePointsOfChargeRecyclerView();
 
@@ -111,7 +118,19 @@ public class DetailsActivity extends AppCompatActivity {
         ImageButton button = findViewById(R.id.navigateToStation);
         button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                reachDestination();
+                int permissionFineLocation = ContextCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_FINE_LOCATION);
+                if(permissionFineLocation != PackageManager.PERMISSION_GRANTED) {
+                    // explain to activate permission
+                    Context context = getApplicationContext();
+                    CharSequence text = "To reach the destination, you have to granted location permission!";
+                    int duration = Toast.LENGTH_SHORT;
+
+                    Toast toast = Toast.makeText(context, text, duration);
+                    toast.show();
+                }
+                else {
+                    reachDestination();
+                }
             }
         });
     }
@@ -179,6 +198,14 @@ public class DetailsActivity extends AppCompatActivity {
         stationAddress.setText(station.getAddress());
         stationUrl.setText(station.getUrl());
         stationNumPointsOfCharge.setText(String.valueOf(station.getNumberOfPointsOfCharge()));
+
+        // disable navigateToStation button when permission is disabled
+        int permissionFineLocation = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
+        if(permissionFineLocation != PackageManager.PERMISSION_GRANTED) {
+            // non concessi
+            ImageButton button = (ImageButton) this.findViewById(R.id.navigateToStation);
+            button.setColorFilter(ContextCompat.getColor(context, R.color.disabled_color));
+        }
     }
 
     public void managePointsOfChargeRecyclerView(){
@@ -227,8 +254,7 @@ public class DetailsActivity extends AppCompatActivity {
         imageStation.setImageBitmap(newImage);
     }
 
-
-
+    
     /**
      * Function to define a custom behaviour for the actionBar arrow back.
      *

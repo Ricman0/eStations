@@ -13,4 +13,5 @@
     <color name="background_color">#FEFFFE</color>
     <color name="grigio_color">#666666</color>
     <color name="white">#D0FFFFFF</color>
+    <color name="disabled_color">#dddddd</color>
 </resources>
