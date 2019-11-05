@@ -11,6 +11,10 @@ import androidx.core.content.ContextCompat;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationAvailability;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnSuccessListener;
 
@@ -19,6 +23,21 @@ public class GoogleLocationService {
     private FusedLocationProviderClient providerClient;
 
     private GoogleLocationService.LocationListener listener;
+
+    private LocationCallback locationCallback = new LocationCallback() {
+
+        @Override
+        public void onLocationResult(LocationResult locationResult) {
+            super.onLocationResult(locationResult);
+            if(listener != null) listener.onLastLocationResult(locationResult.getLastLocation());
+        }
+
+        @Override
+        public void onLocationAvailability(LocationAvailability locationAvailability) {
+            super.onLocationAvailability(locationAvailability);
+            System.out.println("Is location available? " + locationAvailability.isLocationAvailable());
+        }
+    };
 
     public void onCreate(Activity activity, GoogleLocationService.LocationListener listener){
         // client per fare la richiesta per ottenere la locazione
@@ -38,7 +57,6 @@ public class GoogleLocationService {
     }
 
 
-
     /**
      * Get the last known location
      *
@@ -53,7 +71,7 @@ public class GoogleLocationService {
             {
                 if(areGoogleServicesAvailable(activity)) {
                     if (LocationService.LOCATION_CHANGED == true || LocationService.getInstance().getCurrentLocation() == null) {
-
+                        System.out.println(" onrequestLastLocation  LOCATION_CHANGED == true o  CurrentLocation() == null");
                         providerClient.getLastLocation()
                                 .addOnSuccessListener(activity, new OnSuccessListener<Location>() {
                                     @Override
@@ -68,6 +86,8 @@ public class GoogleLocationService {
                                 });
                     }
                     else{
+                        System.out.println(" onrequestLastLocation  Lcarico dal db");
+
                         listener.onLoadAllStationFromDB();
                     }
                 }
@@ -75,8 +95,43 @@ public class GoogleLocationService {
                 return true;
         }
         else{
+            System.out.println(" onrequestLastLocation  permessi non concessi");
+
             listener.onPermissionNotGranted();
             return false;
+        }
+    }
+
+    /**
+     * Request locations updates.
+     *
+     * @param context the context of the application
+     * @return true if the permissions are granted and api is available or false otherwise
+     */
+    public boolean requestLocationUpdates(Context context){
+        System.out.println("onrequestLocationUpdates");
+
+
+        int permissionFineLocation = ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION);
+        if(permissionFineLocation == PackageManager.PERMISSION_GRANTED) {
+
+            if(areGoogleServicesAvailable(context)) {
+                LocationRequest request = new LocationRequest();
+                request.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+                request.setInterval(10000);
+                request.setFastestInterval(5000);
+
+                providerClient.requestLocationUpdates(request, locationCallback, null);
+
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public void stopLocationUpdates(Context context){
+        if(areGoogleServicesAvailable(context)) {
+            providerClient.removeLocationUpdates(locationCallback);
         }
     }
 

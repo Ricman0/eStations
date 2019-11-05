@@ -2,14 +2,19 @@ package it.univaq.estations.activity;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -79,6 +84,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private  static final float DEFAULT_ZOOM = 12;
 
+    private boolean stopAsking = false;
+    private boolean firstTime = true;
+
 
     private BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override
@@ -86,8 +94,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             // do what i need
         }
     };
-    private boolean stopAsking = false;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -101,9 +107,33 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         appDB = Database.getInstance(getApplicationContext());
         stations = new ArrayList<>();
 
-        //todo: da cancellare se tutto andrà per il meglio
-//        // client per fare la richiesta per ottenere la locazione
-//        mfusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+        ImageView icon = findViewById(R.id.iconToStationListActivity);
+
+//        ConnectivityManager cm =
+//                (ConnectivityManager)getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+//
+//        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+//        boolean isConnected = (activeNetwork != null &&
+//                activeNetwork.isConnectedOrConnecting());
+//        if (!isConnected){
+//            AlertDialog dialog = new AlertDialog.Builder(getApplicationContext())
+//                    .setTitle("Connection Failed")
+//                    .setMessage("Please Check Your Internet Connection")
+//                    .setPositiveButton("Try Again", new DialogInterface.OnClickListener() {
+//                        @Override
+//                        public void onClick(DialogInterface dialogInterface, int i) {
+//                            //Code for try again
+//                        }
+//                    })
+//                    .setNegativeButton("Exit", new DialogInterface.OnClickListener() {
+//                        @Override
+//                        public void onClick(DialogInterface dialogInterface, int i) {
+//
+//                        }
+//                    }).create();
+//            dialog.show();
+//        }
+//        finish();
 
         // todo: mHandler da cancellare se si può usare il receveir
         mHandler = new Handler() {
@@ -123,12 +153,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 if (msg.what == ALL_STATIONS_DELETED) {
                     stations.clear();
                     System.out.println("All station deleted 2");
+                    icon.setEnabled(false);
+                    icon.setBackgroundColor(Color.LTGRAY);
+
                     downloadDataBoundedInBoundingBox();
                     for (int y = 0; y < stations.size(); y++)
                     {
                         addEStationMarker(stations.get(y));
                     }
                     System.out.println("added marker");
+
                 }
             }
         };
@@ -149,7 +183,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
 
         //add click listener to the navigationToStation button
-        ImageView icon = findViewById(R.id.iconToStationListActivity);
         icon.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 // Open another Activity and pass to it the right station
@@ -407,13 +440,18 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         super.onResume();
         stations.clear();
         if(mMap != null) {
-            System.out.println("NMAP NOT NULL ");
+            System.out.println(" onResume  NMAP NOT NULL ");
             locationService = new GoogleLocationService();
             locationService.onCreate(this, this);
-            if (!locationService.requestLastLocation(this) && !stopAsking){
+            if (!locationService.requestLocationUpdates(this) && !stopAsking){
                 // richiedo permessi
                 ActivityCompat.requestPermissions(MapsActivity.this, new String[] {
                         Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSIONS_REQUEST_FINE_LOCATION);
+            }
+            else{
+
+                System.out.println(" onResume  non chiedo i permessi");
+
             }
             //todo: da eliminare ??
 //        registerReceiver(mReceiver, new IntentFilter(PermissionService.PERMISSION_GRANTED));
@@ -434,7 +472,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private void clearDataFromDB(){
 
         stations.clear();
-        System.out.println("clearDataFromDB");
         Thread ThreadToClearDataFromDB = new Thread(new Runnable() {
             @Override
             public void run() {
@@ -443,10 +480,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 Message message = new Message();
                 message.what = ALL_STATIONS_DELETED;
                 mHandler.sendMessage(message);
-                int x = Database.getInstance(getApplicationContext())
-                        .getStationDao().howManyStationInDB();
-                System.out.println("station on db : " + x);
-                System.out.println("All station deleted");
             }
         });
         ThreadToClearDataFromDB.start();
@@ -532,23 +565,18 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                 stations.add(station);
                             }
 
+                            ImageView icon = findViewById(R.id.iconToStationListActivity);
+
+                            icon.setEnabled(true);
+                            icon.setBackgroundColor(Color.parseColor("#BFFFFFFF"));
 
                             Thread threadToSaveStationsInDB = new Thread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    int x = Database.getInstance(getApplicationContext())
-                                            .getStationDao().howManyStationInDB();
-                                    System.out.println(" downloadData3 station on db : " + x);
                                     saveStationsDataInDB();
-                                     x = Database.getInstance(getApplicationContext())
-                                            .getStationDao().howManyStationInDB();
-                                    System.out.println(" downloadData4 station on db : " + x);
                                     Message message = new Message();
                                     message.what = ALL_STATIONS_SAVED;
                                     mHandler.sendMessage(message);
-                                     x = Database.getInstance(getApplicationContext())
-                                            .getStationDao().howManyStationInDB();
-                                    System.out.println(" downloadData5 station on db : " + x);
                                 }
                             });
                             threadToSaveStationsInDB.start();
@@ -568,7 +596,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
      * @author Claudia Di Marco & Riccardo Mantini
      */
     private void saveStationsDataInDB(){
-        System.out.println(" saveStationsDataInDB stations.size() : " + stations.size());
         // per ogni stazione salva la stazione e tutti i suoi punti di ricarica
         for (int k = 0; k < stations.size(); k++)
         {
@@ -580,9 +607,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 appDB.getPointOfChargeDao().save(pointOfChargeToSave); // salvo il punto di ricarica
             }
         }
-        int x = Database.getInstance(getApplicationContext())
-                .getStationDao().howManyStationInDB();
-        System.out.println(" saveStationsDataInDB station on db : " + x);
     }
 
     @Override
@@ -596,9 +620,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         LocationService.getInstance().setCurrentLocation(currentPos);
         clearDataFromDB();
         LocationService.LOCATION_CHANGED = false;
-        mMap.setMyLocationEnabled(true); // richiede i permetti di access_fine o coarse
-        mUiSettings.setMyLocationButtonEnabled(true);
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentPos, DEFAULT_ZOOM));
+        if(firstTime){
+            mMap.setMyLocationEnabled(true); // richiede i permetti di access_fine o coarse
+            mUiSettings.setMyLocationButtonEnabled(true);
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentPos, DEFAULT_ZOOM));
+            firstTime = false;
+        }
+
     }
 
     @Override
@@ -656,6 +684,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     //allow
                     // on resume viene richiamato non appena il popup sparisce
+
 
                 }
                 else{
@@ -834,6 +863,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     protected void onStop() {
         super.onStop();
+        locationService.stopLocationUpdates(this);
     }
 }
 
