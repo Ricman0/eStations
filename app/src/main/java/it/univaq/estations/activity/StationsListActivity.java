@@ -305,7 +305,9 @@ public class StationsListActivity extends AppCompatActivity {
 
     @Override
     protected void onPause() {
-
+        if(threadToLoadAllStationsFromDB.isAlive()){
+            threadToLoadAllStationsFromDB.interrupt();
+        }
         super.onPause();
     }
 

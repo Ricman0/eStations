@@ -57,49 +57,38 @@ import it.univaq.estations.utility.VolleyRequest;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, GoogleLocationService.LocationListener {
 
-    private static final int PERMISSIONS_REQUEST_FINE_LOCATION = 1 ;
-    private GoogleMap mMap;
-    private UiSettings mUiSettings;
-
-    private List<Station> stations = new ArrayList<>();
-
-    //private MyListener listener = new MyListener(); se serve decommentare
-
-    private GoogleLocationService locationService;
-
-    //private FusedLocationProviderClient mfusedLocationClient; il client è nella classe di utility
-
-    private LatLng currentPos;
-    private LatLng  mDefaultLocation;
-
     private Context context;
     private Activity activity;
     private Database appDB;
 
+    private GoogleMap mMap;
+    private UiSettings mUiSettings;
+    private GoogleLocationService locationService;
+
+    private List<Station> stations = new ArrayList<>();
+    private LatLng currentPos;
+    private LatLng  mDefaultLocation;
+    private  static final float DEFAULT_ZOOM = 12;
+    private static final int PERMISSIONS_REQUEST_FINE_LOCATION = 1 ;
+
     Handler mHandler;
     Thread threadToLoadAllStationsFromDB;
+    Thread threadToClearDataFromDB;
+    Thread threadToSaveStationsInDB;
+
     private static final int ALL_STATIONS_LOADED = 101;
     private static final int ALL_STATIONS_SAVED = 102;
     private static final int ALL_STATIONS_DELETED = 103;
 
-    private  static final float DEFAULT_ZOOM = 12;
-
-    private boolean stopAsking = false;
+    private boolean stopAsking = false; // avoid keep asking for location permission if deny
     private boolean firstTime = true;
 
-
-    private BroadcastReceiver mReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            // do what i need
-        }
-    };
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         this.setContentView(R.layout.activity_maps);
 
-        mDefaultLocation = new LatLng( 42.4584, 14.216090);
+        mDefaultLocation = new LatLng( 42.4584, 14.216090); //DefaultLocation Pescara
         currentPos = null;
 
         context = this.getApplicationContext();
@@ -107,33 +96,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         appDB = Database.getInstance(getApplicationContext());
         stations = new ArrayList<>();
 
-        ImageView icon = findViewById(R.id.iconToStationListActivity);
+        ImageView iconToStationListActivity = findViewById(R.id.iconToStationListActivity);
 
-//        ConnectivityManager cm =
-//                (ConnectivityManager)getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
-//
-//        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
-//        boolean isConnected = (activeNetwork != null &&
-//                activeNetwork.isConnectedOrConnecting());
-//        if (!isConnected){
-//            AlertDialog dialog = new AlertDialog.Builder(getApplicationContext())
-//                    .setTitle("Connection Failed")
-//                    .setMessage("Please Check Your Internet Connection")
-//                    .setPositiveButton("Try Again", new DialogInterface.OnClickListener() {
-//                        @Override
-//                        public void onClick(DialogInterface dialogInterface, int i) {
-//                            //Code for try again
-//                        }
-//                    })
-//                    .setNegativeButton("Exit", new DialogInterface.OnClickListener() {
-//                        @Override
-//                        public void onClick(DialogInterface dialogInterface, int i) {
-//
-//                        }
-//                    }).create();
-//            dialog.show();
-//        }
-//        finish();
+       // checkConnection();
 
         // todo: mHandler da cancellare se si può usare il receveir
         mHandler = new Handler() {
@@ -143,6 +108,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                 super.handleMessage(msg);
                 if (msg.what == ALL_STATIONS_LOADED || msg.what == ALL_STATIONS_SAVED) {
+
+                    iconToStationListActivity.setEnabled(true);
+                    iconToStationListActivity.setBackgroundColor(ContextCompat.getColor(context, R.color.transparent_white));
                     // per ogni stazione aggiungi un marker
                     for (int y = 0; y < stations.size(); y++)
                     {
@@ -152,21 +120,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 }
                 if (msg.what == ALL_STATIONS_DELETED) {
                     stations.clear();
-                    System.out.println("All station deleted 2");
-                    icon.setEnabled(false);
-                    icon.setBackgroundColor(Color.LTGRAY);
+                    iconToStationListActivity.setEnabled(false);
+                    iconToStationListActivity.setBackgroundColor(ContextCompat.getColor(context, R.color.disabled_color));
 
                     downloadDataBoundedInBoundingBox();
                     for (int y = 0; y < stations.size(); y++)
                     {
                         addEStationMarker(stations.get(y));
                     }
-                    System.out.println("added marker");
-
                 }
             }
         };
-
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -181,9 +145,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         PERMISSIONS_REQUEST_FINE_LOCATION);
         }
 
-
         //add click listener to the navigationToStation button
-        icon.setOnClickListener(new View.OnClickListener() {
+        iconToStationListActivity.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 // Open another Activity and pass to it the right station
                 //new Intent object: Il costruttore, in caso di intent esplicito, richiede due parametri: il Context (che, nel nostro caso, è l’activity che vuole chiamare la seconda) e la classe che riceverà l’intent, cioè l’activity che vogliamo richiamare.
@@ -194,7 +157,45 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 overridePendingTransition(R.anim.slide_in_right,R.anim.slide_out_left);
             }
         });
+    }
 
+    /**
+     * Function to check if is available an Internet connection
+     *
+     * @author Claudia Di Marco & Riccardo Mantini
+     */
+    public void checkConnection(){
+        ConnectivityManager cm =
+                (ConnectivityManager)getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        boolean isConnected = (activeNetwork != null &&
+                activeNetwork.isConnectedOrConnecting());
+        if (!isConnected){
+            this.setTheme(R.style.AlertDialogEstationsTheme);
+            AlertDialog dialog = new AlertDialog.Builder(this)
+                    .setTitle(R.string.titleAlertDialogConnectionFailed)
+                    .setCancelable(false)
+                    .setMessage(R.string.messageAlertDialogConnectionFailed)
+                    .setPositiveButton(R.string.positiveButtonAlertDialogConnectionFailed, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+
+                            dialogInterface.dismiss();
+                            checkConnection();
+                        }
+                    })
+                    .setNegativeButton(R.string.negativeButtonAlertDialogConnectionFailed, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+
+                            finishAffinity();
+                            System.exit(0);
+
+                        }
+                    }).create();
+            dialog.show();
+        }
     }
 
     /**
@@ -210,8 +211,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 mMap.getProjection().getVisibleRegion().latLngBounds.southwest.longitude );
         LatLng bottomRightCorner = new LatLng(mMap.getProjection().getVisibleRegion().latLngBounds.southwest.latitude,
                 mMap.getProjection().getVisibleRegion().latLngBounds.northeast.longitude);
-
-        // downloadData
 
         downloadData(topLeftCorner, bottomRightCorner);
     }
@@ -269,40 +268,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         });
     }
 
-    private BitmapDescriptor bitmapDescriptorFromVector(Context context, @DrawableRes int vectorDrawableResourceId) {
-        Drawable background = ContextCompat.getDrawable(context, R.drawable.ic_battery_charging_90_black_24dp);
-        background.setBounds(0, 0, background.getIntrinsicWidth(), background.getIntrinsicHeight());
-        Drawable vectorDrawable = ContextCompat.getDrawable(context, vectorDrawableResourceId);
-        vectorDrawable.setBounds(40, 20, vectorDrawable.getIntrinsicWidth() + 40, vectorDrawable.getIntrinsicHeight() + 20);
-        Bitmap bitmap = Bitmap.createBitmap(background.getIntrinsicWidth(), background.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(bitmap);
-        background.draw(canvas);
-        vectorDrawable.draw(canvas);
-        return BitmapDescriptorFactory.fromBitmap(bitmap);
-    }
-
-    /**
-     * Demonstrates converting a {@link Drawable} to a {@link BitmapDescriptor},
-     * for use as a marker icon_green.
-     */
-    private BitmapDescriptor vectorToBitmap(@DrawableRes int id) {
-        Drawable vectorDrawable = ResourcesCompat.getDrawable(getResources(), id, null);
-        Bitmap bitmap = Bitmap.createBitmap((vectorDrawable.getIntrinsicWidth()),
-                (vectorDrawable.getIntrinsicHeight()), Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(bitmap);
-        vectorDrawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
-        //DrawableCompat.setTint(vectorDrawable, color);
-        vectorDrawable.draw(canvas);
-        return BitmapDescriptorFactory.fromBitmap(bitmap);
-    }
-
-
-    @Override
-    protected void onDestroy(){
-        unregisterReceiver(mReceiver);
-        super.onDestroy();
-    }
-
     /**
      * Manipulates the map once available.
      * This callback is triggered when the map is ready to be used.
@@ -325,11 +290,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap.setOnCameraIdleListener(new GoogleMap.OnCameraIdleListener() {
             @Override
             public void onCameraIdle() {
+                checkConnection();
                 // clear data in  the DB and then get bounding box and download data
-                System.out.println("onCameraIdle clear db");
                  clearDataFromDB();
-//                    // get bounding box and download data
-//                    downloadDataBoundedInBoundingBox();
             }
         });
         locationService = new GoogleLocationService();
@@ -337,108 +300,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         locationService.requestLastLocation(this);
     }
 
-
-
-
-//    private void updateLocationUI() {
-//        if (mMap == null) {
-//            return;
-//        }
-//        try {
-//            PermissionService.getInstance().permissionsCheck(context, activity);
-//            if (PermissionService.getInstance().isFineLocationPermissionGranted()) {
-//                mMap.setMyLocationEnabled(true); // richiede i permetti di access_fine o coarse
-//                mUiSettings.setMyLocationButtonEnabled(true); //Sets the preference for whether rotate gestures should be enabled or disabled.
-//            } else {
-//                mMap.setMyLocationEnabled(false);
-//                mMap.getUiSettings().setMyLocationButtonEnabled(false);
-//                PermissionService.getInstance().permissionsCheck(context, activity);
-//            }
-//        } catch (SecurityException e)  {
-//            Log.e("Exception: %s", e.getMessage());
-//        }
-//    }
-
-//    private void getDeviceLocation() {
-//        /*
-//         * Get the best and most recent location of the device, which may be null in rare
-//         * cases when a location is not available.
-//         */
-//        try {
-//            PermissionService.getInstance().permissionsCheck(context, activity);
-//            if (PermissionService.getInstance().isFineLocationPermissionGranted()) {
-//                if (LocationService.LOCATION_CHANGED == true || LocationService.getInstance().getCurrentLocation() == null)
-//                {
-//                    mfusedLocationClient.getLastLocation()
-//                            .addOnSuccessListener(this, new OnSuccessListener<Location>() {
-//                                @Override
-//                                public void onSuccess(Location location) {
-//                                    if (location != null) {
-//                                        currentPos = new LatLng(location.getLatitude(), location.getLongitude());
-//                                        if(LocationService.getInstance().getPreviousLocation() == null)
-//                                        {
-//                                            // inizialmente pongo previous e current position alla stessa posizione
-//                                            LocationService.getInstance().setPreviousLocation(currentPos);
-//                                        }
-//                                        LocationService.getInstance().setCurrentLocation(currentPos);
-//                                        clearDataFromDB();
-//                                        LocationService.LOCATION_CHANGED = false;
-//                                        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentPos, DEFAULT_ZOOM));
-//                                    }
-//                                    else {
-//                                        // move the camera and add a marker in my position
-//                                        mMap.moveCamera(CameraUpdateFactory.newLatLng(mDefaultLocation));
-//                                        mMap.animateCamera(CameraUpdateFactory.zoomTo(12.0f));
-//                                       // mMap.getUiSettings().setMyLocationButtonEnabled(false);
-//
-//                                    }
-//                                }
-//                            });
-//                }
-//                else{
-//                    currentPos = LocationService.getInstance().getCurrentLocation();
-//
-//                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentPos, DEFAULT_ZOOM));
-//
-//                    threadToLoadAllStationsFromDB = new Thread(new Runnable() {
-//                        @Override
-//                        public void run() {
-//                            stations.clear();
-//                            //get stations and all pointOFCharges from database
-//                            stations.addAll(appDB.getStationDao().getAllStations()); // get all stations without theirs pointOFCharges
-//                            for (int k = 0; k < stations.size(); k++) {
-//                                Station stationToFill = stations.get(k);
-//                                stationToFill.addPointOfChargeList(appDB.getPointOfChargeDao().getAllStationPointsOfCharge(stationToFill.getId()));
-//                            }
-//                            Message message = new Message();
-//                            message.what = ALL_STATIONS_LOADED;
-//                            mHandler.sendMessage(message);
-//                        }
-//                    });
-//
-//                    threadToLoadAllStationsFromDB.start();
-//                }
-//
-//            }
-//            else
-//            {
-//                currentPos = mDefaultLocation;
-//                if(LocationService.getInstance().getPreviousLocation() == null)
-//                {
-//                    // inizialmente pongo previous e current position alla stessa posizione
-//                    LocationService.getInstance().setPreviousLocation(currentPos);
-//                }
-//                LocationService.getInstance().setCurrentLocation(currentPos);
-//                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mDefaultLocation, DEFAULT_ZOOM));
-//            }
-//        } catch(SecurityException e)  {
-//            Log.e("Exception: %s", e.getMessage());
-//        }
-//    }
-
     protected void onResume() {
         super.onResume();
         stations.clear();
+        checkConnection();
         if(mMap != null) {
             System.out.println(" onResume  NMAP NOT NULL ");
             locationService = new GoogleLocationService();
@@ -448,20 +313,38 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 ActivityCompat.requestPermissions(MapsActivity.this, new String[] {
                         Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSIONS_REQUEST_FINE_LOCATION);
             }
-            else{
-
-                System.out.println(" onResume  non chiedo i permessi");
-
+            else {
+                System.out.println(" onResume non chiedo i permessi ");
             }
-            //todo: da eliminare ??
-//        registerReceiver(mReceiver, new IntentFilter(PermissionService.PERMISSION_GRANTED));
-        }    else {        System.out.println("NMAP NULL ");}
-
+        }
+        else {
+            System.out.println("NMAP NULL ");
+        }
     }
 
     @Override
     protected void onPause() {
         super.onPause();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        locationService.stopLocationUpdates(this);
+        if(threadToLoadAllStationsFromDB != null && threadToLoadAllStationsFromDB.isAlive()){
+            threadToLoadAllStationsFromDB.interrupt();
+        }
+        if(threadToClearDataFromDB != null && threadToClearDataFromDB.isAlive()){
+            threadToClearDataFromDB.interrupt();
+        }
+        if(threadToSaveStationsInDB != null && threadToSaveStationsInDB.isAlive()){
+            threadToSaveStationsInDB.interrupt();
+        }
+    }
+
+    @Override
+    protected void onDestroy(){
+        super.onDestroy();
     }
 
     /**
@@ -472,7 +355,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private void clearDataFromDB(){
 
         stations.clear();
-        Thread ThreadToClearDataFromDB = new Thread(new Runnable() {
+        threadToClearDataFromDB = new Thread(new Runnable() {
             @Override
             public void run() {
                 Database.getInstance(getApplicationContext())
@@ -482,7 +365,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 mHandler.sendMessage(message);
             }
         });
-        ThreadToClearDataFromDB.start();
+        threadToClearDataFromDB.start();
     }
 
     /**
@@ -565,12 +448,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                 stations.add(station);
                             }
 
-                            ImageView icon = findViewById(R.id.iconToStationListActivity);
-
-                            icon.setEnabled(true);
-                            icon.setBackgroundColor(Color.parseColor("#BFFFFFFF"));
-
-                            Thread threadToSaveStationsInDB = new Thread(new Runnable() {
+                            threadToSaveStationsInDB = new Thread(new Runnable() {
                                 @Override
                                 public void run() {
                                     saveStationsDataInDB();
@@ -584,8 +462,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
-
-
                     }
                 }, currentPos, null, topLeftCorner, bottomRightCorner);
     }
@@ -646,8 +522,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
         LocationService.getInstance().setCurrentLocation(currentPos);
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mDefaultLocation, DEFAULT_ZOOM));
-//        ActivityCompat.requestPermissions(MapsActivity.this, new String[] {
-//                Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSIONS_REQUEST_FINE_LOCATION);
     }
 
     @Override
@@ -682,10 +556,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         switch (requestCode) {
             case PERMISSIONS_REQUEST_FINE_LOCATION:
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    //allow
-                    // on resume viene richiamato non appena il popup sparisce
-
-
+                    //allow  // on resume viene richiamato non appena il popup sparisce
                 }
                 else{
                     // deny
@@ -701,170 +572,37 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
 
-//    /**
-//     * Returns whether the checkbox with the given id is checked.
-//     */
-//    private boolean isChecked(int id) {
-//        return ((CheckBox) findViewById(id)).isChecked();
-//    }
-//
-//    /**
-//     * Checks if the map is ready (which depends on whether the Google Play services APK is
-//     * available. This should be called prior to calling any methods on GoogleMap.
-//     */
-//    private boolean checkReady() {
-//        if (mMap == null) {
-//            Toast.makeText(this, R.string.map_not_ready, Toast.LENGTH_SHORT).show();
-//            return false;
-//        }
-//        return true;
-//    }
-//
-//    public void setZoomButtonsEnabled(View v) {
-//        if (!checkReady()) {
-//            return;
-//        }
-//        // Enables/disables the zoom controls (+/- buttons in the bottom-right of the map for LTR
-//        // locale or bottom-left for RTL locale).
-//        mUiSettings.setZoomControlsEnabled(((CheckBox) v).isChecked());
-//    }
-//
-//    public void setCompassEnabled(View v) {
-//        if (!checkReady()) {
-//            return;
-//        }
-//        // Enables/disables the compass (icon_green in the top-left for LTR locale or top-right for RTL
-//        // locale that indicates the orientation of the map).
-//        mUiSettings.setCompassEnabled(((CheckBox) v).isChecked());
-//    }
-//
-//    public void setMyLocationButtonEnabled(View v) {
-//        if (!checkReady()) {
-//            return;
-//        }
-//        // Enables/disables the my location button (this DOES NOT enable/disable the my location
-//        // dot/chevron on the map). The my location button will never appear if the my location
-//        // layer is not enabled.
-//        // First verify that the location permission has been granted.
-//        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION)
-//                == PackageManager.PERMISSION_GRANTED) {
-//            mUiSettings.setMyLocationButtonEnabled(true);
-//        } else {
-//            // Uncheck the box and request missing location permission.
-//            mMyLocationButtonCheckbox.setChecked(false);
-//         //   requestLocationPermission(MY_LOCATION_PERMISSION_REQUEST_CODE); // commentato quando ho coomentato tutta la parte dei permessi
-//        }
-//    }
-//
-//    public void setMyLocationLayerEnabled(View v) {
-//        if (!checkReady()) {
-//            return;
-//        }
-//        // Enables/disables the my location layer (i.e., the dot/chevron on the map). If enabled, it
-//        // will also cause the my location button to show (if it is enabled); if disabled, the my
-//        // location button will never show.
-//        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION)
-//                == PackageManager.PERMISSION_GRANTED) {
-//            mMap.setMyLocationEnabled(mMyLocationLayerCheckbox.isChecked());
-//        } else {
-//            // Uncheck the box and request missing location permission.
-//            mMyLocationLayerCheckbox.setChecked(false);
-////            PermissionUtils.requestPermission(this, LOCATION_LAYER_PERMISSION_REQUEST_CODE,
-////                    android.Manifest.permission.ACCESS_FINE_LOCATION, false); // commentato quando ho coomentato i permessi
-//        }
-//    }
-//
-//    public void setScrollGesturesEnabled(View v) {
-//        if (!checkReady()) {
-//            return;
-//        }
-//        // Enables/disables scroll gestures (i.e. panning the map).
-//        mUiSettings.setScrollGesturesEnabled(((CheckBox) v).isChecked());
-//    }
-//
-//    public void setZoomGesturesEnabled(View v) {
-//        if (!checkReady()) {
-//            return;
-//        }
-//        // Enables/disables zoom gestures (i.e., double tap, pinch & stretch).
-//        mUiSettings.setZoomGesturesEnabled(((CheckBox) v).isChecked());
-//    }
-//
-//    public void setTiltGesturesEnabled(View v) {
-//        if (!checkReady()) {
-//            return;
-//        }
-//        // Enables/disables tilt gestures.
-//        mUiSettings.setTiltGesturesEnabled(((CheckBox) v).isChecked());
-//    }
-//
-//    public void setRotateGesturesEnabled(View v) {
-//        if (!checkReady()) {
-//            return;
-//        }
-//        // Enables/disables rotate gestures.
-//        mUiSettings.setRotateGesturesEnabled(((CheckBox) v).isChecked());
-//    }
-
-//    /**
-//     * Requests the fine location permission. If a rationale with an additional explanation should
-//     * be shown to the user, displays a dialog that triggers the request.
-//     */
-//    public void requestLocationPermission(int requestCode) {
-//        if (ActivityCompat.shouldShowRequestPermissionRationale(this,
-//                Manifest.permission.ACCESS_FINE_LOCATION)) {
-//            // Display a dialog with rationale.
-//            PermissionUtils.RationaleDialog
-//                    .newInstance(requestCode, false).show(
-//                    getSupportFragmentManager(), "dialog");
-//        } else {
-//            // Location permission has not been granted yet, request it.
-//            PermissionUtils.requestPermission(this, requestCode,
-//                    Manifest.permission.ACCESS_FINE_LOCATION, false);
-//        }
-//    }
-//
-//    @Override
-//    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
-//                                           @NonNull int[] grantResults) {
-//        if (requestCode == MY_LOCATION_PERMISSION_REQUEST_CODE) {
-//            // Enable the My Location button if the permission has been granted.
-//            if (PermissionUtils.isPermissionGranted(permissions, grantResults,
-//                    Manifest.permission.ACCESS_FINE_LOCATION)) {
-//                mUiSettings.setMyLocationButtonEnabled(true);
-//                mMyLocationButtonCheckbox.setChecked(true);
-//            } else {
-//                mLocationPermissionDenied = true;
-//            }
-//
-//        } else if (requestCode == LOCATION_LAYER_PERMISSION_REQUEST_CODE) {
-//            // Enable the My Location layer if the permission has been granted.
-//            if (PermissionUtils.isPermissionGranted(permissions, grantResults,
-//                    Manifest.permission.ACCESS_FINE_LOCATION)) {
-//                mMap.setMyLocationEnabled(true);
-//                mMyLocationLayerCheckbox.setChecked(true);
-//            } else {
-//                mLocationPermissionDenied = true;
-//            }
-//        }
-//    }
-//
-//    @Override
-//    protected void onResumeFragments() {
-//        super.onResumeFragments();
-//        if (mLocationPermissionDenied) {
-//            PermissionUtils.PermissionDeniedDialog
-//                    .newInstance(false).show(getSupportFragmentManager(), "dialog");
-//            mLocationPermissionDenied = false;
-//        }
-//    }
 
 
-    @Override
-    protected void onStop() {
-        super.onStop();
-        locationService.stopLocationUpdates(this);
+
+    private BitmapDescriptor bitmapDescriptorFromVector(Context context, @DrawableRes int vectorDrawableResourceId) {
+        Drawable background = ContextCompat.getDrawable(context, R.drawable.ic_battery_charging_90_black_24dp);
+        background.setBounds(0, 0, background.getIntrinsicWidth(), background.getIntrinsicHeight());
+        Drawable vectorDrawable = ContextCompat.getDrawable(context, vectorDrawableResourceId);
+        vectorDrawable.setBounds(40, 20, vectorDrawable.getIntrinsicWidth() + 40, vectorDrawable.getIntrinsicHeight() + 20);
+        Bitmap bitmap = Bitmap.createBitmap(background.getIntrinsicWidth(), background.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        background.draw(canvas);
+        vectorDrawable.draw(canvas);
+        return BitmapDescriptorFactory.fromBitmap(bitmap);
     }
+
+    /**
+     * Demonstrates converting a {@link Drawable} to a {@link BitmapDescriptor},
+     * for use as a marker icon_green.
+     */
+    private BitmapDescriptor vectorToBitmap(@DrawableRes int id) {
+        Drawable vectorDrawable = ResourcesCompat.getDrawable(getResources(), id, null);
+        Bitmap bitmap = Bitmap.createBitmap((vectorDrawable.getIntrinsicWidth()),
+                (vectorDrawable.getIntrinsicHeight()), Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        vectorDrawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+        //DrawableCompat.setTint(vectorDrawable, color);
+        vectorDrawable.draw(canvas);
+        return BitmapDescriptorFactory.fromBitmap(bitmap);
+    }
+
+
 }
 
 

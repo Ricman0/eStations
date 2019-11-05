@@ -48,7 +48,6 @@ public class LocationService {
                 previousLocation.latitude, previousLocation.longitude, dist);
 
         if (dist[0] < targetDistanceInMeter) {
-
             this.LOCATION_CHANGED = false;
 
         } else {

@@ -142,7 +142,9 @@ public class DetailsActivity extends AppCompatActivity {
     @Override
     public void onPause(){
         super.onPause();
-        threadToLoadStationFromDB.interrupt();
+        if(threadToLoadStationFromDB.isAlive()) {
+            threadToLoadStationFromDB.interrupt();
+        }
     }
 
     @Override
