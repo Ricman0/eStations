@@ -6,8 +6,6 @@ import androidx.room.Room;
 import androidx.room.RoomDatabase;
 import androidx.room.TypeConverters;
 
-import com.google.android.gms.maps.model.LatLng;
-
 import it.univaq.estations.model.PointOfCharge;
 import it.univaq.estations.model.Station;
 

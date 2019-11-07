@@ -7,9 +7,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -19,11 +16,9 @@ import android.os.Message;
 import android.view.View;
 import android.widget.ImageView;
 
-import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-import androidx.core.content.res.ResourcesCompat;
 import androidx.fragment.app.FragmentActivity;
 
 import com.android.volley.Response;
@@ -32,7 +27,6 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.UiSettings;
-import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
@@ -65,9 +59,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private List<Station> stations = new ArrayList<>();
     private LatLng currentPos;
-    private LatLng  mDefaultLocation;
-    private  static final float DEFAULT_ZOOM = 12;
-    private static final int PERMISSIONS_REQUEST_FINE_LOCATION = 1 ;
+    private LatLng mDefaultLocation;
+    private static final float DEFAULT_ZOOM = 12;
+    private static final int PERMISSIONS_REQUEST_FINE_LOCATION = 1;
 
     Handler mHandler;
     Thread threadToLoadAllStationsFromDB;
@@ -78,17 +72,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private static final int ALL_STATIONS_DELETED = 103;
 
     private boolean stopAsking = false; // avoid keep asking for location permission if deny
-    private boolean firstTime = true;
-
-    private boolean backPressed = false;
+    private boolean backPressed = false; // avoid redownload stations when back button is pressed
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        System.out.println(" onCreate");
+
         super.onCreate(savedInstanceState);
         this.setContentView(R.layout.activity_maps);
 
-        mDefaultLocation = new LatLng( 42.4584, 14.216090); //DefaultLocation Pescara
+        mDefaultLocation = new LatLng(42.4584, 14.216090); //DefaultLocation Pescara
         currentPos = mDefaultLocation;
 
         context = this.getApplicationContext();
@@ -103,14 +95,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
-        if(mapFragment != null ) mapFragment.getMapAsync(this); //Objects.requireNonNull(mapFragment).getMapAsync(this);
+        if (mapFragment != null)
+            mapFragment.getMapAsync(this); //Objects.requireNonNull(mapFragment).getMapAsync(this);
 
         int permissionFineLocation = ContextCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_FINE_LOCATION);
-        if(permissionFineLocation != PackageManager.PERMISSION_GRANTED) {
-                // No explanation needed, we can request the permission.
-                ActivityCompat.requestPermissions(this,
-                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                        PERMISSIONS_REQUEST_FINE_LOCATION);
+        if (permissionFineLocation != PackageManager.PERMISSION_GRANTED) {
+            // No explanation needed, we can request the permission.
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                    PERMISSIONS_REQUEST_FINE_LOCATION);
         }
 
         //add click listener to the navigationToStation button
@@ -123,35 +116,26 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                 //Avendo l’intent, per avviare la nuova activity
                 v.getContext().startActivity(intent);
-                overridePendingTransition(R.anim.slide_in_right,R.anim.slide_out_left);
+                overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
             }
         });
     }
 
     protected void onResume() {
-        System.out.println(" onResume");
+        System.out.println(" onREsume");
         super.onResume();
-        if(!backPressed) {
-            stations.clear();
-            checkConnection();
+        if (!backPressed) {
             if (mMap != null) {
-                System.out.println(" onResume  NMAP NOT NULL ");
                 locationService = new GoogleLocationService();
                 locationService.onCreate(this, this);
                 if (!locationService.requestLocationUpdates(this) && !stopAsking) {
-                    // richiedo permessi
+                    // asking for a permission
                     ActivityCompat.requestPermissions(MapsActivity.this, new String[]{
                             Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSIONS_REQUEST_FINE_LOCATION);
-                } else {
-                    System.out.println(" onResume non chiedo i permessi ");
                 }
-            } else {
-                System.out.println("NMAP NULL ");
             }
-        }
-        else{
+        } else {
             backPressed = false;
-            System.out.println(" premuto back ");
         }
     }
 
@@ -176,7 +160,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         locationService = new GoogleLocationService();
         locationService.onCreate(this, this);
         //locationService.requestLastLocation(this);
-        if(!locationService.requestLocationUpdates(this)){
+        if (!locationService.requestLocationUpdates(this)) {
             onPermissionNotGranted();
         }
 
@@ -185,7 +169,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             @Override
             public void onCameraIdle() {
                 System.out.println("on camera idle");
-                checkConnection();
                 // clear data in  the DB and then get bounding box and download data
                 clearDataFromDB();
             }
@@ -194,20 +177,21 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     /**
-     * Function to check if is available an Internet connection otherwise show an alert dialog
+     * Function to check if is available an Internet connection otherwise show an alert dialog.
+     * If it is available an Internet connection, it downloads data
      *
      * @author Claudia Di Marco & Riccardo Mantini
      */
-    public void checkConnection(){
-        System.out.println("checkConnection");
+    public void checkConnectionAndDownloadData() {
+        System.out.println("checkConnectionAndDownloadData");
         ConnectivityManager cm =
-                (ConnectivityManager)getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+                (ConnectivityManager) getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
 
         NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
         boolean isConnected = (activeNetwork != null &&
                 activeNetwork.isConnectedOrConnecting());
-        if (!isConnected){
-            System.out.println("checkConnection non connesso");
+        if (!isConnected) {
+            System.out.println("checkConnectionAndDownloadData non connesso");
             this.setTheme(R.style.AlertDialogEstationsTheme);
             AlertDialog dialog = new AlertDialog.Builder(this)
                     .setTitle(R.string.titleAlertDialogConnectionFailed)
@@ -218,7 +202,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         public void onClick(DialogInterface dialogInterface, int i) {
 
                             dialogInterface.dismiss();
-                            checkConnection();
+                            checkConnectionAndDownloadData();
                         }
                     })
                     .setNegativeButton(R.string.negativeButtonAlertDialogConnectionFailed, new DialogInterface.OnClickListener() {
@@ -231,6 +215,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         }
                     }).create();
             dialog.show();
+        } else {
+            downloadDataBoundedInBoundingBox();
         }
     }
 
@@ -240,11 +226,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
      *
      * @author Claudia Di Marco & Riccardo Mantini
      */
-    public void downloadDataBoundedInBoundingBox()
-    {
+    public void downloadDataBoundedInBoundingBox() {
         // get topLeftCorner and bottomRightCorner coordinates
         LatLng topLeftCorner = new LatLng(mMap.getProjection().getVisibleRegion().latLngBounds.northeast.latitude,
-                mMap.getProjection().getVisibleRegion().latLngBounds.southwest.longitude );
+                mMap.getProjection().getVisibleRegion().latLngBounds.southwest.longitude);
         LatLng bottomRightCorner = new LatLng(mMap.getProjection().getVisibleRegion().latLngBounds.southwest.latitude,
                 mMap.getProjection().getVisibleRegion().latLngBounds.northeast.longitude);
 
@@ -261,13 +246,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private void addEStationMarker(Station n) {
         System.out.println("addEStationMarker");
         // create and add marker to the map
-        Marker estationMarker =  mMap.addMarker(new MarkerOptions().position(n.getPosition()).title("E-Station : " + n.getName()));
+        Marker estationMarker = mMap.addMarker(new MarkerOptions().position(n.getPosition()).title("E-Station : " + n.getName()));
         // Changing marker icon_green
-        if(n.isFree() == true) {
+        if (n.isFree() == true) {
             //estationMarker.setIcon(vectorToBitmap(R.drawable.icon_green));
             estationMarker.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
-        }
-        else{
+        } else {
             //estationMarker.setIcon(vectorToBitmap(R.drawable.icon_red));
             estationMarker.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
         }
@@ -289,16 +273,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 //Avendo l’intent, per avviare la nuova activity
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 context.startActivity(intent);
-                overridePendingTransition(R.anim.slide_in_right,R.anim.slide_out_left);
+                overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
 
                 // check permission to add or not navigation elements
                 int permissionFineLocation = ContextCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_FINE_LOCATION);
-                if(permissionFineLocation != PackageManager.PERMISSION_GRANTED) {
+                if (permissionFineLocation != PackageManager.PERMISSION_GRANTED) {
                     // don't add navigation elements but show marker title
                     marker.showInfoWindow();
                     return true;
-                }
-                else{
+                } else {
                     // to add navigation elements  //return false;
                     return true;
                 }
@@ -315,19 +298,19 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     protected void onStop() {
         super.onStop();
         locationService.stopLocationUpdates(this);
-        if(threadToLoadAllStationsFromDB != null && threadToLoadAllStationsFromDB.isAlive()){
+        if (threadToLoadAllStationsFromDB != null && threadToLoadAllStationsFromDB.isAlive()) {
             threadToLoadAllStationsFromDB.interrupt();
         }
-        if(threadToClearDataFromDB != null && threadToClearDataFromDB.isAlive()){
+        if (threadToClearDataFromDB != null && threadToClearDataFromDB.isAlive()) {
             threadToClearDataFromDB.interrupt();
         }
-        if(threadToSaveStationsInDB != null && threadToSaveStationsInDB.isAlive()){
+        if (threadToSaveStationsInDB != null && threadToSaveStationsInDB.isAlive()) {
             threadToSaveStationsInDB.interrupt();
         }
     }
 
     @Override
-    protected void onDestroy(){
+    protected void onDestroy() {
         super.onDestroy();
     }
 
@@ -337,9 +320,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
      *
      * @author Claudia Di Marco & Riccardo Mantini
      */
-    private void clearDataFromDB(){
+    private void clearDataFromDB() {
         System.out.println(" clearDataFromDB");
         stations.clear();
+        System.out.println(stations.size() + " stazioni");
         threadToClearDataFromDB = new Thread(new Runnable() {
             @Override
             public void run() {
@@ -356,12 +340,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     /**
      * Function to download estation bounded in the boundingBox created by topLeftCorner and bottomRightCorner.
      *
-     * @param topLeftCorner LatLng top left corner of the bounding box map
+     * @param topLeftCorner     LatLng top left corner of the bounding box map
      * @param bottomRightCorner LatLng bottom right corner of the bounding box map
      * @author Claudia Di Marco & Riccardo Mantini
      */
-    private void downloadData(LatLng topLeftCorner, LatLng bottomRightCorner)
-    {
+    private void downloadData(LatLng topLeftCorner, LatLng bottomRightCorner) {
         System.out.println(" downloadData");
         VolleyRequest.getInstance(getApplicationContext())
                 .downloadStations(new Response.Listener<String>() {
@@ -384,7 +367,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                 String title = "", address = "", town = "", stateOrProvince = "", url = "";
                                 LatLng position = null;
 
-                                if (addressInfo != null){
+                                if (addressInfo != null) {
 
                                     title = addressInfo.optString("Title", "No Name");
 
@@ -403,9 +386,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                                 String mediaUrl = null;
 
-                                if(mediaArray != null){
-                                    int k=0;
-                                    while (mediaUrl == null || k != mediaArray.length()){
+                                if (mediaArray != null) {
+                                    int k = 0;
+                                    while (mediaUrl == null || k != mediaArray.length()) {
 
                                         //big image
                                         mediaUrl = mediaArray.getJSONObject(k).optString("ItemURL", null);
@@ -418,14 +401,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                                 JSONArray connections = item.optJSONArray("Connections");
 
-                                int numberOfPointsOfCharge = (connections != null ? connections.length() : 0 );
+                                int numberOfPointsOfCharge = (connections != null ? connections.length() : 0);
 
-                                Station station = new Station(id, title, usageCost,address, town, stateOrProvince, position, url, numberOfPointsOfCharge, mediaUrl);
+                                Station station = new Station(id, title, usageCost, address, town, stateOrProvince, position, url, numberOfPointsOfCharge, mediaUrl);
 
-                                System.out.println("AAAAAAAAAA: " + currentPos.latitude);
                                 station.calcAndSetDistanceFromUser(currentPos);
-                                for (int j = 0; j < numberOfPointsOfCharge; j++)
-                                {
+                                for (int j = 0; j < numberOfPointsOfCharge; j++) {
                                     JSONObject connection = connections.getJSONObject(j);
                                     PointOfCharge pointOfCharge = new PointOfCharge(
                                             connection.optInt("ID"), id, connection.optInt("Voltage"),
@@ -460,15 +441,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
      *
      * @author Claudia Di Marco & Riccardo Mantini
      */
-    private void saveStationsDataInDB(){
+    private void saveStationsDataInDB() {
         System.out.println("saveStationsDataInDB");
         // per ogni stazione salva la stazione e tutti i suoi punti di ricarica
-        for (int k = 0; k < stations.size(); k++)
-        {
+        for (int k = 0; k < stations.size(); k++) {
             Station stationToSave = stations.get(k);
             appDB.getStationDao().save(stationToSave); // salvo la stazione
-            for (int p = 0; p < stationToSave.getPointsOfCharge().size(); p++)
-            {
+            for (int p = 0; p < stationToSave.getPointsOfCharge().size(); p++) {
                 PointOfCharge pointOfChargeToSave = stationToSave.getPointsOfCharge().get(p);
                 appDB.getPointOfChargeDao().save(pointOfChargeToSave); // salvo il punto di ricarica
             }
@@ -479,20 +458,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onLastLocationResult(Location location) {
         System.out.println("onLastLocationResult");
         currentPos = new LatLng(location.getLatitude(), location.getLongitude());
-        //clearDataFromDB();
 
-//        if(firstTime){
-            mMap.setMyLocationEnabled(true); // richiede i permetti di access_fine o coarse
-            mUiSettings.setMyLocationButtonEnabled(true);
-//            firstTime = false;
-            CameraPosition cameraPosition = new CameraPosition.Builder()
-                    .target(currentPos)      // Sets the center of the map to Mountain View
-                    .zoom(DEFAULT_ZOOM)                   // Sets the zoom
-                    .build();                   // Creates a CameraPosition from the builder
-            mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
-//        }
+        mMap.setMyLocationEnabled(true); // richiede i permetti di access_fine o coarse
+        mUiSettings.setMyLocationButtonEnabled(true);
 
-
+        CameraPosition cameraPosition = new CameraPosition.Builder()
+                .target(currentPos)      // Sets the center of the map to Mountain View
+                .zoom(DEFAULT_ZOOM)                   // Sets the zoom
+                .build();                   // Creates a CameraPosition from the builder
+        mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
 
 
     }
@@ -508,7 +482,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onPermissionNotGranted() {
         System.out.println("onPermissionNotGranted");
-        //currentPos = mDefaultLocation;
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mDefaultLocation, DEFAULT_ZOOM));
     }
 
@@ -520,49 +493,19 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             case PERMISSIONS_REQUEST_FINE_LOCATION:
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     //allow  // on resume viene richiamato non appena il popup sparisce
-                }
-                else{
+                } else {
                     // deny
                     stopAsking = true;
                     currentPos = mDefaultLocation;
                 }
                 break;
 
-                default:break;
+            default:
+                break;
 
         }
 
 
-    }
-
-
-
-
-    private BitmapDescriptor bitmapDescriptorFromVector(Context context, @DrawableRes int vectorDrawableResourceId) {
-        Drawable background = ContextCompat.getDrawable(context, R.drawable.ic_battery_charging_90_black_24dp);
-        background.setBounds(0, 0, background.getIntrinsicWidth(), background.getIntrinsicHeight());
-        Drawable vectorDrawable = ContextCompat.getDrawable(context, vectorDrawableResourceId);
-        vectorDrawable.setBounds(40, 20, vectorDrawable.getIntrinsicWidth() + 40, vectorDrawable.getIntrinsicHeight() + 20);
-        Bitmap bitmap = Bitmap.createBitmap(background.getIntrinsicWidth(), background.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(bitmap);
-        background.draw(canvas);
-        vectorDrawable.draw(canvas);
-        return BitmapDescriptorFactory.fromBitmap(bitmap);
-    }
-
-    /**
-     * Demonstrates converting a {@link Drawable} to a {@link BitmapDescriptor},
-     * for use as a marker icon_green.
-     */
-    private BitmapDescriptor vectorToBitmap(@DrawableRes int id) {
-        Drawable vectorDrawable = ResourcesCompat.getDrawable(getResources(), id, null);
-        Bitmap bitmap = Bitmap.createBitmap((vectorDrawable.getIntrinsicWidth()),
-                (vectorDrawable.getIntrinsicHeight()), Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(bitmap);
-        vectorDrawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
-        //DrawableCompat.setTint(vectorDrawable, color);
-        vectorDrawable.draw(canvas);
-        return BitmapDescriptorFactory.fromBitmap(bitmap);
     }
 
 
@@ -570,41 +513,34 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         private final ImageView iconToStationListActivity;
 
-        public MyHandler( ImageView iconToStationListActivity )
-        {
+        public MyHandler(ImageView iconToStationListActivity) {
             this.iconToStationListActivity = iconToStationListActivity;
         }
 
         @Override
-            public void handleMessage(Message msg) {
+        public void handleMessage(Message msg) {
 
-                super.handleMessage(msg);
-                //if (msg.what == ALL_STATIONS_LOADED || msg.what == ALL_STATIONS_SAVED) {
-                if (msg.what == ALL_STATIONS_SAVED) {
+            super.handleMessage(msg);
+            if (msg.what == ALL_STATIONS_SAVED) {
 
-                    iconToStationListActivity.setEnabled(true);
-                    iconToStationListActivity.setBackgroundColor(ContextCompat.getColor(context, R.color.transparent_white));
-                    System.out.println("stazion.size in ALL_STATIONS_SAVED " + stations.size());
-                    //add a market for each station
-                    for (int y = 0; y < stations.size(); y++)
-                    {
-                        addEStationMarker(stations.get(y));
-                    }
-
-                }
-                if (msg.what == ALL_STATIONS_DELETED) {
-                    stations.clear();
-                    if(mMap != null)
-                    {
-                        mMap.clear();
-                    }
-                    iconToStationListActivity.setEnabled(false);
-                    iconToStationListActivity.setBackgroundColor(ContextCompat.getColor(context, R.color.disabled_color));
-                    checkConnection();
-                    downloadDataBoundedInBoundingBox();
+                iconToStationListActivity.setEnabled(true);
+                iconToStationListActivity.setBackgroundColor(ContextCompat.getColor(context, R.color.transparent_white));
+                System.out.println("stazion.size in ALL_STATIONS_SAVED " + stations.size());
+                //add a market for each station
+                for (int y = 0; y < stations.size(); y++) {
+                    addEStationMarker(stations.get(y));
                 }
             }
-
+            if (msg.what == ALL_STATIONS_DELETED) {
+                stations.clear();
+                if (mMap != null) {
+                    mMap.clear();
+                }
+                iconToStationListActivity.setEnabled(false);
+                iconToStationListActivity.setBackgroundColor(ContextCompat.getColor(context, R.color.disabled_color));
+                checkConnectionAndDownloadData();
+            }
+        }
     }
 }
 

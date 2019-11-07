@@ -1,7 +1,5 @@
 package it.univaq.estations.model;
 
-import android.graphics.Bitmap;
-
 import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
@@ -10,10 +8,12 @@ import androidx.room.Ignore;
 import androidx.room.Index;
 import androidx.room.PrimaryKey;
 
+import static androidx.room.ForeignKey.CASCADE;
+
 @Entity(tableName = "pointsofcharge", foreignKeys = @ForeignKey(entity = Station.class,
         parentColumns = "id",
         childColumns = "station_id",
-        onDelete = ForeignKey.CASCADE), indices = {@Index(value = "station_id")})
+        onDelete = CASCADE), indices = {@Index(value = "station_id")})
 public class PointOfCharge {
 
     @PrimaryKey

@@ -105,7 +105,6 @@ public class GoogleLocationService {
     public boolean requestLocationUpdates(Context context){
         System.out.println("onrequestLocationUpdates");
 
-
         int permissionFineLocation = ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION);
         if(permissionFineLocation == PackageManager.PERMISSION_GRANTED) {
 
@@ -114,17 +113,20 @@ public class GoogleLocationService {
                 request.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
                 request.setInterval(20000); // 20 sec
                 request.setFastestInterval(10000); // 10 sec
-                request.setSmallestDisplacement(250); // minimo spostamento dell'utente per ottenere la posizione
-
+                request.setSmallestDisplacement(250); // minimum user movement to get the position
 
                 providerClient.requestLocationUpdates(request, locationCallback, null);
-
                 return true;
             }
         }
         return false;
     }
 
+    /**
+     * Function to stop location update
+     *
+     * @param context the context of the application
+     */
     public void stopLocationUpdates(Context context){
         if(areGoogleServicesAvailable(context)) {
             providerClient.removeLocationUpdates(locationCallback);

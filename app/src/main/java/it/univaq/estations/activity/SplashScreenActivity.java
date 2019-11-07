@@ -10,18 +10,19 @@ import it.univaq.estations.Database.Database;
 public class SplashScreenActivity extends AppCompatActivity {
     Thread threadDeleteStationFromDB;
 
-        @Override
-        protected void onCreate(Bundle savedInstanceState) {
-            super.onCreate(savedInstanceState);
-            threadDeleteStationFromDB = new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    Database.getInstance(getApplicationContext()).getStationDao().deleteAll();
-                }
-            });
-            threadDeleteStationFromDB.start();
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
 
-            startActivity(new Intent(SplashScreenActivity.this, MapsActivity.class));
-            finish();
-        }
+        threadDeleteStationFromDB = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                Database.getInstance(getApplicationContext()).getStationDao().deleteAll();
+            }
+        });
+        threadDeleteStationFromDB.start();
+
+        startActivity(new Intent(SplashScreenActivity.this, MapsActivity.class));
+        finish();
     }
+}

@@ -34,8 +34,8 @@ public class VolleyRequest {
 
         if (currentPosition != null) {
 
-             curLat = currentPosition.latitude;
-             curLng = currentPosition.longitude;
+            curLat = currentPosition.latitude;
+            curLng = currentPosition.longitude;
         }
         else {
             curLat = 42;
@@ -47,7 +47,7 @@ public class VolleyRequest {
                 .appendPath("v3")
                 .appendPath("poi")
                 .appendQueryParameter("output", "json")
-                .appendQueryParameter("countrycode", "IT")
+                //.appendQueryParameter("countrycode", "IT")
                 .appendQueryParameter("latitude", String.valueOf(curLat))
                 .appendQueryParameter("longitude", String.valueOf(curLng))
                 .appendQueryParameter("includecomments", "true")
