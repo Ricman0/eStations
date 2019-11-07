@@ -89,7 +89,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         this.setContentView(R.layout.activity_maps);
 
         mDefaultLocation = new LatLng( 42.4584, 14.216090); //DefaultLocation Pescara
-        currentPos = null;
+        currentPos = mDefaultLocation;
 
         context = this.getApplicationContext();
         activity = this;
@@ -301,7 +301,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 else{
                     // to add navigation elements  //return false;
                     return true;
-
                 }
             }
         });

@@ -2,12 +2,13 @@
 <resources>
     <!--    DetailsActivity    -->
     <string name="activity_details_name">Dettagli Stazione</string>
-    <string name="power">Potenza :</string>
-    <string name="status">Stato :</string>
-    <string name="voltage">Voltaggio :</string>
-    <string name="cost">Costo :</string>
-    <string name="pointOfCharge">Punto di Ricarica</string>
-    <string name="numPointOfCharge">Numero Punti di Ricarica</string>
+    <string name="power">Potenza : </string>
+    <string name="status">Stato : </string>
+    <string name="voltage">Voltaggio : </string>
+    <string name="cost">Costo : </string>
+    <string name="pointOfCharge">Punto di Ricarica </string>
+    <string name="numPointOfCharge">Numero Punti di Ricarica </string>
+    <string name="reach_destination" >Per raggiungere la destinazione, devi abilitare la localizzazione!</string>
 
     <!--    MapsActivity   -->
     <string name="iconToStationListActivity_description">icona per raggiungere l\'activity StationsList</string>
@@ -26,5 +27,11 @@
     <!--    menù    -->
     <string name="action_settings">Impostazioni</string>
     <string name="action_exit">Esci</string>
+    <string name="action_language" >Lingua</string>
+    <string name="titleAlertDialogLanguage">Scegli la tua lingua</string>
+    <string name="positiveButtonAlertDialogLanguage">Fatto</string>
+    <string name="negativeButtonAlertDialogLanguage">Annulla</string>
+
+
 
 </resources>

@@ -14,6 +14,7 @@ import android.os.Message;
 import android.text.SpannableString;
 import android.text.style.UnderlineSpan;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageButton;
@@ -104,7 +105,7 @@ public class DetailsActivity extends AppCompatActivity {
                 if(permissionFineLocation != PackageManager.PERMISSION_GRANTED) {
                     // explain to activate permission
                     Context context = getApplicationContext();
-                    CharSequence text = "To reach the destination, you have to grant location permission!";
+                    CharSequence text = getString(R.string.reach_destination);
                     int duration = Toast.LENGTH_SHORT;
 
                     Toast toast = Toast.makeText(context, text, duration);
@@ -154,10 +155,17 @@ public class DetailsActivity extends AppCompatActivity {
         stationUrl.setText(station.getUrl());
         stationNumPointsOfCharge.setText(String.valueOf(station.getNumberOfPointsOfCharge()));
 
-        //underline the station url
-        SpannableString content = new SpannableString(station.getUrl());
-        content.setSpan(new UnderlineSpan(), 0, content.length(), 0);
-        stationUrl.setText(content);
+        //underline the station url only if there is an url
+        if(station.getUrl().contentEquals( "No Url"))
+        {
+            stationUrl.setVisibility(View.GONE);
+        }
+        else{
+            SpannableString content = new SpannableString(station.getUrl());
+            content.setSpan(new UnderlineSpan(), 0, content.length(), 0);
+            stationUrl.setText(content);
+        }
+
 
         // to reach the web page when touch the link
         stationUrl.setOnTouchListener(new View.OnTouchListener() {
@@ -283,5 +291,26 @@ public class DetailsActivity extends AppCompatActivity {
                 }
             }
 
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+//            case R.id.action_language:
+//                // User chose the "Settings" item, show the app settings UI...
+//                return true;
+
+            case R.id.action_exit:
+
+                finishAffinity();
+                System.exit(0);
+                return true;
+
+            default:
+                // If we got here, the user's action was not recognized.
+                // Invoke the superclass to handle it.
+                return super.onOptionsItemSelected(item);
+
+        }
     }
 }

@@ -14,6 +14,7 @@
     <string name="cost">"Cost : "</string>
     <string name="pointOfCharge">"Point of Charge "</string>
     <string name="numPointOfCharge">"Number of Point of Charge : "</string>
+    <string name="reach_destination" >To reach the destination, you have to grant location permission!</string>
 
     <!--    MapsActivity   -->
     <string name="iconToStationListActivity_description">"icon to reach the StationsList activity"</string>
@@ -28,6 +29,9 @@
     <string name="station_list_name">Stations List</string>
     <string name="no_stations">No stations in the selected area</string>
     <string name="action_exit">Exit</string>
-
+    <string name="action_language" >Language</string>
+    <string name="titleAlertDialogLanguage">Choose your language</string>
+    <string name="positiveButtonAlertDialogLanguage">Done</string>
+    <string name="negativeButtonAlertDialogLanguage">Cancel</string>
 
 </resources>

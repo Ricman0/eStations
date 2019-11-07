@@ -1,8 +1,14 @@
 package it.univaq.estations.activity;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.util.DisplayMetrics;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -15,6 +21,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import it.univaq.estations.Database.Database;
 import it.univaq.estations.R;
@@ -33,6 +40,7 @@ public class StationsListActivity extends AppCompatActivity {
     private MyHandler mHandler;
     private Thread threadToLoadAllStationsFromDB;
     private static final int ALL_STATIONS_LOADED = 101;
+    private Locale myLocale;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -183,9 +191,42 @@ public class StationsListActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.action_settings:
-                // User chose the "Settings" item, show the app settings UI...
-                return true;
+//            case R.id.action_language:
+//                // User chose the "Settings" item, show the app settings UI...
+//                this.setTheme(R.style.AlertDialogEstationsTheme);
+//                AlertDialog dialog = new AlertDialog.Builder(this)
+//                        .setTitle(R.string.titleAlertDialogLanguage)
+//                        .setCancelable(true)
+//                        .setSingleChoiceItems(R.array.languageArray, 0, new DialogInterface.OnClickListener() {
+//                            @Override
+//                            public void onClick(DialogInterface dialogInterface, int i) {
+//                                switch (i){
+//                                    case 1: // Italian language
+//
+//                                        break;
+//                                    default: // English language
+//                                        break;
+//                                }
+//                            }
+//                        })
+//                        .setPositiveButton(R.string.positiveButtonAlertDialogLanguage, new DialogInterface.OnClickListener() {
+//                            @Override
+//                            public void onClick(DialogInterface dialogInterface, int i) {
+//
+////                                dialogInterface.dismiss();
+//                            }
+//                        })
+//                        .setNegativeButton(R.string.negativeButtonAlertDialogLanguage, new DialogInterface.OnClickListener() {
+//                            @Override
+//                            public void onClick(DialogInterface dialogInterface, int i) {
+//                                dialogInterface.dismiss();
+//
+//                            }
+//                        }).create();
+//                dialog.show();
+//        return true;
+
+
 
             case R.id.action_exit:
 
@@ -200,4 +241,8 @@ public class StationsListActivity extends AppCompatActivity {
 
         }
     }
+
+
+
+
 }
