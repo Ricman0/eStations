@@ -29,6 +29,7 @@ public class GoogleLocationService {
         @Override
         public void onLocationResult(LocationResult locationResult) {
             super.onLocationResult(locationResult);
+            System.out.println("locationCallback on location result");
             if(listener != null) listener.onLastLocationResult(locationResult.getLastLocation());
         }
 
@@ -65,34 +66,27 @@ public class GoogleLocationService {
      */
     public boolean requestLastLocation(Activity activity){
 
+        System.out.println("requestLastLocation");
+
         int permissionFineLocation = ContextCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_FINE_LOCATION);
         if(permissionFineLocation == PackageManager.PERMISSION_GRANTED) {
-            if (LocationService.LOCATION_CHANGED == true || LocationService.getInstance().getCurrentLocation() == null)
-            {
-                if(areGoogleServicesAvailable(activity)) {
-                    if (LocationService.LOCATION_CHANGED == true || LocationService.getInstance().getCurrentLocation() == null) {
-                        System.out.println(" onrequestLastLocation  LOCATION_CHANGED == true o  CurrentLocation() == null");
-                        providerClient.getLastLocation()
-                                .addOnSuccessListener(activity, new OnSuccessListener<Location>() {
-                                    @Override
-                                    public void onSuccess(Location location) {
-                                        if (listener != null) {
-                                            if (location != null)
-                                                listener.onLastLocationResult(location);
-                                            else
-                                                listener.onLastLocationNullResult();
-                                        }
-                                    }
-                                });
-                    }
-                    else{
-                        System.out.println(" onrequestLastLocation  Lcarico dal db");
 
-                        listener.onLoadAllStationFromDB();
-                    }
-                }
-                }
-                return true;
+            System.out.println("requestLastLocation qui");
+            if(areGoogleServicesAvailable(activity)) {
+                providerClient.getLastLocation()
+                        .addOnSuccessListener(activity, new OnSuccessListener<Location>() {
+                            @Override
+                            public void onSuccess(Location location) {
+                                if (listener != null) {
+                                    if (location != null)
+                                        listener.onLastLocationResult(location);
+                                    else
+                                        listener.onLastLocationNullResult();
+                                }
+                            }
+                        });
+            }
+            return true;
         }
         else{
             System.out.println(" onrequestLastLocation  permessi non concessi");
@@ -118,8 +112,10 @@ public class GoogleLocationService {
             if(areGoogleServicesAvailable(context)) {
                 LocationRequest request = new LocationRequest();
                 request.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-                request.setInterval(60000);
-                request.setFastestInterval(30000);
+                request.setInterval(30000);
+                request.setFastestInterval(15000);
+                request.setSmallestDisplacement(100); // minimo spostamento dell'utente per ottenere la posizione
+
 
                 providerClient.requestLocationUpdates(request, locationCallback, null);
 
@@ -141,6 +137,5 @@ public class GoogleLocationService {
         void onLastLocationResult(Location location);
         void onLastLocationNullResult();
         void onPermissionNotGranted();
-        void onLoadAllStationFromDB();
     }
 }

@@ -1,12 +1,13 @@
 <resources>
-    <string name="app_name" translatable="false">Estations</string>
+    <string name="app_name" translatable="false">E-Stations</string>
 
     <string name="title_activity_maps" translatable="false">Map</string>
     <string name="title_activity_stations_list" translatable="false">StationsList</string>
     <string name="title_details_activity" translatable="false">DetailsActivity</string>
 
     <!--    DetailsActivity    -->
-    <string name="action_settings" translatable="false">Settings</string>
+    <string name="activity_details_name">Station Details</string>
+    <string name="action_settings">Settings</string>
     <string name="voltage">"Voltage : "</string>
     <string name="power">"Power : "</string>
     <string name="status">"Status : "</string>
@@ -22,5 +23,11 @@
     <string name="messageAlertDialogConnectionFailed">Please Check Your Internet Connection</string>
     <string name="positiveButtonAlertDialogConnectionFailed">Try Again</string>
     <string name="negativeButtonAlertDialogConnectionFailed">Exit</string>
+
+    <!--    StationsListActivity   -->
+    <string name="station_list_name">Stations List</string>
+    <string name="no_stations">No stations in the selected area</string>
+    <string name="action_exit">Exit</string>
+
 
 </resources>

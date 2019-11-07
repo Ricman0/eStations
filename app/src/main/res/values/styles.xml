@@ -1,7 +1,8 @@
 <resources>
 
     <!-- E-stations theme   -->
-    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">-->
+    <!--<style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">-->
+    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
 
         <item name="colorPrimary">@color/primary_color</item>
         <item name="colorPrimaryDark">@color/primary_dark_color</item>
@@ -24,6 +25,12 @@
 
     <style name="AlertDialogEstationsTheme" parent="Theme.AppCompat.Light.Dialog.Alert">
         <item name="colorAccent">@color/primary_color</item>
+    </style>
+
+    <style name="ToolbarStyle" parent="Theme.AppCompat.Light">
+        <item name="android:textColorPrimary">@color/white</item>
+        <item name="android:background">@color/primary_color</item>
+        <item name="actionMenuTextColor">@color/white</item>
     </style>
 
 </resources>

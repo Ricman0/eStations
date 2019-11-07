@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!--    DetailsActivity    -->
+    <string name="activity_details_name">Dettagli Stazione</string>
     <string name="power">Potenza :</string>
     <string name="status">Stato :</string>
     <string name="voltage">Voltaggio :</string>
@@ -17,4 +18,13 @@
     <string name="messageAlertDialogConnectionFailed">Per favore, controlla la tua connessione ad Internet</string>
     <string name="positiveButtonAlertDialogConnectionFailed">Riprova</string>
     <string name="negativeButtonAlertDialogConnectionFailed">Esci</string>
+
+    <!--    StationsListActivity   -->
+    <string name="station_list_name">Lista Stazioni</string>
+    <string name="no_stations">Nessuna stazione nell\'area selezionata</string>
+
+    <!--    menù    -->
+    <string name="action_settings">Impostazioni</string>
+    <string name="action_exit">Esci</string>
+
 </resources>

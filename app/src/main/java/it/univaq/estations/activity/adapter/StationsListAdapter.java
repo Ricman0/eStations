@@ -6,10 +6,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.content.res.ColorStateList;
 import android.graphics.Color;
-import android.graphics.PorterDuff;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
@@ -20,8 +17,11 @@ import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.gms.maps.model.LatLng;
+
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 
 import it.univaq.estations.R;
 import it.univaq.estations.model.Station;
@@ -151,4 +151,6 @@ public class StationsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         mDataset.clear();
         notifyItemRangeRemoved(0, size);
     }
+
+
 }

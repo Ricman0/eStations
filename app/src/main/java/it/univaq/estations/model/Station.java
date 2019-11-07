@@ -1,7 +1,5 @@
 package it.univaq.estations.model;
 
-import android.util.Log;
-
 import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
@@ -16,7 +14,6 @@ import java.util.Iterator;
 import java.util.List;
 
 import it.univaq.estations.Database.LatLngConverter;
-import it.univaq.estations.utility.LocationService;
 
 @Entity(tableName = "stations")
 public class Station {
@@ -75,8 +72,10 @@ public class Station {
         this.numberOfPointsOfCharge = numberOfPointsOfCharge;
         this.pointsOfCharge = new ArrayList<PointOfCharge>();
         this.stationImageUrl = stationImageUrl;
-        calcDistanceFromUser();
+        setDistanceFromUser(0);
     }
+
+    // getter and setter
 
     @Ignore
     public Station(String id) {
@@ -187,27 +186,14 @@ public class Station {
         this.pointsOfCharge = pointsOfCharge;
     }
 
-    public void addPointOfCharge(PointOfCharge pointOfCharge){
-        this.pointsOfCharge.add(pointOfCharge);
-    }
-
-    public void addPointOfChargeList(List<PointOfCharge> pointOfChargeList){
-        this.pointsOfCharge.addAll(pointOfChargeList);
-    }
 
     public String getStationImageUrl() {
 
         return stationImageUrl;
     }
 
-    public Boolean isFree(){
-        boolean isFree = false;
-        Iterator<PointOfCharge> it =  this.pointsOfCharge.iterator();
-        while (it.hasNext()){
-            PointOfCharge p = it.next();
-            if(p.getStatusTypeId() == 50) isFree=true;
-        }
-        return isFree;
+    public void setStationImageUrl(String stationImageUrl) {
+        this.stationImageUrl = stationImageUrl;
     }
 
     public double getDistanceFromUser(){
@@ -218,20 +204,58 @@ public class Station {
         this.distanceFromUser = distanceFromUser;
     }
 
-    //TODO richiamare questa funzione ogni qual volta che l'utente cambia la sua posizione
-    public void updateDistanceFromUser() {
-        calcDistanceFromUser();
+
+    /**
+     * Function to add a point of change in the ArrayList pointsOfCharge
+     *
+     * @param pointOfCharge PointOfCharge The point of charge to add to the points of charge ArrayList
+     * @author Claudia Di Marco & Riccardo Mantini
+     */
+    public void addPointOfCharge(PointOfCharge pointOfCharge){
+        this.pointsOfCharge.add(pointOfCharge);
     }
 
-    private void calcDistanceFromUser(){
-        LatLng currentPosition = LocationService.getInstance().getCurrentLocation();
+    /**
+     * Function to add a list of points of change in the ArrayList pointsOfCharge
+     *
+     * @param pointOfChargeList List<PointOfCharge> List of points of charge to add
+     * @author Claudia Di Marco & Riccardo Mantini
+     */
+    public void addPointOfChargeList(List<PointOfCharge> pointOfChargeList){
+        this.pointsOfCharge.addAll(pointOfChargeList);
+    }
+
+    /**
+     * Function to know if one charging point of the station is free
+     *
+     * @return true if one point of charge is free, false otherwise
+     * @author Claudia Di Marco & Riccardo Mantini
+     */
+    public Boolean isFree(){
+        boolean isFree = false;
+        Iterator<PointOfCharge> it =  this.pointsOfCharge.iterator();
+        while (it.hasNext()){
+            PointOfCharge p = it.next();
+            if(p.getStatusTypeId() == 50) isFree=true;
+        }
+        return isFree;
+    }
+
+
+
+    /**
+     * Function to calculate the distance between the user and the station, then it sets this
+     * distance in the distanceFromUser attribute.
+     *
+     * @param currentPosition LatLng the user current position
+     * @author Claudia Di Marco & Riccardo Mantini
+     */
+    public void calcAndSetDistanceFromUser(LatLng currentPosition){
         float[] dist = new float[1];
         android.location.Location.distanceBetween(currentPosition.latitude, currentPosition.longitude,
                 this.position.latitude, this.position.longitude, dist);
-        this.distanceFromUser = (((int) dist[0] / 100) / 10.0);
+        setDistanceFromUser(((int) dist[0] / 100) / 10.0);
     }
 
-    public void setStationImageUrl(String stationImageUrl) {
-        this.stationImageUrl = stationImageUrl;
-    }
+
 }

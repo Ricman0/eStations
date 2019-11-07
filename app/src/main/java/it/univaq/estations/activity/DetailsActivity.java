@@ -1,10 +1,5 @@
 package it.univaq.estations.activity;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.ContextCompat;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -12,13 +7,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.text.SpannableString;
 import android.text.style.UnderlineSpan;
+import android.view.Menu;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageButton;
@@ -26,11 +21,15 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.android.volley.Response;
 
 import java.util.ArrayList;
-import java.util.Currency;
-import java.util.Locale;
 
 import it.univaq.estations.Database.Database;
 import it.univaq.estations.R;
@@ -63,39 +62,18 @@ public class DetailsActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_details);
+
+        Toolbar myToolbar = findViewById(R.id.toolbar_details);
+        setSupportActionBar(myToolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
-        getSupportActionBar().setTitle("E-stations");
-        getSupportActionBar().setSubtitle("Station Details");
+        getSupportActionBar().setTitle(getString(R.string.app_name));
+        getSupportActionBar().setSubtitle(getString(R.string.activity_details_name));
 
         activity = this;
         context = getApplicationContext();
         managePointsOfChargeRecyclerView();
-
-        mHandler = new Handler() {
-
-            @Override
-            public void handleMessage(Message msg) {
-                super.handleMessage(msg);
-                if (msg.what == LOAD_STATION_COMPLETED) {
-                    // get Image from the urlImage and change ImageView element
-                    if(urlImage != null ) {
-                        VolleyRequest.getInstance(getApplicationContext()).downloadImage(new Response.Listener<Bitmap>() {
-                            @Override
-                            public void onResponse(Bitmap response) {
-                                changeImage(response);
-                            }
-                        }, urlImage);
-                    }
-
-                    fillDetailsLayout();
-                    pointsOfCharge = station.getPointsOfCharge();
-                    adapter.add(pointsOfCharge);
-                }
-            }
-        };
-
-
+        mHandler = new MyHandler();
 
         //get Extras from intent
         stationId = getIntent().getStringExtra("stationId");
@@ -150,36 +128,6 @@ public class DetailsActivity extends AppCompatActivity {
     @Override
     public void onResume(){
         super.onResume();
-        /*context = getApplicationContext();
-
-        //get Extras from intent
-        stationId = getIntent().getStringExtra("stationId");
-
-        //get station from database
-        appDB = Database.getInstance(getApplicationContext());
-
-        threadToLoadStationFromDB = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                station = appDB.getStationDao().getById(stationId);
-                station.addPointOfChargeList(appDB.getPointOfChargeDao().getAllStationPointsOfCharge(stationId));
-                Message message = new Message();
-                message.what = LOAD_STATION_COMPLETED;
-                mHandler.sendMessage(message);
-            }
-        });
-
-        threadToLoadStationFromDB.start();
-
-        //add click listener to the navigationToStation button
-        ImageButton button = findViewById(R.id.navigateToStation);
-        button.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                reachDestination();
-            }
-        });*/
-
-
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -211,7 +159,7 @@ public class DetailsActivity extends AppCompatActivity {
         content.setSpan(new UnderlineSpan(), 0, content.length(), 0);
         stationUrl.setText(content);
 
-        // to reach the web page
+        // to reach the web page when touch the link
         stationUrl.setOnTouchListener(new View.OnTouchListener() {
 
             @Override
@@ -242,7 +190,6 @@ public class DetailsActivity extends AppCompatActivity {
         recyclerView.setAdapter(adapter);
     }
 
-
     public void reachDestination(){
         //In order to launch Google Maps: create an Intent object specifying its action, URI and package.
 
@@ -268,15 +215,19 @@ public class DetailsActivity extends AppCompatActivity {
             startActivity(mapIntent);
             overridePendingTransition(R.anim.slide_in_right,R.anim.slide_out_left);
         }
-
     }
 
+    /**
+     * Function to change station image in the DetailsActivity
+     *
+     * @param newImage Bitmap Immage to set
+     * @author Claudia Di Marco & Riccardo Mantini
+     */
     private void changeImage(Bitmap newImage)
     {
         ImageView imageStation = findViewById(R.id.StationImageDetails);
         imageStation.setImageBitmap(newImage);
     }
-
 
     /**
      * Function to define a custom behaviour for the actionBar arrow back.
@@ -291,7 +242,6 @@ public class DetailsActivity extends AppCompatActivity {
         return true;
     }
 
-
     /**
      * Function to reach the web page associated to the url
      *
@@ -304,4 +254,34 @@ public class DetailsActivity extends AppCompatActivity {
         startActivity(launchBrowser);
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+
+        getMenuInflater().inflate(R.menu.menu, menu);
+        return true;
+    }
+
+    private class MyHandler extends Handler {
+
+            @Override
+            public void handleMessage(Message msg) {
+                super.handleMessage(msg);
+                if (msg.what == LOAD_STATION_COMPLETED) {
+                    // get Image from the urlImage and change ImageView element
+                    if(urlImage != null ) {
+                        VolleyRequest.getInstance(getApplicationContext()).downloadImage(new Response.Listener<Bitmap>() {
+                            @Override
+                            public void onResponse(Bitmap response) {
+                                changeImage(response);
+                            }
+                        }, urlImage);
+                    }
+
+                    fillDetailsLayout();
+                    pointsOfCharge = station.getPointsOfCharge();
+                    adapter.add(pointsOfCharge);
+                }
+            }
+
+    }
 }
