@@ -112,9 +112,9 @@ public class GoogleLocationService {
             if(areGoogleServicesAvailable(context)) {
                 LocationRequest request = new LocationRequest();
                 request.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-                request.setInterval(30000);
-                request.setFastestInterval(15000);
-                request.setSmallestDisplacement(100); // minimo spostamento dell'utente per ottenere la posizione
+                request.setInterval(20000); // 20 sec
+                request.setFastestInterval(10000); // 10 sec
+                request.setSmallestDisplacement(250); // minimo spostamento dell'utente per ottenere la posizione
 
 
                 providerClient.requestLocationUpdates(request, locationCallback, null);

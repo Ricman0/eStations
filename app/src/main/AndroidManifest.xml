@@ -12,16 +12,15 @@
         <activity
             android:name=".activity.StationsListActivity"
             android:label="@string/title_activity_stations_list">
-
         </activity>
         <activity
             android:name=".activity.DetailsActivity"
             android:label="@string/title_details_activity"
             android:parentActivityName=".activity.StationsListActivity">
             <!-- Parent activity meta-data to support 4.0 and lower -->
-            <meta-data
+            <!--<meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value=".activity.StationsListActivity" />
+                android:value=".activity.StationsListActivity" />-->
         </activity>
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.

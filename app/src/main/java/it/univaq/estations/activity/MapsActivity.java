@@ -80,6 +80,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private boolean stopAsking = false; // avoid keep asking for location permission if deny
     private boolean firstTime = true;
 
+    private boolean backPressed = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         System.out.println(" onCreate");
@@ -114,6 +116,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         //add click listener to the navigationToStation button
         iconToStationListActivity.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
+                backPressed = true;
                 // Open another Activity and pass to it the right station
                 //new Intent object: Il costruttore, in caso di intent esplicito, richiede due parametri: il Context (che, nel nostro caso, è l’activity che vuole chiamare la seconda) e la classe che riceverà l’intent, cioè l’activity che vogliamo richiamare.
                 Intent intent = new Intent(v.getContext(), StationsListActivity.class);
@@ -128,23 +131,27 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     protected void onResume() {
         System.out.println(" onResume");
         super.onResume();
-        stations.clear();
-        checkConnection();
-        if(mMap != null) {
-            System.out.println(" onResume  NMAP NOT NULL ");
-            locationService = new GoogleLocationService();
-            locationService.onCreate(this, this);
-            if (!locationService.requestLocationUpdates(this) && !stopAsking){
-                // richiedo permessi
-                ActivityCompat.requestPermissions(MapsActivity.this, new String[] {
-                        Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSIONS_REQUEST_FINE_LOCATION);
-            }
-            else {
-                System.out.println(" onResume non chiedo i permessi ");
+        if(!backPressed) {
+            stations.clear();
+            checkConnection();
+            if (mMap != null) {
+                System.out.println(" onResume  NMAP NOT NULL ");
+                locationService = new GoogleLocationService();
+                locationService.onCreate(this, this);
+                if (!locationService.requestLocationUpdates(this) && !stopAsking) {
+                    // richiedo permessi
+                    ActivityCompat.requestPermissions(MapsActivity.this, new String[]{
+                            Manifest.permission.ACCESS_FINE_LOCATION}, PERMISSIONS_REQUEST_FINE_LOCATION);
+                } else {
+                    System.out.println(" onResume non chiedo i permessi ");
+                }
+            } else {
+                System.out.println("NMAP NULL ");
             }
         }
-        else {
-            System.out.println("NMAP NULL ");
+        else{
+            backPressed = false;
+            System.out.println(" premuto back ");
         }
     }
 
@@ -169,7 +176,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         locationService = new GoogleLocationService();
         locationService.onCreate(this, this);
         //locationService.requestLastLocation(this);
-        locationService.requestLocationUpdates(this);
+        if(!locationService.requestLocationUpdates(this)){
+            onPermissionNotGranted();
+        }
 
         // add listener to know if the camera movement has ended
         mMap.setOnCameraIdleListener(new GoogleMap.OnCameraIdleListener() {
@@ -268,6 +277,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
             @Override
             public boolean onMarkerClick(final Marker marker) {
+                backPressed = true;
                 String stationId = (String) marker.getTag();
 
                 //new Intent object: Il costruttore, in caso di intent esplicito, richiede due parametri: il Context (che, nel nostro caso, è l’activity che vuole chiamare la seconda) e la classe che riceverà l’intent, cioè l’activity che vogliamo richiamare.
@@ -289,8 +299,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     return true;
                 }
                 else{
-                    // to add navigation elements
-                    return false;
+                    // to add navigation elements  //return false;
+                    return true;
+
                 }
             }
         });
@@ -471,16 +482,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         currentPos = new LatLng(location.getLatitude(), location.getLongitude());
         //clearDataFromDB();
 
-        if(firstTime){
+//        if(firstTime){
             mMap.setMyLocationEnabled(true); // richiede i permetti di access_fine o coarse
             mUiSettings.setMyLocationButtonEnabled(true);
-            firstTime = false;
+//            firstTime = false;
             CameraPosition cameraPosition = new CameraPosition.Builder()
                     .target(currentPos)      // Sets the center of the map to Mountain View
                     .zoom(DEFAULT_ZOOM)                   // Sets the zoom
                     .build();                   // Creates a CameraPosition from the builder
             mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
-        }
+//        }
 
 
 
@@ -498,7 +509,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onPermissionNotGranted() {
         System.out.println("onPermissionNotGranted");
-        currentPos = mDefaultLocation;
+        //currentPos = mDefaultLocation;
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mDefaultLocation, DEFAULT_ZOOM));
     }
 
@@ -514,6 +525,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 else{
                     // deny
                     stopAsking = true;
+                    currentPos = mDefaultLocation;
                 }
                 break;
 
