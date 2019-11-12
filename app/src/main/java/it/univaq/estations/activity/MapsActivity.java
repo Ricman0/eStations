@@ -58,6 +58,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private UiSettings mUiSettings;
     private GoogleLocationService locationService;
 
+    public List<Station> getStations() {
+        return stations;
+    }
+
     private List<Station> stations = new ArrayList<>();
     private LatLng currentPos;
     private LatLng mDefaultLocation;
@@ -93,7 +97,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         iconToStationListActivity = findViewById(R.id.iconToStationListActivity);
 
-        mHandler = new MyHandler(iconToStationListActivity);
+        mHandler = new MyHandler(iconToStationListActivity, activity);
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -167,6 +171,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             onPermissionNotGranted();
         }
 
+        mMap.setOnCameraMoveStartedListener(new GoogleMap.OnCameraMoveStartedListener() {
+            @Override
+            public void onCameraMoveStarted(int i) {
+                System.out.println("on camera move starter");
+
+                iconToStationListActivity.setEnabled(false);
+                iconToStationListActivity.setBackgroundColor(ContextCompat.getColor(context, R.color.disabled_color));
+
+            }
+        });
+
         // add listener to know if the camera movement has ended
         mMap.setOnCameraIdleListener(new GoogleMap.OnCameraIdleListener() {
             @Override
@@ -178,8 +193,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 if (mMap != null) {
                     mMap.clear();
                 }
-                iconToStationListActivity.setEnabled(false);
-                iconToStationListActivity.setBackgroundColor(ContextCompat.getColor(context, R.color.disabled_color));
                 checkConnectionAndDownloadData();
             }
         });
@@ -197,7 +210,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         ConnectivityManager cm =
                 (ConnectivityManager) getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
 
-        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+        NetworkInfo activeNetwork = cm != null ? cm.getActiveNetworkInfo() : null;
         boolean isConnected = (activeNetwork != null &&
                 activeNetwork.isConnectedOrConnecting());
         if (!isConnected) {
@@ -259,7 +272,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         // create and add marker to the map
         Marker estationMarker = mMap.addMarker(new MarkerOptions().position(n.getPosition()).title("E-Station : " + n.getName()));
         // Changing marker icon_green
-        if (n.isFree() == true) {
+        if (n.isFree()) {
             //estationMarker.setIcon(vectorToBitmap(R.drawable.icon_green));
             estationMarker.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
         } else {
@@ -377,7 +390,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                 while (mediaUrl == null || k != mediaArray.length()) {
 
                                     //big image
-                                    mediaUrl = mediaArray.getJSONObject(k).optString("ItemURL", null);
+                                    mediaUrl = mediaArray.getJSONObject(k).optString("ItemURL", "");
 
                                     //small image
                                     //mediaUrl = mediaArray.getJSONObject(k).optString("ItemThumbnailURL", null);
@@ -446,18 +459,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     Station stationToSave = stations.get(k);
                     long idStationSaved = appDB.getStationDao().save(stationToSave); // salvo la stazione
                     stationToSave.setId(idStationSaved);
-
-                    //todo settare in station l'id  che ho ottenuto nella stazione
-                    System.out.println("id della station salvata " +  idStationSaved);
-                    System.out.println("nome della station salvata " +  stationToSave.getName());
                     for (int p = 0; p < stationToSave.getPointsOfCharge().size(); p++) {
                         PointOfCharge pointOfChargeToSave = stationToSave.getPointsOfCharge().get(p);
                         pointOfChargeToSave.setStationId(idStationSaved);
                         long  idPointOfChargeSaved = appDB.getPointOfChargeDao().save(pointOfChargeToSave); // salvo il punto di ricarica
                         pointOfChargeToSave.setId(idPointOfChargeSaved);
-                        System.out.println("id del poc della station salvata " +  idPointOfChargeSaved);
-
-
                     }
                 }
             }
@@ -522,12 +528,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
 
-    private class MyHandler extends Handler {
+    private static class MyHandler extends Handler {
 
         private final ImageView iconToStationListActivity;
+        private Activity activity;
 
-        public MyHandler(ImageView iconToStationListActivity) {
+        MyHandler(ImageView iconToStationListActivity, Activity activity) {
             this.iconToStationListActivity = iconToStationListActivity;
+            this.activity = activity;
         }
 
         @Override
@@ -537,11 +545,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             if (msg.what == ALL_STATIONS_SAVED) {
 
                 iconToStationListActivity.setEnabled(true);
-                iconToStationListActivity.setBackgroundColor(ContextCompat.getColor(context, R.color.transparent_white));
-                System.out.println("stazion.size in ALL_STATIONS_SAVED " + stations.size());
+                iconToStationListActivity.setBackgroundColor(ContextCompat.getColor(activity.getApplicationContext(), R.color.transparent_white));
+                System.out.println("stazion.size in ALL_STATIONS_SAVED " + ((MapsActivity)activity).getStations().size());
                 //add a market for each station
-                for (int y = 0; y < stations.size(); y++) {
-                    addEStationMarker(stations.get(y));
+                for (int y = 0; y < ((MapsActivity)activity).getStations().size(); y++) {
+                    ((MapsActivity)activity).addEStationMarker(((MapsActivity)activity).getStations().get(y));
                 }
             }
         }

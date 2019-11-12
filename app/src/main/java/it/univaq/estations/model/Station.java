@@ -9,7 +9,6 @@ import androidx.room.TypeConverters;
 import com.google.android.gms.maps.model.LatLng;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import it.univaq.estations.database.LatLngConverter;
@@ -20,8 +19,7 @@ public class Station {
     @PrimaryKey(autoGenerate = true)
     private long id;
 
-    @ColumnInfo(name = "name")
-    private String title;
+    private String name;
 
     @ColumnInfo(name = "usage_cost")
     private String usageCost;
@@ -50,13 +48,15 @@ public class Station {
     @ColumnInfo(name = "distance_from_user")
     private double distanceFromUser;
 
-    @Ignore // ignore this constructor because it si necessary do this.pointsOfCharge = new ArrayList<PointOfCharge>(); and setDistanceFromUser(0);
-    public Station(){}
+    @Ignore
+    // ignore this constructor because it si necessary do this.pointsOfCharge = new ArrayList<PointOfCharge>(); and setDistanceFromUser(0);
+    public Station() {
+    }
 
 
-    public Station(String title, String usageCost,String address, String town, String stateOrProvince,
+    public Station(String name, String usageCost, String address, String town, String stateOrProvince,
                    LatLng position, String url, int numberOfPointsOfCharge, String stationImageUrl) {
-        this.title = title;
+        this.name = name;
         this.usageCost = usageCost;
         this.address = address;
         this.town = town;
@@ -64,7 +64,7 @@ public class Station {
         this.position = position;
         this.url = url;
         this.numberOfPointsOfCharge = numberOfPointsOfCharge;
-        this.pointsOfCharge = new ArrayList<PointOfCharge>();
+        this.pointsOfCharge = new ArrayList<>();
         this.stationImageUrl = stationImageUrl;
         setDistanceFromUser(0);
     }
@@ -79,36 +79,31 @@ public class Station {
     public void setId(long id) {
         this.id = id;
     }
+
     public String getName() {
-        return title;
+        return name;
     }
 
     public void setName(String name) {
-        this.title = name;
+        this.name = name;
     }
 
-    public String getTitle() {
-        return title;
+    public String getUsageCost() {
+        return usageCost;
     }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public String getUsageCost() { return usageCost; }
 
     /**
      * Function to return the usage cost when it is provided.
      *
      * @return Object the usage cost
      */
-    public Object usageCost(){
+    public Object usageCost() {
 
-        String cost = usageCost.substring(0,4);
+        String cost = usageCost.substring(0, 4);
         cost = cost.replaceFirst(",", ".");
+        cost = cost.replace("â","");
         try {
-            Float floatCost = Float.parseFloat(cost);
-            return floatCost;
+            return Float.parseFloat(cost);
 
         } catch (NumberFormatException e) {
             return usageCost;
@@ -185,7 +180,7 @@ public class Station {
         this.stationImageUrl = stationImageUrl;
     }
 
-    public double getDistanceFromUser(){
+    public double getDistanceFromUser() {
         return distanceFromUser;
     }
 
@@ -200,7 +195,7 @@ public class Station {
      * @param pointOfCharge PointOfCharge The point of charge to add to the points of charge ArrayList
      * @author Claudia Di Marco & Riccardo Mantini
      */
-    public void addPointOfCharge(PointOfCharge pointOfCharge){
+    public void addPointOfCharge(PointOfCharge pointOfCharge) {
         this.pointsOfCharge.add(pointOfCharge);
     }
 
@@ -210,7 +205,7 @@ public class Station {
      * @param pointOfChargeList List<PointOfCharge> List of points of charge to add
      * @author Claudia Di Marco & Riccardo Mantini
      */
-    public void addPointOfChargeList(List<PointOfCharge> pointOfChargeList){
+    public void addPointOfChargeList(List<PointOfCharge> pointOfChargeList) {
         System.out.println("quanti poc?? " + pointOfChargeList.size());
         this.pointsOfCharge.addAll(pointOfChargeList);
     }
@@ -221,12 +216,10 @@ public class Station {
      * @return true if one point of charge is free, false otherwise
      * @author Claudia Di Marco & Riccardo Mantini
      */
-    public Boolean isFree(){
+    public Boolean isFree() {
         boolean isFree = false;
-        Iterator<PointOfCharge> it =  this.pointsOfCharge.iterator();
-        while (it.hasNext()){
-            PointOfCharge p = it.next();
-            if(p.getStatusTypeId() == 50) isFree=true;
+        for (PointOfCharge p : this.pointsOfCharge) {
+            if (p.getStatusTypeId() == 50) isFree = true;
         }
         return isFree;
     }
@@ -238,7 +231,7 @@ public class Station {
      * @param currentPosition LatLng the user current position
      * @author Claudia Di Marco & Riccardo Mantini
      */
-    public void calcAndSetDistanceFromUser(LatLng currentPosition){
+    public void calcAndSetDistanceFromUser(LatLng currentPosition) {
         float[] dist = new float[1];
         android.location.Location.distanceBetween(currentPosition.latitude, currentPosition.longitude,
                 this.position.latitude, this.position.longitude, dist);

@@ -31,6 +31,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.android.volley.Response;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 import it.univaq.estations.database.Database;
 import it.univaq.estations.R;
@@ -44,17 +45,31 @@ import it.univaq.estations.utility.VolleyRequest;
  * */
 public class DetailsActivity extends AppCompatActivity {
 
+    public Station getStation() {
+        return station;
+    }
+
     private Station station;
     private ArrayList<PointOfCharge> pointsOfCharge = new ArrayList<>();
     private Database appDB;
     private LinearLayoutManager layoutManager;
     private RecyclerView  recyclerView;
+
+    public PointOfChargeListAdapter getAdapter() {
+        return adapter;
+    }
+
     private PointOfChargeListAdapter adapter;
     private long stationId;
     private Context context;
     Handler mHandler;
     Thread threadToLoadStationFromDB;
     private static final int LOAD_STATION_COMPLETED = 100;
+
+    public String getUrlImage() {
+        return urlImage;
+    }
+
     private String urlImage = "";
     private Activity activity;
 
@@ -66,7 +81,7 @@ public class DetailsActivity extends AppCompatActivity {
 
         Toolbar myToolbar = findViewById(R.id.toolbar_details);
         setSupportActionBar(myToolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
         getSupportActionBar().setTitle(getString(R.string.app_name));
         getSupportActionBar().setSubtitle(getString(R.string.activity_details_name));
@@ -74,7 +89,7 @@ public class DetailsActivity extends AppCompatActivity {
         activity = this;
         context = getApplicationContext();
         managePointsOfChargeRecyclerView();
-        mHandler = new MyHandler();
+        mHandler = new MyHandler(activity);
 
         //get Extras from intent
 //        stationId = getIntent().getIntExtra("stationId", -1);
@@ -145,8 +160,8 @@ public class DetailsActivity extends AppCompatActivity {
         TextView stationUrl = findViewById(R.id.stationUrlDetails);
         TextView stationNumPointsOfCharge = findViewById(R.id.numPointsOfChargeDetails);
 
-        stationName.setText(station.getTitle());
-        //TODO mostrare euro se in europa dollaro se in usa e così via
+        stationName.setText(station.getName());
+        System.out.println(station.getUsageCost());
         Object o = station.usageCost();
         if (o instanceof Number) {
             stationUsageCost.setText(o + " €/KWh");
@@ -234,7 +249,7 @@ public class DetailsActivity extends AppCompatActivity {
      * @param newImage Bitmap Immage to set
      * @author Claudia Di Marco & Riccardo Mantini
      */
-    private void changeImage(Bitmap newImage)
+    public void changeImage(Bitmap newImage)
     {
         ImageView imageStation = findViewById(R.id.StationImageDetails);
         imageStation.setImageBitmap(newImage);
@@ -272,25 +287,34 @@ public class DetailsActivity extends AppCompatActivity {
         return true;
     }
 
-    private class MyHandler extends Handler {
+    private static class MyHandler extends Handler {
+        private Activity activity;
+
+        MyHandler(Activity activity) {
+            this.activity = activity;
+        }
 
             @Override
             public void handleMessage(Message msg) {
                 super.handleMessage(msg);
                 if (msg.what == LOAD_STATION_COMPLETED) {
                     // get Image from the urlImage and change ImageView element
-                    if(urlImage != null ) {
-                        VolleyRequest.getInstance(getApplicationContext()).downloadImage(new Response.Listener<Bitmap>() {
+                    if(((DetailsActivity)activity).getUrlImage() != "" && ((DetailsActivity)activity).getUrlImage() != null ) {
+                        //VolleyRequest.getInstance(getApplicationContext()).downloadImage(new Response.Listener<Bitmap>() {
+                        VolleyRequest.getInstance(((DetailsActivity)activity).getApplicationContext()).downloadImage(new Response.Listener<Bitmap>() {
                             @Override
                             public void onResponse(Bitmap response) {
-                                changeImage(response);
+                                ((DetailsActivity)activity).changeImage(response);
                             }
-                        }, urlImage);
+                        }, ((DetailsActivity)activity).getUrlImage());
                     }
 
-                    fillDetailsLayout();
-                    pointsOfCharge = station.getPointsOfCharge();
-                    adapter.add(pointsOfCharge);
+                    ((DetailsActivity)activity).fillDetailsLayout();
+                    //pointsOfCharge = ((DetailsActivity)activity).getStation().getPointsOfCharge();
+                    //((DetailsActivity)activity).add(pointsOfCharge);
+
+                    ArrayList<PointOfCharge> pointsOfCharge = ((DetailsActivity)activity).getStation().getPointsOfCharge();
+                    ((DetailsActivity)activity).getAdapter().add(pointsOfCharge);
                 }
             }
 
@@ -299,10 +323,6 @@ public class DetailsActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-//            case R.id.action_language:
-//                // User chose the "Settings" item, show the app settings UI...
-//                return true;
-
             case R.id.action_exit:
 
                 finishAffinity();
