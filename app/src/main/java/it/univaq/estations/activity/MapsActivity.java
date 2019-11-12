@@ -196,7 +196,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             @Override
             public void onCameraMoveStarted(int i) {
                 System.out.println("on camera move starter");
-
                 iconToStationListActivity.setEnabled(false);
                 iconToStationListActivity.setBackgroundColor(ContextCompat.getColor(context, R.color.disabled_color));
 
@@ -221,12 +220,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     /**
-     * Function to check if is available an Internet connection otherwise show an alert dialog.
+     * Check if is available an Internet connection otherwise show an alert dialog.
      * If it is available an Internet connection, it downloads data
      *
      * @author Claudia Di Marco & Riccardo Mantini
      */
-    public void checkConnectionAndDownloadData() {
+    private void checkConnectionAndDownloadData() {
         System.out.println("checkConnectionAndDownloadData");
         ConnectivityManager cm =
                 (ConnectivityManager) getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -265,12 +264,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     /**
-     * Function to find the bounding box coordinates and then download estation bounded in the boundingBox
+     * Find the bounding box coordinates and then download estation bounded in the boundingBox
      * created by topLeftCorner and bottomRightCorner coordinates.
      *
      * @author Claudia Di Marco & Riccardo Mantini
      */
-    public void downloadDataBoundedInBoundingBox() {
+    private void downloadDataBoundedInBoundingBox() {
         System.out.println("downloadDataBoundedInBoundingBox");
         // get topLeftCorner and bottomRightCorner coordinates
         LatLng topLeftCorner = new LatLng(mMap.getProjection().getVisibleRegion().latLngBounds.northeast.latitude,
@@ -289,7 +288,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
      * @author Claudia Di Marco & Riccardo Mantini
      */
     private void addEStationMarker(Station n) {
-        System.out.println("addEStationMarker");
         // create and add marker to the map
         Marker estationMarker = mMap.addMarker(new MarkerOptions().position(n.getPosition()).title("E-Station : " + n.getName()));
         // Changing marker icon_green
@@ -301,7 +299,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             estationMarker.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
         }
         estationMarker.setTag(n.getId());
-        System.out.println(" addTAg " + n.getId());
 
         // Lister to add custom behaviour to click on a marker
         mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
@@ -335,10 +332,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         });
     }
 
-    @Override
-    protected void onPause() {
-        super.onPause();
-    }
 
     @Override
     protected void onStop() {
@@ -349,13 +342,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-    }
 
     /**
-     * Function to download estation bounded in the boundingBox created by topLeftCorner and bottomRightCorner.
+     * Download estation bounded in the boundingBox created by topLeftCorner and bottomRightCorner.
      *
      * @param topLeftCorner     LatLng top left corner of the bounding box map
      * @param bottomRightCorner LatLng bottom right corner of the bounding box map
@@ -458,7 +447,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     /**
-     * Function to clear stations data form database and save Stations and associated points of charge in the database.
+     * Clear stations data form database and save Stations and associated points of charge in the database.
      *
      * @author Claudia Di Marco & Riccardo Mantini
      */

@@ -53,7 +53,6 @@ public class Station {
     public Station() {
     }
 
-
     public Station(String name, String usageCost, String address, String town, String stateOrProvince,
                    LatLng position, String url, int numberOfPointsOfCharge, String stationImageUrl) {
         this.name = name;
@@ -93,7 +92,7 @@ public class Station {
     }
 
     /**
-     * Function to return the usage cost when it is provided.
+     * Return the usage cost (when it is provided).
      *
      * @return Object the usage cost
      */
@@ -190,7 +189,7 @@ public class Station {
 
 
     /**
-     * Function to add a point of change in the ArrayList pointsOfCharge
+     * Add a point of change in the ArrayList pointsOfCharge
      *
      * @param pointOfCharge PointOfCharge The point of charge to add to the points of charge ArrayList
      * @author Claudia Di Marco & Riccardo Mantini
@@ -200,7 +199,7 @@ public class Station {
     }
 
     /**
-     * Function to add a list of points of change in the ArrayList pointsOfCharge
+     * Add a list of points of change in the ArrayList pointsOfCharge
      *
      * @param pointOfChargeList List<PointOfCharge> List of points of charge to add
      * @author Claudia Di Marco & Riccardo Mantini
@@ -211,7 +210,7 @@ public class Station {
     }
 
     /**
-     * Function to know if one charging point of the station is free
+     * To Know if one charging point of the station is free
      *
      * @return true if one point of charge is free, false otherwise
      * @author Claudia Di Marco & Riccardo Mantini
@@ -225,7 +224,7 @@ public class Station {
     }
 
     /**
-     * Function to calculate the distance between the user and the station, then it sets this
+     * Calculate the distance between the user and the station, then it sets this
      * distance in the distanceFromUser attribute.
      *
      * @param currentPosition LatLng the user current position

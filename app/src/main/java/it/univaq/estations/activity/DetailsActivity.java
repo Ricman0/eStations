@@ -62,8 +62,8 @@ public class DetailsActivity extends AppCompatActivity {
     private PointOfChargeListAdapter adapter;
     private long stationId;
     private Context context;
-    Handler mHandler;
-    Thread threadToLoadStationFromDB;
+    private Handler mHandler;
+    private Thread threadToLoadStationFromDB;
     private static final int LOAD_STATION_COMPLETED = 100;
 
     public String getUrlImage() {
@@ -92,7 +92,6 @@ public class DetailsActivity extends AppCompatActivity {
         mHandler = new MyHandler(activity);
 
         //get Extras from intent
-//        stationId = getIntent().getIntExtra("stationId", -1);
         stationId = getIntent().getLongExtra("stationId", -1);
 
         System.out.println("detailsActitivyt" + stationId );

@@ -21,7 +21,6 @@ public interface StationDao {
     @Delete
     public void delete(Station station);
 
-    //DELETE FROM sqlite_sequence WHERE name = 'SequenceAction'
     @Query("DELETE FROM stations")
     public void deleteAll();
 
