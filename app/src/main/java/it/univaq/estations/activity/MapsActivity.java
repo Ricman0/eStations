@@ -71,7 +71,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private ImageView iconToStationListActivity;
 
-    private static final int ALL_STATIONS_SAVED = 1;
+    private static final int ALL_STATIONS_SAVED = 2;
 
     private boolean stopAsking = false; // avoid keep asking for location permission if deny
     private boolean backPressed = false; // avoid redownload stations when back button is pressed
