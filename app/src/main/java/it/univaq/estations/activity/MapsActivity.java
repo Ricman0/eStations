@@ -17,6 +17,7 @@ import android.view.View;
 import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentActivity;
@@ -58,20 +59,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private UiSettings mUiSettings;
     private GoogleLocationService locationService;
 
-    public List<Station> getStations() {
-        return stations;
-    }
-
     private List<Station> stations = new ArrayList<>();
     private LatLng currentPos;
-    private LatLng mDefaultLocation;
     private static final float DEFAULT_ZOOM = 12;
     private static final int PERMISSIONS_REQUEST_FINE_LOCATION = 1;
 
-    Handler mHandler;
-    Thread threadToLoadAllStationsFromDB;
-    Thread threadToClearDataFromDB;
-    Thread threadToSaveStationsInDB;
+    private Handler mHandler;
+    private Thread threadToSaveStationsInDB;
 
     private ImageView iconToStationListActivity;
 
@@ -80,6 +74,23 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private boolean stopAsking = false; // avoid keep asking for location permission if deny
     private boolean backPressed = false; // avoid redownload stations when back button is pressed
 
+    /**
+     * Get a Station list of MapsActivity
+     *
+     * @return List<Station> station list
+     */
+    public List<Station> getStations() {
+        return stations;
+    }
+
+    /**
+     * Initialize the fragment, set MapsActivity layout, check location permission,
+     * add click listener to the navigationToStation button
+     *
+     * @Override
+     * @param savedInstanceState
+     * @author Claudia Di Marco & Riccardo Mantini
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         System.out.println("onCreate");
@@ -87,8 +98,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         super.onCreate(savedInstanceState);
         this.setContentView(R.layout.activity_maps);
 
-        mDefaultLocation = new LatLng(42.4584, 14.216090); //DefaultLocation Pescara
-        currentPos = mDefaultLocation;
+        currentPos  = new LatLng(42.4584, 14.216090); //DefaultLocation Pescara
 
         context = this.getApplicationContext();
         activity = this;
@@ -118,16 +128,24 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             public void onClick(View v) {
                 backPressed = true;
                 // Open another Activity and pass to it the right station
-                //new Intent object: Il costruttore, in caso di intent esplicito, richiede due parametri: il Context (che, nel nostro caso, è l’activity che vuole chiamare la seconda) e la classe che riceverà l’intent, cioè l’activity che vogliamo richiamare.
+                //the intent explicit costructor require 2 parameters: il Context (the activity that call the 2 activity) and the class that will receive the intent, that is the activity to recall.
                 Intent intent = new Intent(v.getContext(), StationsListActivity.class);
 
-                //Avendo l’intent, per avviare la nuova activity
+                //to start the new activity
                 v.getContext().startActivity(intent);
+                // to custom animate the transition between the 2 activities
                 overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
             }
         });
     }
 
+    /**
+     * Resume
+     *
+     * @Override
+     * @author Claudia Di Marco & Riccardo Mantini
+     */
+    @Override
     protected void onResume() {
         System.out.println(" onREsume");
         super.onResume();
@@ -150,10 +168,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
      * Manipulates the map once available.
      * This callback is triggered when the map is ready to be used.
      * This is where we can add markers or lines, add listeners or move the camera. In this case,
-     * we just add a marker near Sydney, Australia.
-     * If Google Play services is not installed on the device, the user will be prompted to install
-     * it inside the SupportMapFragment. This method will only be triggered once the user has
-     * installed Google Play services and returned to the app.
+     * add settings on the map, request a location update,
+     * set a GoogleMap.OnCameraMoveStartedListener to disable iconToStationListActivity button,
+     * set a GoogleMap.OnCameraIdleListener to know if the camera movement has ended so it can clear
+     * the map, check Internet connection and then download data.
+     *
+     * @Override
+     * @param googleMap GoogleMap
+     * @author Claudia Di Marco & Riccardo Mantini
      */
     @Override
     public void onMapReady(GoogleMap googleMap) {
@@ -166,7 +188,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         locationService = new GoogleLocationService();
         locationService.onCreate(this, this);
-        //locationService.requestLastLocation(this);
         if (!locationService.requestLocationUpdates(this)) {
             onPermissionNotGranted();
         }
@@ -323,12 +344,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     protected void onStop() {
         super.onStop();
         locationService.stopLocationUpdates(this);
-        if (threadToLoadAllStationsFromDB != null && threadToLoadAllStationsFromDB.isAlive()) {
-            threadToLoadAllStationsFromDB.interrupt();
-        }
-        if (threadToClearDataFromDB != null && threadToClearDataFromDB.isAlive()) {
-            threadToClearDataFromDB.interrupt();
-        }
         if (threadToSaveStationsInDB != null && threadToSaveStationsInDB.isAlive()) {
             threadToSaveStationsInDB.interrupt();
         }
@@ -497,13 +512,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         System.out.println("onLastLocationNullResult");
         mMap.setMyLocationEnabled(true); // richiede i permetti di access_fine o coarse
         mUiSettings.setMyLocationButtonEnabled(true);
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mDefaultLocation, DEFAULT_ZOOM));
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentPos, DEFAULT_ZOOM));
     }
 
     @Override
     public void onPermissionNotGranted() {
         System.out.println("onPermissionNotGranted");
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(mDefaultLocation, DEFAULT_ZOOM));
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentPos, DEFAULT_ZOOM));
     }
 
 
@@ -517,7 +532,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 } else {
                     // deny
                     stopAsking = true;
-                    currentPos = mDefaultLocation;
                 }
                 break;
 
