@@ -2,7 +2,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="it.univaq.estations">
 
-
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -10,29 +9,6 @@
         android:roundIcon="@mipmap/ic_estations"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-
-        <activity
-            android:name=".activity.StationsListActivity"
-            android:label="@string/title_activity_stations_list">
-        </activity>
-        <activity
-            android:name=".activity.DetailsActivity"
-            android:label="@string/title_details_activity"
-            android:parentActivityName=".activity.StationsListActivity">
-            <!-- Parent activity meta-data to support 4.0 and lower -->
-            <!--<meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".activity.StationsListActivity" />-->
-        </activity>
-        <!--
-             The API key for Google Maps-based APIs is defined as a string resource.
-             (See the file "res/values/google_maps_api.xml").
-             Note that the API key is linked to the encryption key used to sign the APK.
-             You need a different API key for each encryption key, including the release key that is used to
-             sign the APK for publishing.
-             You can define the keys for the debug and release targets in src/debug/ and src/release/.
-        -->
-
 
         <activity android:name=".activity.SplashScreenActivity"
             android:theme="@style/SplashScreenTheme">
@@ -47,18 +23,23 @@
             android:name=".activity.MapsActivity">
         </activity>
 
+        <activity
+            android:name=".activity.StationsListActivity"
+            android:label="@string/title_activity_stations_list">
+        </activity>
+
+        <activity
+            android:name=".activity.DetailsActivity"
+            android:label="@string/title_details_activity"
+            android:parentActivityName=".activity.StationsListActivity">
+        </activity>
+
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
     </application>
 
 
-
-    <!--
-        The ACCESS_COARSE/FINE_LOCATION permissions are not required to use
-        Google Maps Android API v2, but you must specify either coarse or fine
-        location permissions for the 'MyLocation' functionality.
-    -->
     <uses-feature
         android:glEsVersion="0x00020000"
         android:required="true" />

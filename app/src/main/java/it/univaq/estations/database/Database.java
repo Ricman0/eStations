@@ -18,9 +18,6 @@ public abstract class Database extends RoomDatabase {
 
     private static Database instance = null;
 
-    //private Database(){}
-    //protected Database(){}
-
     public static Database getInstance(Context context){
         if(instance == null){
             instance = Room.databaseBuilder(
