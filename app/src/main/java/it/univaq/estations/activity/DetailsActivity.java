@@ -32,7 +32,7 @@ import com.android.volley.Response;
 
 import java.util.ArrayList;
 
-import it.univaq.estations.Database.Database;
+import it.univaq.estations.database.Database;
 import it.univaq.estations.R;
 import it.univaq.estations.activity.adapter.PointOfChargeListAdapter;
 import it.univaq.estations.model.PointOfCharge;
@@ -50,7 +50,7 @@ public class DetailsActivity extends AppCompatActivity {
     private LinearLayoutManager layoutManager;
     private RecyclerView  recyclerView;
     private PointOfChargeListAdapter adapter;
-    private String stationId;
+    private long stationId;
     private Context context;
     Handler mHandler;
     Thread threadToLoadStationFromDB;
@@ -77,8 +77,10 @@ public class DetailsActivity extends AppCompatActivity {
         mHandler = new MyHandler();
 
         //get Extras from intent
-        stationId = getIntent().getStringExtra("stationId");
+//        stationId = getIntent().getIntExtra("stationId", -1);
+        stationId = getIntent().getLongExtra("stationId", -1);
 
+        System.out.println("detailsActitivyt" + stationId );
         //get station from database
         appDB = Database.getInstance(getApplicationContext());
 
@@ -86,6 +88,7 @@ public class DetailsActivity extends AppCompatActivity {
             @Override
             public void run() {
                 station = appDB.getStationDao().getById(stationId);
+                System.out.println("threadToLoadStationFromDB id stazione " + station.getId());
                 station.addPointOfChargeList(appDB.getPointOfChargeDao().getAllStationPointsOfCharge(stationId));
                 urlImage = station.getStationImageUrl();
                 Message message = new Message();

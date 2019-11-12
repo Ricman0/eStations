@@ -1,4 +1,4 @@
-package it.univaq.estations.Database;
+package it.univaq.estations.database;
 
 import androidx.room.Dao;
 import androidx.room.Delete;
@@ -15,7 +15,7 @@ import it.univaq.estations.model.PointOfCharge;
 public interface PointOfChargeDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    public void save(PointOfCharge poc);
+    public long save(PointOfCharge poc);
 
     @Delete
     public void delete(PointOfCharge poc);
@@ -29,6 +29,6 @@ public interface PointOfChargeDao {
     @Query("SELECT * FROM pointsofcharge WHERE id=:id")
     public PointOfCharge getById(long id);
 
-    @Query("SELECT * FROM pointsofcharge WHERE station_id=:station_id")
-    public List<PointOfCharge> getAllStationPointsOfCharge(String station_id);
+    @Query("SELECT * FROM pointsofcharge WHERE stationId=:stationId")
+    public List<PointOfCharge> getAllStationPointsOfCharge(long stationId);
 }

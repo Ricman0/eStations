@@ -1,4 +1,4 @@
-package it.univaq.estations.Database;
+package it.univaq.estations.database;
 
 import androidx.room.Dao;
 import androidx.room.Delete;
@@ -14,11 +14,12 @@ import it.univaq.estations.model.Station;
 @Dao
 public interface StationDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    public void save(Station station);
+    public long save(Station station);
 
     @Delete
     public void delete(Station station);
 
+    //DELETE FROM sqlite_sequence WHERE name = 'SequenceAction'
     @Query("DELETE FROM stations")
     public void deleteAll();
 
@@ -32,6 +33,6 @@ public interface StationDao {
     public List<Station> getAllStations();
 
     @Query("SELECT * FROM stations WHERE id=:id")
-    public Station getById(String id);
+    public Station getById(long id);
 
 }

@@ -12,60 +12,43 @@ import static androidx.room.ForeignKey.CASCADE;
 
 @Entity(tableName = "pointsofcharge", foreignKeys = @ForeignKey(entity = Station.class,
         parentColumns = "id",
-        childColumns = "station_id",
-        onDelete = CASCADE), indices = {@Index(value = "station_id")})
+        childColumns = "stationId",
+        onDelete = CASCADE), indices = {@Index(value = "stationId")})
 public class PointOfCharge {
 
-    @PrimaryKey
-    @NonNull
-    @ColumnInfo(name = "id")
+    @PrimaryKey(autoGenerate = true)
     private long id;
 
-    @NonNull
-    @ColumnInfo(name = "station_id")
-    private String station_id;
+    private long stationId;
 
-    @ColumnInfo(name = "voltage")
     private int voltage;
 
-    @ColumnInfo(name = "kw")
     private int kw;
 
-    @ColumnInfo(name = "statusTypeId")
+    @ColumnInfo(name = "status_type_id")
     private int statusTypeId;
 
-    @Ignore
     public PointOfCharge() {
     }
 
-    public PointOfCharge(long id, String station_id, int voltage, int kw, int statusTypeId) {
-        this.id = id;
-        this.station_id = station_id;
+    @Ignore
+    public PointOfCharge( int voltage, int kw, int statusTypeId) {
         this.voltage = voltage;
         this.kw = kw;
         this.statusTypeId = statusTypeId;
-    }
-
-    @Ignore
-    public PointOfCharge(long id) {
-        this.id = id;
     }
 
     public long getId() {
         return id;
     }
 
-    public void setId(long id) {
-        this.id = id;
+    public void setId(long id){ this.id = id;}
+
+    public long getStationId() {
+        return stationId;
     }
 
-    public String getStation_id() {
-        return station_id;
-    }
-
-    public void setStation_id(String station_id) {
-        this.station_id = station_id;
-    }
+    public void setStationId(long stationId){this.stationId = stationId;}
 
     public int getVoltage() {
         return voltage;

@@ -1,4 +1,4 @@
-package it.univaq.estations.Database;
+package it.univaq.estations.database;
 
 import androidx.room.TypeConverter;
 

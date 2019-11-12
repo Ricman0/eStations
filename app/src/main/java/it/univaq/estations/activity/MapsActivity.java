@@ -13,6 +13,7 @@ import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 
@@ -22,6 +23,7 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentActivity;
 
 import com.android.volley.Response;
+import com.android.volley.VolleyError;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -40,7 +42,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
-import it.univaq.estations.Database.Database;
+import it.univaq.estations.database.Database;
 import it.univaq.estations.R;
 import it.univaq.estations.model.PointOfCharge;
 import it.univaq.estations.model.Station;
@@ -76,6 +78,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        System.out.println("onCreate");
 
         super.onCreate(savedInstanceState);
         this.setContentView(R.layout.activity_maps);
@@ -227,6 +230,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
      * @author Claudia Di Marco & Riccardo Mantini
      */
     public void downloadDataBoundedInBoundingBox() {
+        System.out.println("downloadDataBoundedInBoundingBox");
         // get topLeftCorner and bottomRightCorner coordinates
         LatLng topLeftCorner = new LatLng(mMap.getProjection().getVisibleRegion().latLngBounds.northeast.latitude,
                 mMap.getProjection().getVisibleRegion().latLngBounds.southwest.longitude);
@@ -256,13 +260,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             estationMarker.setIcon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
         }
         estationMarker.setTag(n.getId());
+        System.out.println(" addTAg " + n.getId());
 
         // Lister to add custom behaviour to click on a marker
         mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
             @Override
             public boolean onMarkerClick(final Marker marker) {
                 backPressed = true;
-                String stationId = (String) marker.getTag();
+                long stationId = (long) marker.getTag();
 
                 //new Intent object: Il costruttore, in caso di intent esplicito, richiede due parametri: il Context (che, nel nostro caso, è l’activity che vuole chiamare la seconda) e la classe che riceverà l’intent, cioè l’activity che vogliamo richiamare.
                 Intent intent = new Intent(context, DetailsActivity.class);
@@ -324,15 +329,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         System.out.println(" clearDataFromDB");
         stations.clear();
         System.out.println(stations.size() + " stazioni");
-        threadToClearDataFromDB = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                Database.getInstance(getApplicationContext())
-                        .getStationDao().deleteAll();// i points of charge associati dovrebbero essere eliminati con on cascade
-                Message message = new Message();
-                message.what = ALL_STATIONS_DELETED;
-                mHandler.sendMessage(message);
-            }
+        threadToClearDataFromDB = new Thread(() -> {
+            Database.getInstance(getApplicationContext())
+                    .getStationDao().deleteAll();// i points of charge associati dovrebbero essere eliminati con on cascade
+            System.out.println("point of charge dopo cancellati sono " +  Database.getInstance(getApplicationContext()).getPointOfChargeDao().getAllPointsOfCharge().size());
+            Message message = new Message();
+            message.what = ALL_STATIONS_DELETED;
+            mHandler.sendMessage(message);
         });
         threadToClearDataFromDB.start();
     }
@@ -347,93 +350,104 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private void downloadData(LatLng topLeftCorner, LatLng bottomRightCorner) {
         System.out.println(" downloadData");
         VolleyRequest.getInstance(getApplicationContext())
-                .downloadStations(new Response.Listener<String>() {
+                .downloadStations(response -> {
+                    System.out.println(response.isEmpty());
+                    try {
+                        System.out.println(" downloadData2");
 
-                    @Override
-                    public void onResponse(String response) {
-                        try {
-                            //recyclerView.setAdapter(adapter);
-                            JSONArray jsonRoot = new JSONArray(response);
-                            for (int i = 0; i < jsonRoot.length(); i++) {
+                        //recyclerView.setAdapter(adapter);
+                        JSONArray jsonRoot = new JSONArray(response);
+                        for (int i = 0; i < jsonRoot.length(); i++) {
 
-                                JSONObject item = jsonRoot.getJSONObject(i);
+                            JSONObject item = jsonRoot.getJSONObject(i);
 
-                                String id = item.optString("ID");
+                            // String id = item.optString("ID");
 
-                                String usageCost = item.optString("UsageCost", " N/A");
+                            String usageCost = item.optString("UsageCost", " N/A");
 
-                                JSONObject addressInfo = item.optJSONObject("AddressInfo");
+                            JSONObject addressInfo = item.optJSONObject("AddressInfo");
 
-                                String title = "", address = "", town = "", stateOrProvince = "", url = "";
-                                LatLng position = null;
+                            String title = "", address = "", town = "", stateOrProvince = "", url = "";
+                            LatLng position = null;
 
-                                if (addressInfo != null) {
+                            if (addressInfo != null) {
 
-                                    title = addressInfo.optString("Title", "No Name");
+                                title = addressInfo.optString("Title", "No Name");
 
-                                    address = addressInfo.optString("AddressLine1", "No Address");
+                                address = addressInfo.optString("AddressLine1", "No Address");
 
-                                    town = addressInfo.optString("Town", "No Town");
+                                town = addressInfo.optString("Town", "No Town");
 
-                                    stateOrProvince = addressInfo.optString("StateOrProvince", "No State or Province");
+                                stateOrProvince = addressInfo.optString("StateOrProvince", "No State or Province");
 
-                                    position = new LatLng(addressInfo.optDouble("Latitude"), addressInfo.optDouble("Longitude"));
+                                position = new LatLng(addressInfo.optDouble("Latitude"), addressInfo.optDouble("Longitude"));
 
-                                    url = addressInfo.optString("RelatedURL", "No Url");
-                                }
-
-                                JSONArray mediaArray = item.optJSONArray("MediaItems");
-
-                                String mediaUrl = null;
-
-                                if (mediaArray != null) {
-                                    int k = 0;
-                                    while (mediaUrl == null || k != mediaArray.length()) {
-
-                                        //big image
-                                        mediaUrl = mediaArray.getJSONObject(k).optString("ItemURL", null);
-
-                                        //small image
-                                        //mediaUrl = mediaArray.getJSONObject(k).optString("ItemThumbnailURL", null);
-                                        k++;
-                                    }
-                                }
-
-                                JSONArray connections = item.optJSONArray("Connections");
-
-                                int numberOfPointsOfCharge = (connections != null ? connections.length() : 0);
-
-                                Station station = new Station(id, title, usageCost, address, town, stateOrProvince, position, url, numberOfPointsOfCharge, mediaUrl);
-
-                                station.calcAndSetDistanceFromUser(currentPos);
-                                for (int j = 0; j < numberOfPointsOfCharge; j++) {
-                                    JSONObject connection = connections.getJSONObject(j);
-                                    PointOfCharge pointOfCharge = new PointOfCharge(
-                                            connection.optInt("ID"), id, connection.optInt("Voltage"),
-                                            connection.optInt("PowerKW"), connection.optInt("StatusTypeID")
-                                    );
-                                    station.addPointOfCharge(pointOfCharge);
-                                }
-                                stations.add(station);
-
+                                url = addressInfo.optString("RelatedURL", "No Url");
                             }
 
-                            threadToSaveStationsInDB = new Thread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    saveStationsDataInDB();
-                                    Message message = new Message();
-                                    message.what = ALL_STATIONS_SAVED;
-                                    mHandler.sendMessage(message);
-                                }
-                            });
-                            threadToSaveStationsInDB.start();
+                            JSONArray mediaArray = item.optJSONArray("MediaItems");
 
-                        } catch (JSONException e) {
-                            e.printStackTrace();
+                            String mediaUrl = null;
+
+                            if (mediaArray != null) {
+                                int k = 0;
+                                while (mediaUrl == null || k != mediaArray.length()) {
+
+                                    //big image
+                                    mediaUrl = mediaArray.getJSONObject(k).optString("ItemURL", null);
+
+                                    //small image
+                                    //mediaUrl = mediaArray.getJSONObject(k).optString("ItemThumbnailURL", null);
+                                    k++;
+                                }
+                            }
+
+                            JSONArray connections = item.optJSONArray("Connections");
+
+                            int numberOfPointsOfCharge = (connections != null ? connections.length() : 0);
+
+                            Station station = new Station(title, usageCost, address, town, stateOrProvince, position, url, numberOfPointsOfCharge, mediaUrl);
+
+                            station.calcAndSetDistanceFromUser(currentPos);
+                            for (int j = 0; j < numberOfPointsOfCharge; j++) {
+                                JSONObject connection = connections.getJSONObject(j);
+                                PointOfCharge pointOfCharge = new PointOfCharge(
+                                        connection.optInt("Voltage"),
+                                        connection.optInt("PowerKW"),
+                                        connection.optInt("StatusTypeID")
+                                );
+//                                    PointOfCharge pointOfCharge = new PointOfCharge(
+//                                            connection.optInt("ID"), connection.optInt("Voltage"),
+//                                            connection.optInt("PowerKW"), connection.optInt("StatusTypeID")
+//                                    );
+                                station.addPointOfCharge(pointOfCharge);
+                            }
+                            stations.add(station);
+
                         }
+
+                        threadToSaveStationsInDB = new Thread() {
+                            @Override
+                            public void run() {
+                                System.out.println("threadToSaveStationsInDB");
+                                saveStationsDataInDB();
+                                Message message = new Message();
+                                message.what = ALL_STATIONS_SAVED;
+                                mHandler.sendMessage(message);
+                            }
+                        };
+                        threadToSaveStationsInDB.start();
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
                     }
-                }, currentPos, null, topLeftCorner, bottomRightCorner);
+                }, currentPos, null, topLeftCorner, bottomRightCorner, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError volleyError) {
+                        System.out.println("VOLLEY ERROR: " + volleyError.toString());
+
+                    }
+                });
     }
 
     /**
@@ -446,10 +460,24 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         // per ogni stazione salva la stazione e tutti i suoi punti di ricarica
         for (int k = 0; k < stations.size(); k++) {
             Station stationToSave = stations.get(k);
-            appDB.getStationDao().save(stationToSave); // salvo la stazione
+            long idStationSaved = appDB.getStationDao().save(stationToSave); // salvo la stazione
+//            long idStationSaved = appDB.getStationDao().getAllStations()
+//                    .get(appDB.getStationDao().getAllStations().size()-1).getId();
+            stationToSave.setId(idStationSaved);
+
+//todo settare in station l'id  che ho ottenuto nella stazione
+            System.out.println("id della station salvata " +  idStationSaved);
+            System.out.println("nome della station salvata " +  stationToSave.getName());
             for (int p = 0; p < stationToSave.getPointsOfCharge().size(); p++) {
                 PointOfCharge pointOfChargeToSave = stationToSave.getPointsOfCharge().get(p);
-                appDB.getPointOfChargeDao().save(pointOfChargeToSave); // salvo il punto di ricarica
+                pointOfChargeToSave.setStationId(idStationSaved);
+                long  idPointOfChargeSaved = appDB.getPointOfChargeDao().save(pointOfChargeToSave); // salvo il punto di ricarica
+//                int idPointOfChargeSaved = appDB.getPointOfChargeDao().getAllPointsOfCharge()
+//                        .get(appDB.getPointOfChargeDao().getAllPointsOfCharge().size()-1).getId();
+                pointOfChargeToSave.setId(idPointOfChargeSaved);
+                System.out.println("id del poc della station salvata " +  idPointOfChargeSaved);
+
+
             }
         }
     }

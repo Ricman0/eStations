@@ -1,14 +1,8 @@
 package it.univaq.estations.activity;
 
-import android.app.AlertDialog;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.content.res.Configuration;
-import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.util.DisplayMetrics;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -23,7 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-import it.univaq.estations.Database.Database;
+import it.univaq.estations.database.Database;
 import it.univaq.estations.R;
 import it.univaq.estations.activity.adapter.StationsListAdapter;
 import it.univaq.estations.model.Station;

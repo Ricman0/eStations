@@ -1,6 +1,5 @@
 package it.univaq.estations.model;
 
-import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.Ignore;
@@ -13,55 +12,50 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import it.univaq.estations.Database.LatLngConverter;
+import it.univaq.estations.database.LatLngConverter;
 
 @Entity(tableName = "stations")
 public class Station {
 
-    @PrimaryKey @NonNull
-    private String id;
+    @PrimaryKey(autoGenerate = true)
+    private long id;
 
     @ColumnInfo(name = "name")
     private String title;
 
-    @ColumnInfo(name = "usageCost")
+    @ColumnInfo(name = "usage_cost")
     private String usageCost;
 
-    @ColumnInfo(name = "address")
     private String address;
 
-    @ColumnInfo(name = "town")
     private String town;
 
-    @ColumnInfo(name = "stateOrProvince")
+    @ColumnInfo(name = "state_or_province")
     private String stateOrProvince;
 
-    @ColumnInfo(name = "position")
     @TypeConverters(LatLngConverter.class)
     private LatLng position;
 
-    @ColumnInfo(name = "url")
     private String url;
 
-    @ColumnInfo(name = "numberOfPointsOfCharge")
+    @ColumnInfo(name = "number_of_points_of_charge")
     private int numberOfPointsOfCharge;
 
     @Ignore
     private ArrayList<PointOfCharge> pointsOfCharge;
 
-    @ColumnInfo(name = "urlImage")
+    @ColumnInfo(name = "url_image")
     private String stationImageUrl;
 
-    @ColumnInfo(name = "distanceFromUser")
+    @ColumnInfo(name = "distance_from_user")
     private double distanceFromUser;
 
-    @Ignore
+    @Ignore // ignore this constructor because it si necessary do this.pointsOfCharge = new ArrayList<PointOfCharge>(); and setDistanceFromUser(0);
     public Station(){}
 
 
-    public Station(String id, String title, String usageCost,String address, String town, String stateOrProvince,
+    public Station(String title, String usageCost,String address, String town, String stateOrProvince,
                    LatLng position, String url, int numberOfPointsOfCharge, String stationImageUrl) {
-        this.id = id;
         this.title = title;
         this.usageCost = usageCost;
         this.address = address;
@@ -77,19 +71,14 @@ public class Station {
 
     // getter and setter
 
-    @Ignore
-    public Station(String id) {
-        this.id = id;
-    }
 
-    public String getId() {
+    public long getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(long id) {
         this.id = id;
     }
-
     public String getName() {
         return title;
     }
@@ -222,6 +211,7 @@ public class Station {
      * @author Claudia Di Marco & Riccardo Mantini
      */
     public void addPointOfChargeList(List<PointOfCharge> pointOfChargeList){
+        System.out.println("quanti poc?? " + pointOfChargeList.size());
         this.pointsOfCharge.addAll(pointOfChargeList);
     }
 
@@ -240,8 +230,6 @@ public class Station {
         }
         return isFree;
     }
-
-
 
     /**
      * Function to calculate the distance between the user and the station, then it sets this

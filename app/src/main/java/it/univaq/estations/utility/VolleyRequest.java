@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.net.Uri;
 
+import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.toolbox.ImageRequest;
@@ -27,7 +28,7 @@ public class VolleyRequest {
     }
 
     public void downloadStations(Response.Listener<String> listener, LatLng currentPosition, Integer kmDistance,
-                                 LatLng topLeftCorner, LatLng bottomRightCorner){
+                                 LatLng topLeftCorner, LatLng bottomRightCorner, Response.ErrorListener errorListner){
 
         double curLat;
         double curLng;
@@ -65,11 +66,18 @@ public class VolleyRequest {
         }
         String myUrl = builder.build().toString();
 
+        System.out.println("URL: " + myUrl);
+
         StringRequest request = new StringRequest(
                 StringRequest.Method.GET,
                 myUrl,
                 listener,
-                null);
+                errorListner);
+
+        request.setRetryPolicy(new DefaultRetryPolicy(10000,
+                DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
+
         queue.add(request);
     }
 

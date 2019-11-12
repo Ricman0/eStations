@@ -5,7 +5,7 @@ import android.os.Bundle;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import it.univaq.estations.Database.Database;
+import it.univaq.estations.database.Database;
 
 public class SplashScreenActivity extends AppCompatActivity {
     Thread threadDeleteStationFromDB;
@@ -17,7 +17,7 @@ public class SplashScreenActivity extends AppCompatActivity {
         threadDeleteStationFromDB = new Thread(new Runnable() {
             @Override
             public void run() {
-                Database.getInstance(getApplicationContext()).getStationDao().deleteAll();
+                Database.getInstance(getApplicationContext()).clearAllTables();
             }
         });
         threadDeleteStationFromDB.start();
