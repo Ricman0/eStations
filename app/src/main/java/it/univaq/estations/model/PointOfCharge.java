@@ -13,7 +13,7 @@ import static androidx.room.ForeignKey.CASCADE;
 @Entity(tableName = "pointsofcharge", foreignKeys = @ForeignKey(entity = Station.class,
         parentColumns = "id",
         childColumns = "stationId",
-        onDelete = CASCADE), indices = {@Index(value = "stationId")})
+        onDelete = CASCADE, onUpdate = CASCADE), indices = {@Index(value = "stationId")})
 public class PointOfCharge {
 
     @PrimaryKey(autoGenerate = true)

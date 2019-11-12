@@ -13,7 +13,6 @@ import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 
@@ -42,8 +41,8 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
-import it.univaq.estations.database.Database;
 import it.univaq.estations.R;
+import it.univaq.estations.database.Database;
 import it.univaq.estations.model.PointOfCharge;
 import it.univaq.estations.model.Station;
 import it.univaq.estations.utility.GoogleLocationService;
@@ -70,8 +69,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     Thread threadToClearDataFromDB;
     Thread threadToSaveStationsInDB;
 
-    private static final int ALL_STATIONS_SAVED = 102;
-    private static final int ALL_STATIONS_DELETED = 103;
+    private ImageView iconToStationListActivity;
+
+    private static final int ALL_STATIONS_SAVED = 1;
 
     private boolean stopAsking = false; // avoid keep asking for location permission if deny
     private boolean backPressed = false; // avoid redownload stations when back button is pressed
@@ -91,7 +91,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         appDB = Database.getInstance(getApplicationContext());
         stations = new ArrayList<>();
 
-        ImageView iconToStationListActivity = findViewById(R.id.iconToStationListActivity);
+        iconToStationListActivity = findViewById(R.id.iconToStationListActivity);
 
         mHandler = new MyHandler(iconToStationListActivity);
 
@@ -172,8 +172,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             @Override
             public void onCameraIdle() {
                 System.out.println("on camera idle");
-                // clear data in  the DB and then get bounding box and download data
-                clearDataFromDB();
+
+                //clear the elements on map and stations, disable iconToStationListActivity button and call checkConnectionAndDownloadData function
+                stations.clear();
+                if (mMap != null) {
+                    mMap.clear();
+                }
+                iconToStationListActivity.setEnabled(false);
+                iconToStationListActivity.setBackgroundColor(ContextCompat.getColor(context, R.color.disabled_color));
+                checkConnectionAndDownloadData();
             }
         });
 
@@ -320,27 +327,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     /**
-     * Function to clear all stations and associated Points of charges from database.
-     * To do this, this function creates a new thread and when it finishes, it sends ALL_STATIONS_DELETED message
-     *
-     * @author Claudia Di Marco & Riccardo Mantini
-     */
-    private void clearDataFromDB() {
-        System.out.println(" clearDataFromDB");
-        stations.clear();
-        System.out.println(stations.size() + " stazioni");
-        threadToClearDataFromDB = new Thread(() -> {
-            Database.getInstance(getApplicationContext())
-                    .getStationDao().deleteAll();// i points of charge associati dovrebbero essere eliminati con on cascade
-            System.out.println("point of charge dopo cancellati sono " +  Database.getInstance(getApplicationContext()).getPointOfChargeDao().getAllPointsOfCharge().size());
-            Message message = new Message();
-            message.what = ALL_STATIONS_DELETED;
-            mHandler.sendMessage(message);
-        });
-        threadToClearDataFromDB.start();
-    }
-
-    /**
      * Function to download estation bounded in the boundingBox created by topLeftCorner and bottomRightCorner.
      *
      * @param topLeftCorner     LatLng top left corner of the bounding box map
@@ -355,13 +341,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     try {
                         System.out.println(" downloadData2");
 
-                        //recyclerView.setAdapter(adapter);
                         JSONArray jsonRoot = new JSONArray(response);
                         for (int i = 0; i < jsonRoot.length(); i++) {
 
                             JSONObject item = jsonRoot.getJSONObject(i);
-
-                            // String id = item.optString("ID");
 
                             String usageCost = item.optString("UsageCost", " N/A");
 
@@ -416,10 +399,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                         connection.optInt("PowerKW"),
                                         connection.optInt("StatusTypeID")
                                 );
-//                                    PointOfCharge pointOfCharge = new PointOfCharge(
-//                                            connection.optInt("ID"), connection.optInt("Voltage"),
-//                                            connection.optInt("PowerKW"), connection.optInt("StatusTypeID")
-//                                    );
                                 station.addPointOfCharge(pointOfCharge);
                             }
                             stations.add(station);
@@ -430,7 +409,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                             @Override
                             public void run() {
                                 System.out.println("threadToSaveStationsInDB");
-                                saveStationsDataInDB();
+                                deleteDataAndSaveStationsDataInDB();
                                 Message message = new Message();
                                 message.what = ALL_STATIONS_SAVED;
                                 mHandler.sendMessage(message);
@@ -451,36 +430,44 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     /**
-     * Function to save Stations and associated points of charge in the database.
+     * Function to clear stations data form database and save Stations and associated points of charge in the database.
      *
      * @author Claudia Di Marco & Riccardo Mantini
      */
-    private void saveStationsDataInDB() {
+    private void deleteDataAndSaveStationsDataInDB() {
         System.out.println("saveStationsDataInDB");
-        // per ogni stazione salva la stazione e tutti i suoi punti di ricarica
-        for (int k = 0; k < stations.size(); k++) {
-            Station stationToSave = stations.get(k);
-            long idStationSaved = appDB.getStationDao().save(stationToSave); // salvo la stazione
-//            long idStationSaved = appDB.getStationDao().getAllStations()
-//                    .get(appDB.getStationDao().getAllStations().size()-1).getId();
-            stationToSave.setId(idStationSaved);
 
-//todo settare in station l'id  che ho ottenuto nella stazione
-            System.out.println("id della station salvata " +  idStationSaved);
-            System.out.println("nome della station salvata " +  stationToSave.getName());
-            for (int p = 0; p < stationToSave.getPointsOfCharge().size(); p++) {
-                PointOfCharge pointOfChargeToSave = stationToSave.getPointsOfCharge().get(p);
-                pointOfChargeToSave.setStationId(idStationSaved);
-                long  idPointOfChargeSaved = appDB.getPointOfChargeDao().save(pointOfChargeToSave); // salvo il punto di ricarica
-//                int idPointOfChargeSaved = appDB.getPointOfChargeDao().getAllPointsOfCharge()
-//                        .get(appDB.getPointOfChargeDao().getAllPointsOfCharge().size()-1).getId();
-                pointOfChargeToSave.setId(idPointOfChargeSaved);
-                System.out.println("id del poc della station salvata " +  idPointOfChargeSaved);
+        appDB.runInTransaction(new Runnable() {
+            @Override
+            public void run() {
+                appDB.getStationDao().deleteAll(); // delete all stations
+                // per ogni stazione salva la stazione e tutti i suoi punti di ricarica
+                for (int k = 0; k < stations.size(); k++) {
+                    Station stationToSave = stations.get(k);
+                    long idStationSaved = appDB.getStationDao().save(stationToSave); // salvo la stazione
+                    stationToSave.setId(idStationSaved);
+
+                    //todo settare in station l'id  che ho ottenuto nella stazione
+                    System.out.println("id della station salvata " +  idStationSaved);
+                    System.out.println("nome della station salvata " +  stationToSave.getName());
+                    for (int p = 0; p < stationToSave.getPointsOfCharge().size(); p++) {
+                        PointOfCharge pointOfChargeToSave = stationToSave.getPointsOfCharge().get(p);
+                        pointOfChargeToSave.setStationId(idStationSaved);
+                        long  idPointOfChargeSaved = appDB.getPointOfChargeDao().save(pointOfChargeToSave); // salvo il punto di ricarica
+                        pointOfChargeToSave.setId(idPointOfChargeSaved);
+                        System.out.println("id del poc della station salvata " +  idPointOfChargeSaved);
 
 
+                    }
+                }
             }
         }
+
+
+        );
+
     }
+
 
     @Override
     public void onLastLocationResult(Location location) {
@@ -532,8 +519,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 break;
 
         }
-
-
     }
 
 
@@ -558,15 +543,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 for (int y = 0; y < stations.size(); y++) {
                     addEStationMarker(stations.get(y));
                 }
-            }
-            if (msg.what == ALL_STATIONS_DELETED) {
-                stations.clear();
-                if (mMap != null) {
-                    mMap.clear();
-                }
-                iconToStationListActivity.setEnabled(false);
-                iconToStationListActivity.setBackgroundColor(ContextCompat.getColor(context, R.color.disabled_color));
-                checkConnectionAndDownloadData();
             }
         }
     }
