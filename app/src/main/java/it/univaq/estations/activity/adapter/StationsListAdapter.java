@@ -77,6 +77,7 @@ public class StationsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     }
 
 
+    //return the ViewHolder linked to specific layout by LayoutInflater
     // Create new views (invoked by the layout manager)
     //inflates the row layout when needed
     @NonNull
@@ -88,7 +89,7 @@ public class StationsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
     // Replace the contents of a view (invoked by the layout manager)
     //come parametro prende in ingresso un oggetto di tipo View, ossia il layout list_item
-    //binds the daa to the textview in each row
+    //binds the data to the textview in each row
     @SuppressLint("SetTextI18n")
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
@@ -105,10 +106,12 @@ public class StationsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             itemHolder.title.setText(mDataset.get(position).getName());
             itemHolder.town.setText(mDataset.get(position).getTown());
             if (mDataset.get(position).isFree() == true){
-                itemHolder.statusIcon.setColorFilter(Color.argb(255, 80, 200, 120));
+                itemHolder.statusIcon.setColorFilter(ContextCompat.getColor(activity.getApplicationContext(), R.color.green));
+
+
             }
             else
-            { itemHolder.statusIcon.setColorFilter(Color.argb(255, 226, 110, 110));}
+            { itemHolder.statusIcon.setColorFilter(ContextCompat.getColor(activity.getApplicationContext(), R.color.red));}
 
             int permissionFineLocation = ContextCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_FINE_LOCATION);
             if(permissionFineLocation != PackageManager.PERMISSION_GRANTED) {

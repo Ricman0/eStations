@@ -8,7 +8,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import it.univaq.estations.database.Database;
 
 public class SplashScreenActivity extends AppCompatActivity {
-    Thread threadDeleteStationFromDB;
+    private Thread threadDeleteStationFromDB;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

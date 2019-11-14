@@ -36,7 +36,7 @@ public class GoogleLocationService {
         @Override
         public void onLocationAvailability(LocationAvailability locationAvailability) {
             super.onLocationAvailability(locationAvailability);
-            System.out.println("Is location available? " + locationAvailability.isLocationAvailable());
+            System.out.println("location available? " + locationAvailability.isLocationAvailable());
         }
     };
 

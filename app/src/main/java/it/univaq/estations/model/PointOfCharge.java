@@ -1,6 +1,5 @@
 package it.univaq.estations.model;
 
-import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.ForeignKey;
@@ -37,6 +36,8 @@ public class PointOfCharge {
         this.kw = kw;
         this.statusTypeId = statusTypeId;
     }
+
+    // getter and setter
 
     public long getId() {
         return id;

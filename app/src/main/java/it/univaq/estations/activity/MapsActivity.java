@@ -17,7 +17,6 @@ import android.view.View;
 import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentActivity;
@@ -50,6 +49,10 @@ import it.univaq.estations.utility.GoogleLocationService;
 import it.univaq.estations.utility.VolleyRequest;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, GoogleLocationService.LocationListener {
+
+    // GoogleLocationService.LocationListener used for receiving notifications from the FusedLocationProviderApi
+    // when the location has changed. The methods are called if the LocationListener has been registered
+    // with the location client using the requestLocationUpdates
 
     private Context context;
     private Activity activity;

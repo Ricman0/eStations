@@ -27,6 +27,17 @@ public class VolleyRequest {
         queue = Volley.newRequestQueue(context);
     }
 
+    /**
+     * Download stations (near the current position) in the bounding box passed as a parameter.
+     *
+     * @param listener
+     * @param currentPosition
+     * @param kmDistance
+     * @param topLeftCorner
+     * @param bottomRightCorner
+     * @param errorListner
+     * @author Claudia Di Marco & Riccardo Mantini
+     */
     public void downloadStations(Response.Listener<String> listener, LatLng currentPosition, Integer kmDistance,
                                  LatLng topLeftCorner, LatLng bottomRightCorner, Response.ErrorListener errorListner){
 
@@ -81,6 +92,13 @@ public class VolleyRequest {
         queue.add(request);
     }
 
+    /**
+     * Download an image (the url image is associated to one station)
+     *
+     * @param listener
+     * @param url
+     * @author Claudia Di Marco & Riccardo Mantini
+     */
     public void downloadImage(Response.Listener<Bitmap> listener, String url){
 
         ImageRequest imageRequest = new ImageRequest(url,listener,0,0,null, Bitmap.Config.RGB_565, null);

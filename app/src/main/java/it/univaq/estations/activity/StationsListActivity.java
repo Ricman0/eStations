@@ -34,7 +34,6 @@ public class StationsListActivity extends AppCompatActivity {
     private MyHandler mHandler;
     private Thread threadToLoadAllStationsFromDB;
     private static final int ALL_STATIONS_LOADED = 101;
-    private Locale myLocale;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -185,42 +184,6 @@ public class StationsListActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-//            case R.id.action_language:
-//                // User chose the "Settings" item, show the app settings UI...
-//                this.setTheme(R.style.AlertDialogEstationsTheme);
-//                AlertDialog dialog = new AlertDialog.Builder(this)
-//                        .setTitle(R.string.titleAlertDialogLanguage)
-//                        .setCancelable(true)
-//                        .setSingleChoiceItems(R.array.languageArray, 0, new DialogInterface.OnClickListener() {
-//                            @Override
-//                            public void onClick(DialogInterface dialogInterface, int i) {
-//                                switch (i){
-//                                    case 1: // Italian language
-//
-//                                        break;
-//                                    default: // English language
-//                                        break;
-//                                }
-//                            }
-//                        })
-//                        .setPositiveButton(R.string.positiveButtonAlertDialogLanguage, new DialogInterface.OnClickListener() {
-//                            @Override
-//                            public void onClick(DialogInterface dialogInterface, int i) {
-//
-////                                dialogInterface.dismiss();
-//                            }
-//                        })
-//                        .setNegativeButton(R.string.negativeButtonAlertDialogLanguage, new DialogInterface.OnClickListener() {
-//                            @Override
-//                            public void onClick(DialogInterface dialogInterface, int i) {
-//                                dialogInterface.dismiss();
-//
-//                            }
-//                        }).create();
-//                dialog.show();
-//        return true;
-
-
 
             case R.id.action_exit:
 
