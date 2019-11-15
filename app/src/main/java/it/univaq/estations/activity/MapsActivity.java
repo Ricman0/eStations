@@ -90,7 +90,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
      * Initialize the fragment, set MapsActivity layout, check location permission,
      * add click listener to the navigationToStation button
      *
-     * @Override
      * @param savedInstanceState
      * @author Claudia Di Marco & Riccardo Mantini
      */
@@ -145,7 +144,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     /**
      * Resume
      *
-     * @Override
      * @author Claudia Di Marco & Riccardo Mantini
      */
     @Override
@@ -176,7 +174,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
      * set a GoogleMap.OnCameraIdleListener to know if the camera movement has ended so it can clear
      * the map, check Internet connection and then download data.
      *
-     * @Override
      * @param googleMap GoogleMap
      * @author Claudia Di Marco & Riccardo Mantini
      */
@@ -187,7 +184,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mUiSettings = mMap.getUiSettings();
         mUiSettings.setZoomControlsEnabled(true); //Enables (or disables if we pass false) the zoom controls.
         mUiSettings.setZoomGesturesEnabled(true); //Sets the preference for whether zoom gestures should be enabled or disabled.
-        mUiSettings.setRotateGesturesEnabled(true); //Sets the preference for whether rotate gestures should be enabled or disabled.
+        mUiSettings.setRotateGesturesEnabled(false); //Sets the preference for whether rotate gestures should be enabled or disabled.
 
         locationService = new GoogleLocationService();
         locationService.onCreate(this, this);
@@ -316,8 +313,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 //add extras to intent
                 intent.putExtra("stationId", stationId);
 
+                // Calling startActivity() from outside of an Activity context requires the FLAG_ACTIVITY_NEW_TASK flag.
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);  //If set, this activity will become the start of a new task on this history stack.
                 //Avendo l’intent, per avviare la nuova activity
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 context.startActivity(intent);
                 overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
 
@@ -328,7 +326,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     marker.showInfoWindow();
                     return true;
                 } else {
-                    // to add navigation elements  //return false;
+                    // to add navigation elements return false;
                     return true;
                 }
             }
@@ -360,7 +358,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     System.out.println(response.isEmpty());
                     try {
                         System.out.println(" downloadData2");
-
+                        stations.clear();
                         JSONArray jsonRoot = new JSONArray(response);
                         for (int i = 0; i < jsonRoot.length(); i++) {
 
@@ -474,11 +472,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     }
                 }
             }
-        }
-
-
-        );
-
+        });
     }
 
 
@@ -491,7 +485,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mUiSettings.setMyLocationButtonEnabled(true);
 
         CameraPosition cameraPosition = new CameraPosition.Builder()
-                .target(currentPos)      // Sets the center of the map to Mountain View
+                .target(currentPos)      // Sets the center of the map to current position
                 .zoom(DEFAULT_ZOOM)                   // Sets the zoom
                 .build();                   // Creates a CameraPosition from the builder
         mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));

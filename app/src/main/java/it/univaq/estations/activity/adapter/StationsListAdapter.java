@@ -6,7 +6,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Color;
 import android.os.Build;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
@@ -17,11 +16,8 @@ import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.android.gms.maps.model.LatLng;
-
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 
 import it.univaq.estations.R;
 import it.univaq.estations.model.Station;
@@ -33,15 +29,22 @@ public class StationsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     private LayoutInflater mInflater;
     private static Activity activity;
 
+    public StationsListAdapter(Context context, List<Station> myDataset) {
 
-    //inner class
+        mDataset = myDataset;
+        this.mInflater = LayoutInflater.from(context);
+        activity = (Activity) context;
+    }
+
+    //inner class //2
     class ItemListViewHolder extends RecyclerView.ViewHolder {
 
         TextView title;
         TextView town;
         TextView km;
         ImageView statusIcon;
-        ItemListViewHolder(@NonNull View itemView) {
+
+        public ItemListViewHolder(@NonNull View itemView) {
 
             super(itemView);
             title = itemView.findViewById(R.id.stationName);
@@ -69,14 +72,10 @@ public class StationsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     }
 
 
-    public StationsListAdapter(Context context, List<Station> myDataset, RecyclerView recyclerView) {
-
-        mDataset = myDataset;
-        this.mInflater = LayoutInflater.from(context);
-        activity = (Activity) context;
-    }
 
 
+
+    //1
     //return the ViewHolder linked to specific layout by LayoutInflater
     // Create new views (invoked by the layout manager)
     //inflates the row layout when needed
@@ -87,13 +86,13 @@ public class StationsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         return new ItemListViewHolder(v);
     }
 
+    //3
     // Replace the contents of a view (invoked by the layout manager)
     //come parametro prende in ingresso un oggetto di tipo View, ossia il layout list_item
     //binds the data to the textview in each row
     @SuppressLint("SetTextI18n")
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             //ordina in senso crescente
             mDataset.sort(Comparator.comparingDouble(Station::getDistanceFromUser));
@@ -140,6 +139,7 @@ public class StationsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
      */
     public void add(List<Station> stations)
     {
+        System.out.println("add");
         mDataset.addAll(stations);
         notifyDataSetChanged();
     }

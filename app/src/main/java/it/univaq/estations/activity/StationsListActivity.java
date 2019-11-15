@@ -54,7 +54,7 @@ public class StationsListActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(layoutManager);
 
         // specify an adapter
-        adapter = new StationsListAdapter(this, stations, recyclerView);
+        adapter = new StationsListAdapter(this, stations);
         recyclerView.setAdapter(adapter);
 
         appDB = Database.getInstance(getApplicationContext());
