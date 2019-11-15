@@ -313,8 +313,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 //add extras to intent
                 intent.putExtra("stationId", stationId);
 
+                //If set, the activity will not be launched if it is already running at the top of the history stack.
+                intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP); // per il doppio click
+                //if set, and this activity is either being started in a new task or bringing to the top an existing task, then it will be launched as the front door of the task.
+                intent.setFlags(Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
+                //If set, and the activity being launched is already running in the current task, then instead of launching a new instance of that activity, all of the other activities on top of it will be closed and this Intent will be delivered to the (now on top) old activity as a new Intent.
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 // Calling startActivity() from outside of an Activity context requires the FLAG_ACTIVITY_NEW_TASK flag.
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);  //If set, this activity will become the start of a new task on this history stack.
+
                 //Avendo l’intent, per avviare la nuova activity
                 context.startActivity(intent);
                 overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);

@@ -54,10 +54,14 @@ public class StationsListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
             // Define the click event on item (creating Anonymous View.OnClickListener)
             itemView.setOnClickListener(v -> {
-
                 // Open another Activity and pass to it the right station
                 //new Intent object: Il costruttore, in caso di intent esplicito, richiede due parametri: il Context (che, nel nostro caso, è l’activity che vuole chiamare la seconda) e la classe che riceverà l’intent, cioè l’activity che vogliamo richiamare.
                 Intent intent = new Intent(v.getContext(), DetailsActivity.class);
+
+                intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                intent.setFlags(Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
 
                 //add extras to intent
                 Station station = mDataset.get(getAdapterPosition());
